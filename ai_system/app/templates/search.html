@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بحث عن شخص - مفقود</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="logo"><i class="fa-solid fa-person-circle-question"></i> مفقود</a>
+            <nav>
+                <a href="/report">تبليغ عن مفقود</a>
+                <a href="/search" style="color: var(--text);">بحث عن شخص</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+                <h2 style="margin-bottom: 2rem;"><i class="fa-solid fa-magnifying-glass"></i> ابحث عن شخص بمطابقة الوجه
+                </h2>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">ارفع صورة للشخص الذي تبحث عنه وسنقوم بمطابقتها
+                    مع قاعدة بياناتنا.</p>
+
+                <form id="search-form" action="/search/results" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                            <i class="fa-solid fa-camera-viewfinder"
+                                style="font-size: 3rem; color: var(--primary);"></i>
+                            <p>ارفع الصورة للبحث</p>
+                            <input type="file" id="file-input" name="file" accept="image/*" style="display: none;"
+                                onchange="previewImage(event)" required>
+                            <img id="image-preview" src="#" alt="Preview">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%; padding: 1rem;">
+                        <i class="fa-solid fa-microchip"></i> ابدأ مطابقة الوجه
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function previewImage(event) {
+            const preview = document.getElementById('image-preview');
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function () {
+                preview.src = reader.result;
+                preview.style.display = 'block';
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+
+</html>

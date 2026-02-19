@@ -1,0 +1,12 @@
+fastapi>=0.85.0
+uvicorn>=0.17.0
+sqlalchemy>=1.4
+celery>=5.2
+chromadb>=0.4.0
+retina-face>=0.0.17
+insightface>=0.7.3
+opencv-python>=4.8.0
+onnxruntime>=1.15.0
+numpy>=1.23.0
+jinja2>=3.1.2
+pytest>=7.0
