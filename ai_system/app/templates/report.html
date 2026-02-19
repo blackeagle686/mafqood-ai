@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تبليغ عن مفقود - مفقود</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="logo"><i class="fa-solid fa-person-circle-question"></i> مفقود</a>
+            <nav>
+                <a href="/report" style="color: var(--text);">تبليغ عن مفقود</a>
+                <a href="/search">بحث عن شخص</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <h2 style="margin-bottom: 2rem;"><i class="fa-solid fa-file-signature"></i> تبليغ عن حالة فقدان</h2>
+
+                <form id="report-form" action="/api/cv/process" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>صورة الشخص المفقود</label>
+                        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <p>اضغط هنا لرفع الصورة</p>
+                            <input type="file" id="file-input" name="file" accept="image/*" style="display: none;"
+                                onchange="previewImage(event)">
+                            <img id="image-preview" src="#" alt="Preview">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>اسم الشخص</label>
+                        <input type="text" name="name" placeholder="الاسم الكامل" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>آخر ظهور</label>
+                        <input type="text" name="last_seen" placeholder="التاريخ والمكان" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>تفاصيل إضافية</label>
+                        <textarea name="details" rows="4" placeholder="العمر، الملابس، أي علامات مميزة..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%;">
+                        <i class="fa-solid fa-paper-plane"></i> إرسال البلاغ
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function previewImage(event) {
+            const preview = document.getElementById('image-preview');
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function () {
+                preview.src = reader.result;
+                preview.style.display = 'block';
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+
+</html>
