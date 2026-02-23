@@ -1,0 +1,132 @@
+services:
+  # Redis - Message broker for Celery
+  redis:
+    image: redis:7-alpine
+    container_name: mafqood_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass mafqood_redis_password
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - mafqood_network
+
+  # FastAPI Application Server
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mafqood_api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - REDIS_URL=redis://:mafqood_redis_password@redis:6379/0
+      - CHROMA_DB_PATH=/app/chroma_db
+      - CV_CTX_ID=-1  # Use -1 for CPU, 0 for GPU (requires nvidia-docker)
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./temp_uploads:/app/temp_uploads
+      - ./logs:/app/logs
+      - .:/app  # For development reload
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - mafqood_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/cv/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Celery Worker for background tasks
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mafqood_worker
+    command: celery -A app.celery_app worker --loglevel=info --autoscale=10,3 --time-limit=3600
+    environment:
+      - REDIS_URL=redis://:mafqood_redis_password@redis:6379/0
+      - CHROMA_DB_PATH=/app/chroma_db
+      - CV_CTX_ID=-1
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./temp_uploads:/app/temp_uploads
+      - ./logs:/app/logs
+      - .:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - mafqood_network
+
+  # Celery Beat Scheduler (optional, for scheduled tasks)
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mafqood_beat
+    command: celery -A app.celery_app beat --loglevel=info
+    environment:
+      - REDIS_URL=redis://:mafqood_redis_password@redis:6379/0
+      - CHROMA_DB_PATH=/app/chroma_db
+      - CV_CTX_ID=-1
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./logs:/app/logs
+      - .:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - mafqood_network
+
+  # Flower - Celery monitoring tool (optional)
+  flower:
+    image: mher/flower
+    container_name: mafqood_flower
+    command: 
+      - "celery"
+      - "-A"
+      - "app.celery_app"
+      - "flower"
+      - "--port=5555"
+      - "--broker=redis://:mafqood_redis_password@redis:6379/0"
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://:mafqood_redis_password@redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - mafqood_network
+
+# Named volumes for data persistence
+volumes:
+  redis_data:
+    driver: local
+
+# Network for service communication
+networks:
+  mafqood_network:
+    driver: bridge

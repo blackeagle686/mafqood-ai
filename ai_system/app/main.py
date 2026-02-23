@@ -20,4 +20,4 @@ app.include_router(api_router)
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "message": "Nizami is running smoothly."}
+    return {"status": "ok", "message": "Mafqood_ai_system is running smoothly."}

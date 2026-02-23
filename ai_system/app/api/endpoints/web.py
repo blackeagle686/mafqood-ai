@@ -21,6 +21,10 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@router.get("/video_search", response_class=HTMLResponse)
+async def video_search_page(request: Request):
+    return templates.TemplateResponse("video_search.html", {"request": request})
+
 @router.get("/report", response_class=HTMLResponse)
 async def report_page(request: Request):
     return templates.TemplateResponse("report.html", {"request": request})
@@ -54,7 +58,7 @@ async def search_results(
             return templates.TemplateResponse("results.html", {"request": request, "results": []})
             
         # Search Vector DB
-        query_embedding = results[0]["embedding"]
+        query_embedding = results[0].embedding
         vdb = VectorDB()
         search_res = vdb.search(query_embedding=query_embedding, n_results=10)
         
@@ -62,15 +66,18 @@ async def search_results(
         formatted_results = []
         if search_res and "ids" in search_res and search_res["ids"]:
             for i in range(len(search_res["ids"][0])):
+                dist = search_res["distances"][0][i]
                 formatted_results.append({
                     "id": search_res["ids"][0][i],
-                    "distance": search_res["distances"][0][i],
-                    "metadata": search_res["metadatas"][0][i]
+                    "distance": dist,
+                    "metadata": search_res["metadatas"][0][i],
+                    "similarity": round(100 * (1 - dist), 1)
                 })
         
         return templates.TemplateResponse("results.html", {
             "request": request, 
-            "results": formatted_results
+            "results": formatted_results,
+            "faces_found": len(results)
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

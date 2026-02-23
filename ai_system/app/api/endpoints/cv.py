@@ -1,18 +1,17 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
-import shutil
-import os
-import uuid
 import logging
 from typing import List, Dict, Any
-from app.core.cv_pipeline import FaceCVPipeline
-from app.db.vector_db import VectorDB
-from app.tasks.cv_tasks import process_image_task
+from app.core.face_search_service import FaceSearchService
+from app.tasks.cv_tasks import process_image_task, process_video_task, search_faces_task
+from app.core.utils import save_uploaded_file
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 TEMP_UPLOAD_DIR = "./temp_uploads"
-os.makedirs(TEMP_UPLOAD_DIR, exist_ok=True)
+
+# Initialize the face search service
+face_search_service = FaceSearchService()
 
 @router.post("/process")
 async def process_image(file: UploadFile = File(...)):
@@ -22,16 +21,9 @@ async def process_image(file: UploadFile = File(...)):
     """
     try:
         # Save uploaded file to temp directory
-        ext = os.path.splitext(file.filename)[1]
-        temp_filename = f"{uuid.uuid4()}{ext}"
-        temp_path = os.path.join(TEMP_UPLOAD_DIR, temp_filename)
-        
-        with open(temp_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        abs_path = save_uploaded_file(file, temp_upload_dir=TEMP_UPLOAD_DIR)
             
         # Dispatch Celery task
-        # Note: In a real prod environment, you'd pass the absolute path
-        abs_path = os.path.abspath(temp_path)
         task = process_image_task.delay(abs_path)
         
         return {
@@ -45,45 +37,85 @@ async def process_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/search")
-async def search_face(file: UploadFile = File(...)):
+async def search_face(file: UploadFile = File(...), n_results: int = 5):
     """
-    Synchronous search endpoint. 
-    Processes the uploaded image to get an embedding and searches ChromaDB.
+    Async endpoint to search for similar faces using an uploaded image.
+    Dispatches a background Celery task for face search and vector DB queries.
+    
+    Args:
+        file: Image file to search with
+        n_results: Number of similar faces to return (default: 5)
     """
     try:
         # Save temp file
-        ext = os.path.splitext(file.filename)[1]
-        temp_path = os.path.join(TEMP_UPLOAD_DIR, f"search_{uuid.uuid4()}{ext}")
-        
-        with open(temp_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        temp_path = save_uploaded_file(file, temp_upload_dir=TEMP_UPLOAD_DIR, prefix="search")
             
-        # Run pipeline synchronously for immediate search
-        pipeline = FaceCVPipeline()
-        results = pipeline.process_image(temp_path)
-        
-        # Cleanup temp file
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-            
-        if not results:
-            return {"status": "success", "results": [], "message": "No faces detected in image."}
-            
-        # Take the first detected face for search
-        query_embedding = results[0]["embedding"]
-        
-        vdb = VectorDB()
-        search_results = vdb.search(query_embedding=query_embedding, n_results=5)
+        # Dispatch Celery task for background face search
+        task = search_faces_task.delay(temp_path, n_results=n_results)
         
         return {
-            "status": "success",
-            "search_results": search_results
+            "status": "queued",
+            "task_id": task.id,
+            "filename": file.filename,
+            "n_results": n_results,
+            "message": "Face search queued for processing"
         }
     except Exception as e:
         logger.error(f"Error in /search endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process_video")
+async def process_video(file: UploadFile = File(...), sampling_rate: int = 15):
+    """
+    Async endpoint to process a video file.
+    Saves video and dispatches a Celery task.
+    """
+    try:
+        # Save uploaded file to temp directory
+        abs_path = save_uploaded_file(file, temp_upload_dir=TEMP_UPLOAD_DIR, prefix="video")
+            
+        # Dispatch Celery task
+        task = process_video_task.delay(abs_path, sampling_rate=sampling_rate)
+        
+        return {
+            "status": "queued",
+            "task_id": task.id,
+            "filename": file.filename,
+            "sampling_rate": sampling_rate
+        }
+    except Exception as e:
+        logger.error(f"Error in /process_video endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/health")
 async def health_check():
     """Health check for the CV service."""
     return {"status": "healthy", "service": "cv_pipeline"}
+
+@router.get("/database/info")
+async def get_database_info():
+    """
+    Get information about the face vector database.
+    Returns the total count of faces stored.
+    """
+    try:
+        info = face_search_service.get_database_info()
+        return info
+    except Exception as e:
+        logger.error(f"Error in /database/info endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/faces")
+async def delete_faces(face_ids: List[str]):
+    """
+    Delete specific faces from the vector database.
+    
+    Args:
+        face_ids: List of face IDs to delete
+    """
+    try:
+        result = face_search_service.delete_faces(face_ids)
+        return result
+    except Exception as e:
+        logger.error(f"Error in /faces delete endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
