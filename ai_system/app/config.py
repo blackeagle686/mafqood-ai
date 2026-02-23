@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class Config:
     fastapi_host: str = "0.0.0.0"
     fastapi_port: int = 8000
-    redis_url: str = "redis://localhost:6379/0"
+    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     chroma_url: str = os.getenv("CHROMA_URL", "http://localhost:8001")
     
     # ChromaDB Persistence

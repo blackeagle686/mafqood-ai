@@ -1,0 +1,50 @@
+version: '3.8'
+
+# Docker Compose for running tests in isolation
+services:
+  # Redis - Message broker for Celery
+  redis:
+    image: redis:7-alpine
+    container_name: mafqood_test_redis
+    ports:
+      - "6380:6379"
+    environment:
+      - REDIS_LOGLEVEL=warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - mafqood_test_network
+
+  # Test runner service
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mafqood_test_runner
+    command: pytest tests/test_workflow_integration.py -v --tb=short --color=yes
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_DB_PATH=/tmp/test_chroma_db
+      - CV_CTX_ID=-1
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      - .:/app
+      - /tmp/test_chroma_db:/tmp/test_chroma_db
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - mafqood_test_network
+
+volumes:
+  test_data:
+    driver: local
+
+networks:
+  mafqood_test_network:
+    driver: bridge
