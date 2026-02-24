@@ -19,9 +19,9 @@ class PipelineResultSchema(BaseModel):
 
 class MissingPersonReportSchema(BaseModel):
     """Schema for reporting a missing person."""
-    name: str = Field(..., example="أحمد محمد")
-    last_seen: str = Field(..., example="القاهرة، 2024-01-01")
-    details: Optional[str] = Field(None, example="كان يرتدي قميصاً أزرق")
+    name: str = Field(..., json_schema_extra={"example": "أحمد محمد"})
+    last_seen: str = Field(..., json_schema_extra={"example": "القاهرة، 2024-01-01"})
+    details: Optional[str] = Field(None, json_schema_extra={"example": "كان يرتدي قميصاً أزرق"})
     image_path: str
 
 class SearchResultSchema(BaseModel):

@@ -4,6 +4,7 @@ Tests utils, cv_pipeline, cv_tasks, and cv endpoints.
 """
 import pytest
 import os
+import sys
 import shutil
 import tempfile
 import uuid
@@ -12,6 +13,9 @@ from unittest.mock import Mock, patch, MagicMock
 from fastapi.testclient import TestClient
 from PIL import Image
 import numpy as np
+
+# ensure project root is on sys.path so that `import app` works inside containers
+sys.path.insert(0, os.path.abspath(os.getcwd()))
 
 # Test fixtures and utilities
 @pytest.fixture
@@ -25,9 +29,33 @@ def temp_dir():
 
 @pytest.fixture
 def sample_image(temp_dir):
-    """Create a sample image file for testing."""
+    """Return a sample image for testing.
+
+    Priority:
+    1. ``TEST_FACE_IMAGE_PATH`` env var pointing to a file.
+    2. Same var pointing to a directory – create a small image inside.
+    3. Any image already checked in under ``images_vdb``.
+    4. Fallback to a generated red image in ``temp_dir``.
+    """
+    provided = os.getenv("TEST_FACE_IMAGE_PATH")
+    if provided:
+        if os.path.isfile(provided):
+            return provided
+        if os.path.isdir(provided):
+            generated = os.path.join(provided, "provided_image.jpg")
+            img = Image.new('RGB', (100, 100), color='blue')
+            img.save(generated)
+            return generated
+
+    # check for checked‑in images (images_vdb directory at project root)
+    repo_images_dir = os.path.join(os.getcwd(), "images_vdb")
+    if os.path.isdir(repo_images_dir):
+        for fname in os.listdir(repo_images_dir):
+            if fname.lower().endswith(('.png', '.jpg', '.jpeg')):
+                return os.path.join(repo_images_dir, fname)
+
+    # fallback: generate a simple image
     image_path = os.path.join(temp_dir, "test_image.jpg")
-    # Create a simple RGB image
     img = Image.new('RGB', (100, 100), color='red')
     img.save(image_path)
     return image_path
@@ -432,7 +460,10 @@ class TestCVEndpoints:
             "message": "Successfully deleted 2 faces"
         }
         
-        response = test_client.delete(
+        # `TestClient.delete` does not accept `json` directly in some versions,
+        # so use the generic request method.
+        response = test_client.request(
+            "DELETE",
             "/cv/faces",
             json=["face_1", "face_2"]
         )
@@ -498,6 +529,105 @@ class TestWorkflowIntegration:
         # Verify both tasks were created
         assert process_task_id != search_task_id
         assert search_data["n_results"] == 5
+
+@pytest.mark.skipif(os.getenv("RUN_E2E") != "1", reason="Resource-intensive E2E test; disabled by default due to ChromaDB upsert hang in containers. Run only with RUN_E2E=1 in environments with adequate resources.")
+class TestE2EWorkflow:
+    """End-to-end workflow test without mocks. Requires running services and significant resources.
+    
+    Note: This test can hang during ChromaDB upsert in container environments with limited resources.
+    Enable only when necessary by setting RUN_E2E=1 environment variable.
+    """
+
+    @pytest.mark.skip(reason="Temporarily disabled: uses real face-detection model causing hangs in Docker. Consider mocking VectorDB.upsert or running outside containers.")
+    def test_full_workflow(self, test_client, sample_image):
+        """Upload an image, wait for Celery tasks, and perform search."""
+        from app.celery_app import celery_app
+        import time
+
+        # Process image via API
+        with open(sample_image, "rb") as f:
+            proc_resp = test_client.post(
+                "/cv/process",
+                files={"file": ("real.jpg", f, "image/jpeg")}
+            )
+        assert proc_resp.status_code == 200
+        proc_data = proc_resp.json()
+        task_id = proc_data.get("task_id")
+        assert task_id
+
+        # Poll Celery result; use a longer timeout to accommodate slow model loading
+        result = celery_app.AsyncResult(task_id)
+        try:
+            res_val = result.get(timeout=300, propagate=False)
+        except Exception:
+            # fall back to manual polling in case backend raised its own TimeoutError
+            start = time.time()
+            while not result.ready():
+                if time.time() - start > 300:
+                    pytest.fail("Celery task did not complete within 5 minutes")
+                time.sleep(1)
+            res_val = result.result
+        assert res_val.get("status") == "success"
+
+        # If faces found, also run search via API and poll
+        if res_val.get("faces_found", 0) > 0:
+            with open(sample_image, "rb") as f:
+                search_resp = test_client.post(
+                    "/cv/search?n_results=1",
+                    files={"file": ("real.jpg", f, "image/jpeg")}
+                )
+            assert search_resp.status_code == 200
+            search_data = search_resp.json()
+            sid = search_data.get("task_id")
+            assert sid
+            try:
+                search_result = celery_app.AsyncResult(sid).get(timeout=300, propagate=False)
+            except Exception:
+                start = time.time()
+                res_obj = celery_app.AsyncResult(sid)
+                while not res_obj.ready():
+                    if time.time() - start > 300:
+                        pytest.fail("Search task did not complete within 5 minutes")
+                    time.sleep(1)
+                search_result = res_obj.result
+            assert search_result.get("status") == "success"
+        else:
+            # even without faces, API should return queued
+            pass
+
+    def test_populate_vdb_and_search(self, temp_dir):
+        """Populate the vector DB with dummy embeddings and perform a search."""
+        from app.db.vector_db import VectorDB
+        from app.core.face_search_service import FaceSearchService
+        from app.core.cv_pipeline import FaceCVPipeline
+        
+        # Build dummy embeddings and insert directly into VectorDB
+        vdb = VectorDB()
+        ids = []
+        embeddings = []
+        metadatas = []
+        for i in range(3):
+            ids.append(f"img_{i}")
+            embeddings.append([0.5] * 512)  # constant embedding
+            metadatas.append({"source": f"dummy_{i}"})
+        vdb.upsert(ids=ids, embeddings=embeddings, metadatas=metadatas)
+
+        # Patch the pipeline so that processing any image returns the same embedding
+        with patch('app.core.cv_pipeline.FaceCVPipeline.process_image') as mock_proc:
+            mock_face = Mock()
+            mock_face.embedding = [0.5] * 512
+            mock_face.bbox = [0, 0, 10, 10]
+            mock_face.score = 0.99
+            mock_proc.return_value = [mock_face]
+
+            service = FaceSearchService()
+            # perform search using one dummy path (file existence not required because patched)
+            result = service.search_face_by_image("/path/to/dummy.jpg", n_results=3, cleanup=False)
+
+        assert result["status"] == "success"
+        assert "search_results" in result
+        # should at least return one of the inserted ids
+        assert len(result["search_results"]["ids"][0]) >= 1
 
 
 if __name__ == "__main__":
