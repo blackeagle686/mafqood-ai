@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Docker Compose for running tests in isolation
 services:
   # Redis - Message broker for Celery
@@ -19,6 +17,28 @@ services:
     networks:
       - mafqood_test_network
 
+  # Celery Worker for tests
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mafqood_test_worker
+    command: celery -A app.celery_app worker --loglevel=info --concurrency=2 --time-limit=7200 --soft-time-limit=6900 -O fair --max-tasks-per-child=100 --without-gossip --without-heartbeat --without-mingle
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_DB_PATH=/tmp/test_chroma_db
+      - CV_CTX_ID=-1
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      - .:/app
+      - /tmp/test_chroma_db:/tmp/test_chroma_db
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - mafqood_test_network
+
   # Test runner service
   test:
     build:
@@ -32,12 +52,17 @@ services:
       - CV_CTX_ID=-1
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONPATH=/app
+      - RUN_E2E=1
+      - INSIGHTFACE_OFFLINE=1
     volumes:
       - .:/app
       - /tmp/test_chroma_db:/tmp/test_chroma_db
     depends_on:
       redis:
         condition: service_healthy
+      worker:
+        condition: service_started
     networks:
       - mafqood_test_network
 

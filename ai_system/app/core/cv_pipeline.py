@@ -17,6 +17,17 @@ class FaceModelLoader:
     @classmethod
     def get_face_analysis(cls):
         if cls._face_analysis is None:
+            # allow tests or offline environments to skip downloading the model
+            if os.getenv("INSIGHTFACE_OFFLINE") == "1":
+                logger.info("INSIGHTFACE_OFFLINE=1; using dummy face analysis")
+                class _Dummy:
+                    def prepare(self, *args, **kwargs):
+                        pass
+                    def get(self, image):
+                        return []
+                cls._face_analysis = _Dummy()
+                return cls._face_analysis
+
             logger.info(f"Loading InsightFace model: {FACE_ANALYSIS_MODEL} (ctx_id={CV_CTX_ID})")
             try:
                 cls._face_analysis = FaceAnalysis(name=FACE_ANALYSIS_MODEL)

@@ -1,19 +1,23 @@
 from typing import List, Dict, Any, Optional
 from celery import shared_task
+from celery.exceptions import SoftTimeLimitExceeded
 import logging
 from app.core.cv_pipeline import FaceCVPipeline
 from app.core.video_pipeline import VideoProcessor
 from app.core.face_search_service import FaceSearchService
 from app.db.vector_db import VectorDB
 import os
+import time
 
 logger = logging.getLogger(__name__)
 
-@shared_task(bind=True, max_retries=3)
+@shared_task(bind=True, max_retries=5, default_retry_delay=60)
 def process_image_task(self, image_path: str, metadata: Optional[Dict[str, Any]] = None):
     """
     Background task to process an image: detection, cropping, and embedding extraction.
     Results are stored in ChromaDB.
+    
+    Retry logic: Retries up to 5 times with 60 second delays for connection issues.
     """
     logger.info(f"Starting background processing for image: {image_path}")
     
@@ -53,15 +57,20 @@ def process_image_task(self, image_path: str, metadata: Optional[Dict[str, Any]]
             return {"status": "success", "faces_found": len(results), "ids": ids}
         else:
             logger.error(f"Failed to store embeddings for {image_path}")
-            return {"status": "failure", "error": "Storage failure"}
+            # Retry if storage fails
+            raise Exception("Failed to upsert embeddings to vector DB")
 
+    except SoftTimeLimitExceeded:
+        logger.error(f"Task timed out for image {image_path}")
+        return {"status": "timeout", "error": "Processing took too long"}
+        
     except Exception as e:
         logger.error(f"Error processing image task: {e}")
-        # Retry logic for transient failures (e.g. DB connection)
+        # Exponential backoff retry
         try:
-            self.retry(exc=e, countdown=60)
+            self.retry(exc=e, countdown=min(2 ** self.request.retries * 10, 600))
         except self.MaxRetriesExceededError:
-            logger.error("Max retries exceeded for image processing task.")
+            logger.error(f"Max retries exceeded for image processing task: {image_path}")
             return {"status": "failure", "error": str(e)}
 
 @shared_task(bind=True, max_retries=1)
@@ -92,11 +101,13 @@ def process_video_task(self, video_path: str, sampling_rate: int = 15):
         logger.error(f"Error in process_video_task: {e}")
         return {"status": "failure", "error": str(e)}
 
-@shared_task(bind=True, max_retries=2)
+@shared_task(bind=True, max_retries=5, default_retry_delay=60)
 def search_faces_task(self, image_path: str, n_results: int = 5):
     """
     Background task to search for similar faces using an uploaded image.
     Processes the image to extract face embeddings and searches ChromaDB.
+    
+    Retry logic: Retries up to 5 times with 60 second delays for connection issues.
     """
     logger.info(f"Starting background face search for image: {image_path}")
     
@@ -113,11 +124,15 @@ def search_faces_task(self, image_path: str, n_results: int = 5):
         logger.info(f"Face search completed for {image_path}")
         return result
 
+    except SoftTimeLimitExceeded:
+        logger.error(f"Search task timed out for image {image_path}")
+        return {"status": "timeout", "error": "Search took too long"}
+        
     except Exception as e:
         logger.error(f"Error in search_faces_task: {e}")
-        # Retry logic for transient failures
+        # Exponential backoff retry
         try:
-            self.retry(exc=e, countdown=30)
+            self.retry(exc=e, countdown=min(2 ** self.request.retries * 10, 600))
         except self.MaxRetriesExceededError:
-            logger.error("Max retries exceeded for face search task.")
+            logger.error(f"Max retries exceeded for face search task.")
             return {"status": "failure", "error": str(e)}
