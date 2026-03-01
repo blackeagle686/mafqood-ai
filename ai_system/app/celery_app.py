@@ -53,3 +53,13 @@ celery_app.conf.update(
 )
 
 celery_app.autodiscover_tasks(["app.tasks"])
+
+# Celery Beat Schedule
+from celery.schedules import crontab
+
+celery_app.conf.beat_schedule = {
+    'evaluate-clustering-every-15-mins': {
+        'task': 'app.tasks.cluster_tasks.evaluate_and_trigger_clustering',
+        'schedule': crontab(minute='*/15'),
+    },
+}

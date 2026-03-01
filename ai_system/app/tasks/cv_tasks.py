@@ -2,10 +2,8 @@ from typing import List, Dict, Any, Optional
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 import logging
-from app.core.cv_pipeline import FaceCVPipeline
-from app.core.video_pipeline import VideoProcessor
 from app.core.face_search_service import FaceSearchService
-from app.db.vector_db import VectorDB
+from app.core.video_pipeline import VideoProcessor
 import os
 import time
 
@@ -22,43 +20,15 @@ def process_image_task(self, image_path: str, metadata: Optional[Dict[str, Any]]
     logger.info(f"Starting background processing for image: {image_path}")
     
     try:
-        pipeline = FaceCVPipeline()
-        results = pipeline.process_image(image_path)
+        search_service = FaceSearchService()
+        result = search_service.index_image(image_path, metadata)
         
-        if not results:
-            logger.warning(f"No faces found in image: {image_path}")
-            return {"status": "success", "faces_found": 0}
-
-        vdb = VectorDB()
-        
-        ids = []
-        embeddings = []
-        metadatas = []
-        
-        for i, res in enumerate(results):
-            # Generate a unique ID for each detected face
-            face_id = f"{os.path.basename(image_path)}_{i}"
-            ids.append(face_id)
-            embeddings.append(res.embedding)
-            
-            # Combine image metadata with detection results
-            meta = metadata.copy() if metadata else {}
-            meta.update({
-                "bbox": str(res.bbox),
-                "score": float(res.score),
-                "original_image": image_path
-            })
-            metadatas.append(meta)
-            
-        success = vdb.upsert(ids=ids, embeddings=embeddings, metadatas=metadatas)
-        
-        if success:
-            logger.info(f"Successfully processed and stored {len(results)} faces from {image_path}")
-            return {"status": "success", "faces_found": len(results), "ids": ids}
+        if result.get("status") == "success":
+            logger.info(f"Successfully processed image {image_path}")
+            return result
         else:
-            logger.error(f"Failed to store embeddings for {image_path}")
-            # Retry if storage fails
-            raise Exception("Failed to upsert embeddings to vector DB")
+            logger.error(f"Failed to process image {image_path}: {result.get('message')}")
+            raise Exception(result.get("message", "Failed to process image"))
 
     except SoftTimeLimitExceeded:
         logger.error(f"Task timed out for image {image_path}")
@@ -102,7 +72,7 @@ def process_video_task(self, video_path: str, sampling_rate: int = 15):
         return {"status": "failure", "error": str(e)}
 
 @shared_task(bind=True, max_retries=5, default_retry_delay=60)
-def search_faces_task(self, image_path: str, n_results: int = 5):
+def search_faces_task(self, image_path: str, n_results: int = 5, use_age_progression: bool = False):
     """
     Background task to search for similar faces using an uploaded image.
     Processes the image to extract face embeddings and searches ChromaDB.
@@ -118,7 +88,8 @@ def search_faces_task(self, image_path: str, n_results: int = 5):
         result = search_service.search_face_by_image(
             image_path=image_path,
             n_results=n_results,
-            cleanup=True
+            cleanup=True,
+            use_age_progression=use_age_progression
         )
         
         logger.info(f"Face search completed for {image_path}")

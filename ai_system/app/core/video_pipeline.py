@@ -2,8 +2,7 @@ import cv2
 import logging
 import os
 from typing import List, Dict, Any, Optional
-from app.core.cv_pipeline import FaceCVPipeline
-from app.db.vector_db import VectorDB
+from app.core.face_search_service import FaceSearchService
 from app.schemas.cv import SearchResultSchema
 
 logger = logging.getLogger(__name__)
@@ -19,8 +18,7 @@ class VideoProcessor:
                            If video is 30fps and sampling_rate=30, process 1 frame per second.
         """
         self.sampling_rate = sampling_rate
-        self.pipeline = FaceCVPipeline()
-        self.vdb = VectorDB()
+        self.search_service = FaceSearchService()
 
     def process_video(self, video_path: str) -> List[Dict[str, Any]]:
         """
@@ -58,28 +56,15 @@ class VideoProcessor:
                 cv2.imwrite(temp_frame_path, frame)
                 
                 try:
-                    faces = self.pipeline.process_image(temp_frame_path)
+                    detections = self.search_service.search_faces_in_frame(temp_frame_path, n_results=1)
                     
-                    for face in faces:
-                        # Search for this face in VectorDB
-                        search_res = self.vdb.search(query_embedding=face.embedding, n_results=1)
-                        
-                        match = None
-                        if search_res and search_res["ids"] and search_res["ids"][0]:
-                            dist = search_res["distances"][0][0]
-                            match = {
-                                "id": search_res["ids"][0][0],
-                                "distance": dist,
-                                "similarity": round(100 * (1 - dist), 1),
-                                "metadata": search_res["metadatas"][0][0]
-                            }
-
+                    for det in detections:
                         results.append({
                             "timestamp": timestamp,
                             "frame_idx": frame_idx,
-                            "bbox": face.bbox,
-                            "score": face.score,
-                            "match": match
+                            "bbox": det["bbox"],
+                            "score": det["score"],
+                            "match": det["match"]
                         })
                 finally:
                     if os.path.exists(temp_frame_path):

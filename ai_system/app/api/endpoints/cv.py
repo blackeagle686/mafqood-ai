@@ -37,7 +37,7 @@ async def process_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/search")
-async def search_face(file: UploadFile = File(...), n_results: int = 5):
+async def search_face(file: UploadFile = File(...), n_results: int = 5, use_age_progression: bool = False):
     """
     Async endpoint to search for similar faces using an uploaded image.
     Dispatches a background Celery task for face search and vector DB queries.
@@ -45,19 +45,21 @@ async def search_face(file: UploadFile = File(...), n_results: int = 5):
     Args:
         file: Image file to search with
         n_results: Number of similar faces to return (default: 5)
+        use_age_progression: If true, runs the image through the Age GAN before searching.
     """
     try:
         # Save temp file
         temp_path = save_uploaded_file(file, temp_upload_dir=TEMP_UPLOAD_DIR, prefix="search")
             
         # Dispatch Celery task for background face search
-        task = search_faces_task.delay(temp_path, n_results=n_results)
+        task = search_faces_task.delay(temp_path, n_results=n_results, use_age_progression=use_age_progression)
         
         return {
             "status": "queued",
             "task_id": task.id,
             "filename": file.filename,
             "n_results": n_results,
+            "use_age_progression": use_age_progression,
             "message": "Face search queued for processing"
         }
     except Exception as e:
