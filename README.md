@@ -58,16 +58,22 @@ Study historical data to:
 # 🧱 AI Pipeline Architecture
 Image / Video Input
 ↓
+
 Face Detection
 ↓
+
 Face Alignment & Crop
 ↓
+
 Face Embedding
 ↓
+
 Vector Search
 ↓
+
 Analysis Engine
 ↓
+
 Alerts / Predictions / Dashboard
 
 ---
