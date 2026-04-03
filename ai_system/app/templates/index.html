@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,24 +8,29 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <header>
             <a href="/" class="logo"><i class="fa-solid fa-person-circle-question"></i> مفقود</a>
             <nav>
-                <a href="/report">تبليغ عن مفقود</a>
-                <a href="/search">بحث عن شخص</a>
+                <a href="{% url 'report_page' %}">تبليغ عن مفقود</a>
+                <a href="{% url 'search_page' %}">بحث عن شخص</a>
             </nav>
         </header>
 
         <main>
             <div class="card" style="text-align: center; padding: 4rem 2rem;">
                 <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">نساعدك في العثور على أحبائك</h1>
-                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 3rem;">نستخدم تقنيات الذكاء الاصطناعي والبحث الشعاعي لمطابقة ملامح الوجوه بدقة عالية.</p>
-                
+                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 3rem;">نستخدم تقنيات الذكاء
+                    الاصطناعي والبحث الشعاعي لمطابقة ملامح الوجوه بدقة عالية.</p>
+
                 <div style="display: flex; gap: 1rem; justify-content: center;">
-                    <a href="/search" class="btn" style="padding: 1rem 2rem; font-size: 1.1rem;">ابدأ البحث الآن</a>
-                    <a href="/report" class="btn btn-secondary" style="padding: 1rem 2rem; font-size: 1.1rem;">تبليغ عن شخص مفقود</a>
+                    <a href="{% url 'search_page' %}" class="btn" style="padding: 1rem 2rem; font-size: 1.1rem;">ابدأ
+                        البحث الآن</a>
+                    <a href="{% url 'report_page' %}" class="btn btn-secondary"
+                        style="padding: 1rem 2rem; font-size: 1.1rem;">تبليغ عن
+                        شخص مفقود</a>
                 </div>
             </div>
 
@@ -32,23 +38,29 @@
                 <h2 style="margin-bottom: 2rem;">كيف يعمل النظام؟</h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
                     <div class="card">
-                        <i class="fa-solid fa-camera" style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                        <i class="fa-solid fa-camera"
+                            style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
                         <h3>1. رفع الصورة</h3>
                         <p style="color: var(--text-muted); font-size: 0.9rem;">ارفع صورة واضحة للشخص المفقود.</p>
                     </div>
                     <div class="card">
-                        <i class="fa-solid fa-microchip" style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                        <i class="fa-solid fa-microchip"
+                            style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
                         <h3>2. التعرف على الملامح</h3>
-                        <p style="color: var(--text-muted); font-size: 0.9rem;">يقوم النظام بتحليل ملامح الوجه وتحويلها لبصمة رقمية.</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">يقوم النظام بتحليل ملامح الوجه وتحويلها
+                            لبصمة رقمية.</p>
                     </div>
                     <div class="card">
-                        <i class="fa-solid fa-magnifying-glass-chart" style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                        <i class="fa-solid fa-magnifying-glass-chart"
+                            style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
                         <h3>3. بحث ذكي</h3>
-                        <p style="color: var(--text-muted); font-size: 0.9rem;">مطابقة البصمة مع آلاف السجلات في قاعدة البيانات.</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">مطابقة البصمة مع آلاف السجلات في قاعدة
+                            البيانات.</p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 </body>
+
 </html>

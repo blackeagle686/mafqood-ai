@@ -7,6 +7,82 @@
     <title>نتائج البحث - مفقود</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 1rem;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            color: var(--text-muted);
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: var(--primary);
+        }
+
+        .modal-header {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .modal-body-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+
+        .modal-info h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .detail-item {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+    </style>
 </head>
 
 <body>
@@ -14,16 +90,15 @@
         <header>
             <a href="/" class="logo"><i class="fa-solid fa-person-circle-question"></i> مفقود</a>
             <nav>
-                <a href="/report">تبليغ عن مفقود</a>
-                <a href="/search">بحث عن شخص</a>
+                <a href="{% url 'report_page' %}">تبليغ عن مفقود</a>
+                <a href="{% url 'search_page' %}">بحث عن شخص</a>
             </nav>
         </header>
 
         <main>
             <div class="results-header" style="margin-bottom: 3rem;">
                 <h1>نتائج المطابقة</h1>
-                <p style="color: var(--text-muted);">تم العثور على {{ results|length }} نتائج محتملة بناءً على بصمة
-                    الوجه.</p>
+                <p style="color: var(--text-muted);">تم العثور على {{ results|length }} نتائج محتملة بناءً على بصمة الوجه.</p>
             </div>
 
             {% if results %}
@@ -31,21 +106,29 @@
                 {% for result in results %}
                 <div class="card result-card">
                     <!-- In a real system, you would show the actual image found -->
-                    <div
-                        style="height: 200px; background: var(--surface); display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; margin-bottom: 1rem;">
-                        <i class="fa-solid fa-user" style="font-size: 4rem; color: var(--text-muted);"></i>
+                    <div class="result-image"
+                        style="height: 200px; overflow: hidden; border-radius: 0.5rem; margin-bottom: 1rem;">
+                        {% if result.image_url %}
+                        <img src="{{ result.image_url }}" alt="{{ result.metadata.name }}"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                        <div
+                            style="height: 100%; background: var(--surface); display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-user" style="font-size: 4rem; color: var(--text-muted);"></i>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="result-info">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <h3>{{ result.metadata.name or 'غير معروف' }}</h3>
-                            <span class="score-badge">مطابقة: {{ (100 * (1 - result.distance))|round(1) }}%</span>
+                            <h3>{{ result.metadata.name|default:'غير معروف' }}</h3>
+                            <span class="score-badge">مطابقة: {{ result.score|floatformat:1 }}%</span>
                         </div>
-                        <p><i class="fa-solid fa-location-dot"></i> {{ result.metadata.last_seen or 'غير متوفر' }}</p>
-                        <p><i class="fa-solid fa-info-circle"></i> {{ result.metadata.details or 'لا توجد تفاصيل إضافية'
-                            }}</p>
+                        <p><i class="fa-solid fa-location-dot"></i> {{ result.metadata.last_seen|default:'غير متوفر' }}
+                        </p>
+                        <p><i class="fa-solid fa-info-circle"></i> {{ result.metadata.details|default:'لا توجد تفاصيل إضافية' }}</p>
                         <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 1rem 0;">
-                        <button class="btn btn-secondary" style="width: 100%; font-size: 0.9rem;">عرض المزيد من
-                            المعلومات</button>
+                        <button class="btn btn-secondary" style="width: 100%; font-size: 0.9rem;"
+                            onclick="showDetails('{{ result.metadata.name|escapejs }}', '{{ result.score }}', '{{ result.metadata.last_seen|escapejs }}', '{{ result.metadata.details|escapejs }}', '{{ result.image_url }}')">عرض المزيد من المعلومات</button>
                     </div>
                 </div>
                 {% endfor %}
@@ -61,6 +144,63 @@
             {% endif %}
         </main>
     </div>
+    <!-- Modal Structure -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="modalBody">
+                <!-- Data will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("infoModal");
+        const closeModal = document.querySelector(".close-modal");
+
+        function showDetails(name, score, location, details, imageUrl) {
+            const body = document.getElementById("modalBody");
+
+            let imgHtml = imageUrl ? `<img src="${imageUrl}" class="modal-body-img">` :
+                `<div class="modal-body-img" style="background: var(--surface); display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-user" style="font-size: 3rem; color: var(--text-muted);"></i></div>`;
+
+            body.innerHTML = `
+                <div class="modal-header">
+                    ${imgHtml}
+                    <div class="modal-info">
+                        <h2>${name || 'غير معروف'}</h2>
+                        <span class="score-badge">نسبة المطابقة: ${score}%</span>
+                    </div>
+                </div>
+                <div class="modal-details">
+                    <div class="detail-item">
+                        <span class="detail-label">آخر مكان تواجد</span>
+                        <p>${location || 'غير متوفر'}</p>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">تفاصيل إضافية</span>
+                        <p>${details || 'لا توجد تفاصيل إضافية'}</p>
+                    </div>
+                </div>
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button class="btn" style="flex: 1;" onclick="window.print()"><i class="fa-solid fa-print"></i> طباعة التقرير</button>
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="modal.style.display='none'">إغلاق</button>
+                </div>
+            `;
+
+            modal.style.display = "block";
+        }
+
+        closeModal.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 
 </html>
