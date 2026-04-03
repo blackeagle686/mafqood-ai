@@ -1,149 +1,88 @@
-# 🧠 mafqood-ai AI System — Missing People Detection & Analysis
+**Mafqood AI** is an advanced facial recognition and reporting system designed to help find missing persons. It uses state-of-the-art computer vision and vector search to match reported individuals against a database of known faces.
 
-This project contains the Artificial Intelligence pipeline responsible for detecting, analyzing, and tracking missing people using computer vision, embeddings, vector search, and time-series intelligence.
+## 📊 System Architecture Flow
 
-The AI module is designed to work in real-time with images, videos, and large-scale datasets to support search, prediction, and decision-making.
+```mermaid
+graph TD
+    User((User / Web UI)) -->|Upload Image| Django[Django Backend]
+    Django -->|API Call| SearchPipeline[Search Pipeline]
+    SearchPipeline -->|Extract Face| InsightFace[InsightFace AI Service]
+    InsightFace -->|512-D Embedding| SearchPipeline
+    SearchPipeline -->|Query Vector| ChromaDB[(ChromaDB Vector Store)]
+    ChromaDB -->|Nearest Matches| SearchPipeline
+    SearchPipeline -->|Filtered Results| Django
+    Django -->|Render Results| User
 
----
+    User -->|Report Missing| ReportPipeline[Report Pipeline]
+    ReportPipeline -->|Queue Task| Redis[Redis Broker]
+    Redis -->|Process| Celery[Celery Worker]
+    Celery -->|Index Face| ChromaDB
+```
 
-# 🚀 AI Capabilities
+## 🏗️ Architecture Overview
 
-## 👁️ Face Detection
-Detect human faces from:
-- images
-- CCTV streams
-- mobile uploads
-- surveillance cameras
+The system is built with a modular, scalable architecture:
 
-## 🧬 Face Embedding
-Convert detected faces into numerical vectors (embeddings) that represent identity features.
+- **Backend**: Django (with Django REST Framework) for API and management.
+- **Computer Vision**: [InsightFace](https://github.com/deepinsight/insightface) for high-accuracy face detection and 512-D embedding extraction.
+- **Vector Database**: [ChromaDB](https://www.trychroma.com/) for efficient similarity search using HNSW (Cosine Space).
+- **Task Queue**: [Celery & Redis](https://docs.celeryq.dev/en/stable/getting-started/introduction.html) for asynchronous processing of reports and heavy AI tasks.
+- **Internal Pipelines**: Specialized domain logic for `Search` and `Report` workflows.
 
-These embeddings are used for:
-- similarity search
-- recognition
-- clustering
+## 🚀 Recent Updates & Fixes
 
-## 🔎 Vector Search
-Search for similar faces using vector databases to:
-- identify missing persons
-- match previously seen faces
-- track movement patterns
+We have recently completed a series of architectural hardenings:
 
-## 📊 Spatio-Temporal Analysis
-Analyze:
-- where people go missing
-- when they go missing
-- how patterns evolve
+- **Infrastructure Integration**: Fixed persistent Celery connection issues by standardizing Django-Celery integration.
+- **Module Resolution**: Resolved `ModuleNotFoundError` for the `app` package by making entry points (`manage.py`, `wsgi.py`) project-aware.
+- **UI Enhancements**: 
+    - Added a **Detail Modal** to show full metadata for each match.
+    - Integrated **Image Serving** from `temp_uploads`.
+    - Fixed template rendering errors.
+- **Scoring Logic**: Implemented score clamping and filtering (only results with **> 40% match** are displayed).
 
-Used for:
-- hotspot detection
-- risk prediction
-- search optimization
+## 📂 Project Structure
 
-## 🎥 Real-Time Surveillance Pipeline
-Processes live camera streams:
-- detect faces
-- generate embeddings
-- search database
-- trigger alerts if matched
+```text
+ai_system/
+├── app/                  # Main Django Application
+│   ├── mafqood_project/  # Project Settings & Routing
+│   ├── core_api/         # Main UI Views & Controllers
+│   ├── people/           # People Management API
+│   ├── search/           # Face Search API
+│   └── templates/        # HTML Templates
+├── services/             # Core AI Services (FaceSearchService)
+├── temp_uploads/         # Uploaded images (Media Root)
+└── run_dev.sh            # One-click launch script
+```
 
-## ⏱️ Time-Series Intelligence
-Study historical data to:
-- detect trends
-- identify seasonal patterns
-- forecast future missing cases
+## 🛠️ Getting Started
 
----
+### Prerequisites
+- Python 3.10+
+- Redis Server (Running on `localhost:6379`)
 
-# 🧱 AI Pipeline Architecture
-Image / Video Input
+### Installation
+1. Install dependencies:
+   ```bash
+   pip install -r app/requirements.txt
+   ```
+2. Set up permissions:
+   ```bash
+   chmod +x run_dev.sh
+   ```
 
-↓
+### Running the Project
+Simply run the development utility:
+```bash
+./run_dev.sh
+```
+The server will be available at `http://localhost:8000`.
 
-Face Detection
-
-↓
-
-Face Alignment & Crop
-
-↓
-
-Face Embedding
-
-↓
-
-Vector Search
-
-↓
-
-Analysis Engine
-
-↓
-
-Alerts / Predictions / Dashboard
-
----
-
-# 🧰 AI Tech Stack
-
-## 🧠 Core AI & Machine Learning
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
-![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
-
-## 👁️ Computer Vision
-![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)
-![InsightFace](https://img.shields.io/badge/InsightFace-000000?style=for-the-badge)
-![RetinaFace](https://img.shields.io/badge/RetinaFace-009688?style=for-the-badge)
-
-## 🧬 Embeddings & Vector Search
-![ChromaDB](https://img.shields.io/badge/ChromaDB-6A5ACD?style=for-the-badge)
-![FAISS](https://img.shields.io/badge/FAISS-0467DF?style=for-the-badge)
-![HuggingFace](https://img.shields.io/badge/HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
-
-## ⚙️ Backend & Async Processing
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Celery](https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-
-## 📊 Data & Analysis
-![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
-![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white)
-![Statsmodels](https://img.shields.io/badge/Statsmodels-003B57?style=for-the-badge)
-
-## ☁️ Deployment & Infra
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
-![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
+## 📡 API Endpoints
+- `POST /api/people/report/`: Submit a new missing person report.
+- `POST /api/search/face/`: Search for a face by image.
+- `GET /results/`: View UI results for the last search.
 
 ---
-
-# 🧪 AI Use Cases
-
-- Missing person identification  
-- CCTV monitoring  
-- Real-time alerts  
-- Movement pattern analysis  
-- Risk area prediction  
-- Search planning support  
-- Historical analytics  
-
----
-
-# 📌 Future AI Roadmap
-
-- 🔄 Multi-camera distributed tracking  
-- 🧠 Behavior analysis models  
-- 📍 Spatio-temporal deep learning  
-- 🤖 Autonomous search planning AI  
-- 🌍 Smart city surveillance integration  
-
----
-
-# 👨‍💻 Author
-
-Built as part of an AI-driven system for large-scale missing persons detection, monitoring, and prediction.
-
-
 
