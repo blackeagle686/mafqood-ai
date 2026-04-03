@@ -14,10 +14,10 @@
         <div class="nav-content">
             <div class="logo">مفقود AI</div>
             <div class="nav-links">
-                <a href="/">الرئيسية</a>
-                <a href="/report">تبليغ</a>
-                <a href="/search">بحث بالصور</a>
-                <a href="/video_search" class="active">بحث بالفيديو</a>
+                <a href="{% url 'index' %}">الرئيسية</a>
+                <a href="{% url 'report_page' %}">تبليغ</a>
+                <a href="{% url 'search_page' %}">بحث بالصور</a>
+                <a href="{% url 'video_search_page' %}" class="active">بحث بالفيديو</a>
             </div>
         </div>
     </nav>
@@ -30,6 +30,7 @@
 
         <section class="upload-section card">
             <form id="videoUploadForm">
+                {% csrf_token %}
                 <div class="upload-area" id="dropZone">
                     <input type="file" id="videoFile" name="file" accept="video/*" hidden>
                     <div class="upload-icon">📹</div>
@@ -81,9 +82,12 @@
             statusArea.style.display = 'block';
 
             try {
-                const response = await fetch('/cv/process_video', {
+                const response = await fetch('/api/search/video/', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
                 });
 
                 const result = await response.json();
