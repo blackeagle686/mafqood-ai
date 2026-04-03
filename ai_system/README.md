@@ -1,6 +1,23 @@
-# Mafqood AI (مفقود)
-
 **Mafqood AI** is an advanced facial recognition and reporting system designed to help find missing persons. It uses state-of-the-art computer vision and vector search to match reported individuals against a database of known faces.
+
+## 📊 System Architecture Flow
+
+```mermaid
+graph TD
+    User((User / Web UI)) -->|Upload Image| Django[Django Backend]
+    Django -->|API Call| SearchPipeline[Search Pipeline]
+    SearchPipeline -->|Extract Face| InsightFace[InsightFace AI Service]
+    InsightFace -->|512-D Embedding| SearchPipeline
+    SearchPipeline -->|Query Vector| ChromaDB[(ChromaDB Vector Store)]
+    ChromaDB -->|Nearest Matches| SearchPipeline
+    SearchPipeline -->|Filtered Results| Django
+    Django -->|Render Results| User
+
+    User -->|Report Missing| ReportPipeline[Report Pipeline]
+    ReportPipeline -->|Queue Task| Redis[Redis Broker]
+    Redis -->|Process| Celery[Celery Worker]
+    Celery -->|Index Face| ChromaDB
+```
 
 ## 🏗️ Architecture Overview
 
@@ -68,4 +85,3 @@ The server will be available at `http://localhost:8000`.
 - `GET /results/`: View UI results for the last search.
 
 ---
-*Developed for human impact using Google Deepmind Advanced Agentic Coding.*
