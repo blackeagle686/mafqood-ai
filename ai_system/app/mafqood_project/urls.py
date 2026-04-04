@@ -18,6 +18,7 @@ urlpatterns = [
     # API Endpoints
     path('api/people/', include('app.people.urls')),
     path('api/search/', include('app.search.urls')),
+    path('api/ai/', include('app.ai.urls')),
 ]
 
 if settings.DEBUG:
