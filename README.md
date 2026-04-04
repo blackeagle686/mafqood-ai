@@ -15,7 +15,7 @@
 
 <br/>
 
-> **Mafqood** (مفقود — Arabic for *"Missing"*) is a production-grade AI system designed to help locate missing persons by leveraging state-of-the-art face recognition, vector similarity search, age progression simulation, and video intelligence — all exposed through a clean Django REST API.
+> **Mafqood** is a production-grade AI system designed to help locate missing persons by leveraging state-of-the-art face recognition, vector similarity search, age progression simulation, and video intelligence — all exposed through a clean Django REST API.
 
 <br/>
 
