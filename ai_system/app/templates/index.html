@@ -10,52 +10,57 @@
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <a href="/" class="logo"><i class="fa-solid fa-person-circle-question"></i> مفقود</a>
-            <nav>
-                <a href="{% url 'report_page' %}">تبليغ عن مفقود</a>
-                <a href="{% url 'search_page' %}">بحث عن شخص</a>
-            </nav>
-        </header>
+    <div class="scanline"></div>
+    <nav>
+        <div class="nav-content">
+            <a href="/" class="logo">مفقود AI <span class="tech-font"
+                    style="font-size: 0.8rem; font-weight: 300;">HUB</span></a>
+            <div class="nav-links">
+                <a href="{% url 'report_page' %}">إرسال بلاغ</a>
+                <a href="{% url 'search_page' %}">بحث الوجه</a>
+                <a href="{% url 'video_search_page' %}">تحليل الفيديو</a>
+            </div>
+        </div>
+    </nav>
 
+    <div class="container" style="padding-top: 5rem;">
         <main>
-            <div class="card" style="text-align: center; padding: 4rem 2rem;">
-                <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">نساعدك في العثور على أحبائك</h1>
-                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 3rem;">نستخدم تقنيات الذكاء
-                    الاصطناعي والبحث الشعاعي لمطابقة ملامح الوجوه بدقة عالية.</p>
+            <div class="card pulse" style="text-align: center; padding: 5rem 2rem; border-color: var(--primary);">
+                <div class="tech-font" style="color: var(--primary); margin-bottom: 1rem; font-size: 0.9rem;">[ SYSTEM
+                    STATUS: OPERATIONAL ]</div>
+                <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem; line-height: 1.1;">منصة مفقود للتحليل الاستخباري
+                </h1>
+                <p style="color: var(--text-muted); max-width: 700px; margin: 0 auto 3rem; font-size: 1.2rem;">نستخدم
+                    خوارزميات HNSW المتقدمة والذكاء الاصطناعي لمطابقة الملامح في أجزاء من الثانية.</p>
 
-                <div style="display: flex; gap: 1rem; justify-content: center;">
-                    <a href="{% url 'search_page' %}" class="btn" style="padding: 1rem 2rem; font-size: 1.1rem;">ابدأ
-                        البحث الآن</a>
-                    <a href="{% url 'report_page' %}" class="btn btn-secondary"
-                        style="padding: 1rem 2rem; font-size: 1.1rem;">تبليغ عن
-                        شخص مفقود</a>
+                <div style="display: flex; gap: 1.5rem; justify-content: center;">
+                    <a href="{% url 'search_page' %}" class="btn-primary">بدء المسح الضوئي</a>
+                    <a href="{% url 'report_page' %}" class="btn-primary"
+                        style="border-color: var(--secondary); color: var(--secondary);">إضافة سجل جديد</a>
                 </div>
             </div>
 
-            <div style="margin-top: 4rem;">
-                <h2 style="margin-bottom: 2rem;">كيف يعمل النظام؟</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+            <div style="margin-top: 6rem;">
+                <div class="section-header">
+                    <h2 class="tech-font">Protocol_v2.0 // نظام العمل</h2>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
                     <div class="card">
-                        <i class="fa-solid fa-camera"
-                            style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
-                        <h3>1. رفع الصورة</h3>
-                        <p style="color: var(--text-muted); font-size: 0.9rem;">ارفع صورة واضحة للشخص المفقود.</p>
+                        <i class="fa-solid fa-camera upload-icon" style="color: var(--primary);"></i>
+                        <h3 class="tech-font">01_المدخلات</h3>
+                        <p style="color: var(--text-muted);">رفع صور عالية الدقة أو فيديوهات مراقبة (CCTV) للتحليل.</p>
                     </div>
                     <div class="card">
-                        <i class="fa-solid fa-microchip"
-                            style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
-                        <h3>2. التعرف على الملامح</h3>
-                        <p style="color: var(--text-muted); font-size: 0.9rem;">يقوم النظام بتحليل ملامح الوجه وتحويلها
-                            لبصمة رقمية.</p>
+                        <i class="fa-solid fa-microchip upload-icon" style="color: var(--accent);"></i>
+                        <h3 class="tech-font">02_المعالجة</h3>
+                        <p style="color: var(--text-muted);">تحويل الملامح الحيوية إلى بصمات رقمية مشفرة في فضاء شعاعي.
+                        </p>
                     </div>
                     <div class="card">
-                        <i class="fa-solid fa-magnifying-glass-chart"
-                            style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
-                        <h3>3. بحث ذكي</h3>
-                        <p style="color: var(--text-muted); font-size: 0.9rem;">مطابقة البصمة مع آلاف السجلات في قاعدة
-                            البيانات.</p>
+                        <i class="fa-solid fa-magnifying-glass-chart upload-icon" style="color: var(--secondary);"></i>
+                        <h3 class="tech-font">03_المطابقة</h3>
+                        <p style="color: var(--text-muted);">البحث في ملايين السجلات باستخدام تقنية HNSW فائقة السرعة.
+                        </p>
                     </div>
                 </div>
             </div>

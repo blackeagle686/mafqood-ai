@@ -4,73 +4,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تبليغ عن مفقود - مفقود</title>
+    <title>إرسال بلاغ - مفقود AI</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <a href="/" class="logo"><i class="fa-solid fa-person-circle-question"></i> مفقود</a>
-            <nav>
-                <a href="{% url 'report_page' %}" style="color: var(--text);">تبليغ عن مفقود</a>
-                <a href="{% url 'search_page' %}">بحث عن شخص</a>
-            </nav>
+    <div class="scanline"></div>
+    <nav>
+        <div class="nav-content">
+            <a href="/" class="logo">مفقود AI</a>
+            <div class="nav-links">
+                <a href="{% url 'report_page' %}" class="active">إرسال بلاغ</a>
+                <a href="{% url 'search_page' %}">بحث الوجه</a>
+                <a href="{% url 'video_search_page' %}">تحليل الفيديو</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 800px;">
+        <header class="section-header">
+            <h1 class="tech-font">تسجيل بلاغ مفقود جديد</h1>
+            <p>إدخال بيانات حيوية جديدة في قاعدة البيانات الاستخبارية (HNSW INDEX).</p>
         </header>
 
-        <main>
-            <div class="card" style="max-width: 600px; margin: 0 auto;">
-                <h2 style="margin-bottom: 1rem;"><i class="fa-solid fa-file-signature"></i> تبليغ عن حالة فقدان</h2>
-
-                {% if status == 'success' %}
-                <div
-                    style="background: rgba(40, 167, 69, 0.2); color: #28a745; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fa-solid fa-circle-check"></i> {{ message }}
+        {% if status == 'success' %}
+        <div class="card" style="border-color: var(--success); text-align: center; margin-bottom: 3rem;">
+            <h2 class="tech-font" style="color: var(--success);">[ SUCCESS_REPORT_ENQUEUED ]</h2>
+            <p style="margin-top: 1rem;">تم استلام البلاغ وجاري معالجته في الخلفية.</p>
+            <a href="{% url 'index' %}" class="btn-primary"
+                style="margin-top: 2rem; display: inline-block; text-decoration: none;">العودة للرئيسية</a>
+        </div>
+        {% else %}
+        <div class="card">
+            <form id="report-form" action="/api/people/report/" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="tech-font">TARGET_FULL_NAME</label>
+                    <input type="text" name="name" required placeholder="أدخل اسم الشخص المفقود">
                 </div>
-                {% endif %}
 
-                {% if errors %}
-                <div
-                    style="background: rgba(220, 53, 69, 0.2); color: #dc3545; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem;">
-                    <i class="fa-solid fa-circle-exclamation"></i> حدث خطأ في البيانات المرسلة.
+                <div class="form-group">
+                    <label class="tech-font">LAST_KNOWN_LOCATION</label>
+                    <input type="text" name="last_seen" placeholder="أين ومتى شوهد لآخر مرة؟" required>
                 </div>
-                {% endif %}
 
-                <form id="report-form" action="/api/people/report/" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label>صورة الشخص المفقود</label>
-                        <div class="upload-area" onclick="document.getElementById('file-input').click()">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <p>اضغط هنا لرفع الصورة</p>
-                            <input type="file" id="file-input" name="file" accept="image/*" style="display: none;"
-                                onchange="previewImage(event)">
-                            <img id="image-preview" src="#" alt="Preview">
-                        </div>
+                <div class="form-group">
+                    <label class="tech-font">SUBJECT_METADATA / DETAILS</label>
+                    <textarea name="details" rows="4" placeholder="أي علامات مميزة، تفاصيل الملابس، إلخ..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="tech-font">IDENTIFICATION_PHOTO</label>
+                    <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                        <div class="upload-icon">📷</div>
+                        <p class="tech-font">UPLOAD_TARGET_BIO_DATA</p>
+                        <input type="file" id="file-input" name="file" accept="image/*" style="display: none;"
+                            onchange="previewImage(event)" required>
+                        <img id="image-preview" src="#" alt="Preview"
+                            style="max-width: 100%; margin-top: 1rem; border: 1px solid var(--primary); display: none;">
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label>اسم الشخص</label>
-                        <input type="text" name="name" placeholder="الاسم الكامل" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>آخر ظهور</label>
-                        <input type="text" name="last_seen" placeholder="التاريخ والمكان" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>تفاصيل إضافية</label>
-                        <textarea name="details" rows="4" placeholder="العمر، الملابس، أي علامات مميزة..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn" style="width: 100%;">
-                        <i class="fa-solid fa-paper-plane"></i> إرسال البلاغ
-                    </button>
-                </form>
-            </div>
-        </main>
+                <button type="submit" class="btn-primary" style="width: 100%;">
+                    تشفير وحفظ في قاعدة البيانات
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
 
     <script>
@@ -78,17 +79,14 @@
             const preview = document.getElementById('image-preview');
             const file = event.target.files[0];
             const reader = new FileReader();
-
-            reader.onload = function () {
+            reader.onload = () => {
                 preview.src = reader.result;
                 preview.style.display = 'block';
             }
-
-            if (file) {
-                reader.readAsDataURL(file);
-            }
+            if (file) reader.readAsDataURL(file);
         }
     </script>
 </body>
 
 </html>
+坐

@@ -19,10 +19,17 @@ class FaceSearchView(APIView):
             image = serializer.validated_data['file']
             n_results = serializer.validated_data['n_results']
             use_age_progression = serializer.validated_data['use_age_progression']
+            sampling_rate = serializer.validated_data.get('sampling_rate', 15)
             
             # Save temp file
             ext = os.path.splitext(image.name)[1]
-            temp_path = os.path.join("temp_uploads", f"search_{uuid.uuid4()}{ext}")
+            temp_prefix = "search_video_" if ext.lower() in ['.mp4', '.avi', '.mov', '.mkv'] else "search_"
+            
+            is_video = False
+            if ext.lower() in ['.mp4', '.avi', '.mov', '.mkv']:
+                is_video = True
+
+            temp_path = os.path.join("temp_uploads", f"{temp_prefix}{uuid.uuid4()}{ext}")
             
             os.makedirs("temp_uploads", exist_ok=True)
             with open(temp_path, 'wb+') as destination:
@@ -30,12 +37,22 @@ class FaceSearchView(APIView):
                     destination.write(chunk)
             
             # Use pipeline
+            result = {}
             pipeline = SearchPipeline()
-            result = pipeline.execute(
-                temp_path, 
-                n_results=n_results, 
-                use_age_progression=use_age_progression
-            )
+            if is_video: # video search continuous frames
+                result = pipeline.execute(
+                    temp_path, 
+                    n_results=n_results, 
+                    use_age_progression=use_age_progression,
+                    sampling_rate=sampling_rate
+                )
+            
+            else: # image search no continuous frames
+                result = pipeline.execute(
+                    temp_path, 
+                    n_results=n_results, 
+                    use_age_progression=use_age_progression,
+                )
             
             # Pre-calculate scores for template
             search_results = result.get('search_results', [])
