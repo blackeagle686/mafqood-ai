@@ -4,54 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>البحث في الفيديوهات - مفقود</title>
+    <title>تحليل الفيديو - مفقود AI</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
+    <div class="scanline"></div>
     <nav>
         <div class="nav-content">
-            <div class="logo">مفقود AI</div>
+            <a href="/" class="logo">مفقود AI</a>
             <div class="nav-links">
-                <a href="{% url 'index' %}">الرئيسية</a>
-                <a href="{% url 'report_page' %}">تبليغ</a>
-                <a href="{% url 'search_page' %}">بحث بالصور</a>
-                <a href="{% url 'video_search_page' %}" class="active">بحث بالفيديو</a>
+                <a href="{% url 'report_page' %}">إرسال بلاغ</a>
+                <a href="{% url 'search_page' %}">بحث الوجه</a>
+                <a href="{% url 'video_search_page' %}" class="active">تحليل الفيديو</a>
             </div>
         </div>
     </nav>
 
     <main class="container">
         <header class="section-header">
-            <h1>البحث في فيديوهات المراقبة (CCTV)</h1>
-            <p>قم برفع ملف فيديو لتحليل الوجوه والبحث عنها في قاعدة البيانات.</p>
+            <h1 class="tech-font">تحليل فيديوهات المراقبة (CCTV)</h1>
+            <p>يتم استخدام خوارزميات التتبع والتعرف المتقدمة لتمشيط ملفات الفيديو واستخراج الأهداف المحتملة.</p>
         </header>
 
         <section class="upload-section card">
-            <form id="videoUploadForm">
+            <form id="videoUploadForm" action="/api/search/video/" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="upload-area" id="dropZone">
-                    <input type="file" id="videoFile" name="file" accept="video/*" hidden>
+                    <input type="file" id="videoFile" name="file" accept="video/*" hidden required>
                     <div class="upload-icon">📹</div>
-                    <p>اسحب ملف الفيديو هنا أو اضغط للاختيار</p>
-                    <small>صيغ الفيديو المدعومة: MP4, AVI, MOV</small>
+                    <p class="tech-font">UPLOAD_VIDEO_FOR_ANALYSIS</p>
+                    <small>MP4 / AVI / MOV</small>
                 </div>
 
-                <div class="form-group" style="margin-top: 20px;">
-                    <label for="sampling_rate">معدل العينات (Frames to skip)</label>
+                <div class="form-group" style="margin-top: 30px;">
+                    <label class="tech-font">Sampling_Rate [Frames to Skip]</label>
                     <input type="number" id="sampling_rate" name="sampling_rate" value="15" min="1">
-                    <small>كلما زاد الرقم زادت سرعة المعالجة (مثال: 30 يعني معالجة إطار واحد كل ثانية لفيديو
-                        30fps).</small>
                 </div>
 
-                <button type="submit" class="btn-primary" id="submitBtn">بدء التحليل الذكي</button>
+                <button type="submit" class="btn-primary" id="submitBtn" style="width: 100%;">بدء التحليل
+                    الاستخباري</button>
             </form>
 
-            <div id="statusArea" style="display: none; margin-top: 20px; text-align: center;">
-                <div class="loader"></div>
-                <p id="statusMessage">يتم رفع الفيديو ومعالجته حالياً...</p>
-                <small id="taskId"></small>
+            <div id="statusArea" style="display: none; margin-top: 30px; text-align: center;">
+                <div class="tech-font" style="color: var(--primary); margin-bottom: 1rem;">[ PROCESSING_VIDEO_STREAM...
+                    ]</div>
+                <p id="statusMessage" style="color: var(--text-muted);">نظام الذكاء الاصطناعي يقوم حالياً بمسح الإطارات
+                    ومطابقتها...</p>
             </div>
         </section>
     </main>
@@ -64,45 +64,20 @@
         const submitBtn = document.getElementById('submitBtn');
 
         dropZone.onclick = () => fileInput.click();
-
         fileInput.onchange = (e) => {
             if (e.target.files.length > 0) {
                 dropZone.querySelector('p').innerText = e.target.files[0].name;
             }
         };
 
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            formData.append('sampling_rate', document.getElementById('sampling_rate').value);
-
-            submitBtn.disabled = true;
-            statusArea.style.display = 'block';
-
-            try {
-                const response = await fetch('/api/search/video/', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    document.getElementById('statusMessage').innerText = 'تم بدء العملية بنجاح! رقم المهمة:';
-                    document.getElementById('taskId').innerText = result.task_id;
-                    submitBtn.innerText = 'تم الإرسال';
-                } else {
-                    alert('خطأ أثناء الرفع: ' + result.detail);
-                    submitBtn.disabled = false;
-                }
-            } catch (error) {
-                alert('حدث خطأ في الاتصال بالسيرفر');
-                submitBtn.disabled = false;
+        form.onsubmit = () => {
+            if (fileInput.files.length > 0) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'جاري التحليل...';
+                statusArea.style.display = 'block';
+                return true;
             }
+            return false;
         };
     </script>
 </body>

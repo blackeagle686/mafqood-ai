@@ -10,43 +10,48 @@
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <a href="/" class="logo"><i class="fa-solid fa-person-circle-question"></i> مفقود</a>
-            <nav>
-                <a href="{% url 'report_page' %}">تبليغ عن مفقود</a>
-                <a href="{% url 'search_page' %}" style="color: var(--text);">بحث عن شخص</a>
-            </nav>
-        </header>
+    <div class="scanline"></div>
+    <nav>
+        <div class="nav-content">
+            <a href="/" class="logo">مفقود AI</a>
+            <div class="nav-links">
+                <a href="{% url 'report_page' %}">إرسال بلاغ</a>
+                <a href="{% url 'search_page' %}" class="active">بحث الوجه</a>
+                <a href="{% url 'video_search_page' %}">تحليل الفيديو</a>
+            </div>
+        </div>
+    </nav>
 
+    <div class="container">
         <main>
-            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
-                <h2 style="margin-bottom: 1rem;"><i class="fa-solid fa-magnifying-glass"></i> ابحث عن شخص بمطابقة الوجه
-                </h2>
+            <div class="section-header">
+                <h1 class="tech-font">تحليل البصمة الحيوية للوجه</h1>
+                <p>قم برفع صورة الهدف للبدء في عملية المطابقة مع قاعدة البيانات المركزية.</p>
+            </div>
+
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
                 {% if errors %}
                 <div
-                    style="background: rgba(220, 53, 69, 0.2); color: #dc3545; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem;">
-                    <i class="fa-solid fa-circle-exclamation"></i> يرجى التأكد من رفع صورة صحيحة.
+                    style="border: 1px solid var(--danger); color: var(--danger); padding: 1rem; margin-bottom: 2rem; font-family: 'Share Tech Mono';">
+                    [ ! ] خطأ في التحليل: يرجى التأكد من جودة الصورة المرفوعة.
                 </div>
                 {% endif %}
-                <p style="color: var(--text-muted); margin-bottom: 2rem;">ارفع صورة للشخص الذي تبحث عنه وسنقوم بمطابقتها
-                    مع قاعدة بياناتنا.</p>
 
                 <form id="search-form" action="/api/search/face/" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
                         <div class="upload-area" onclick="document.getElementById('file-input').click()">
-                            <i class="fa-solid fa-camera-viewfinder"
-                                style="font-size: 3rem; color: var(--primary);"></i>
-                            <p>ارفع الصورة للبحث</p>
+                            <div class="upload-icon">🔍</div>
+                            <p class="tech-font">READY_FOR_SCAN</p>
                             <input type="file" id="file-input" name="file" accept="image/*" style="display: none;"
                                 onchange="previewImage(event)" required>
-                            <img id="image-preview" src="#" alt="Preview">
+                            <img id="image-preview" src="#" alt="Preview"
+                                style="max-width: 100%; border: 1px solid var(--primary);">
                         </div>
                     </div>
 
-                    <button type="submit" class="btn" style="width: 100%; padding: 1rem;">
-                        <i class="fa-solid fa-microchip"></i> ابدأ مطابقة الوجه
+                    <button type="submit" class="btn-primary" style="width: 100%;">
+                        بدء عملية المطابقة الذكية
                     </button>
                 </form>
             </div>
@@ -58,15 +63,11 @@
             const preview = document.getElementById('image-preview');
             const file = event.target.files[0];
             const reader = new FileReader();
-
-            reader.onload = function () {
+            reader.onload = () => {
                 preview.src = reader.result;
                 preview.style.display = 'block';
             }
-
-            if (file) {
-                reader.readAsDataURL(file);
-            }
+            if (file) reader.readAsDataURL(file);
         }
     </script>
 </body>

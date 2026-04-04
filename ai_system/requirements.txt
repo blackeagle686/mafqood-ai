@@ -20,6 +20,7 @@ openai>=1.0.0
 python-dotenv>=1.0.0
 selenium>=4.15.0
 webdriver-manager>=4.0.1
-beautifulsoup4>=4.12.2django>=6.0.3
+beautifulsoup4>=4.12.2
+django>=6.0.3
 djangorestframework>=3.17.1
 django-environ>=0.13.0
