@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'app.core_api',
     'app.search',
     'app.people',
+    'app.ai',
 ]
 
 REST_FRAMEWORK = {
