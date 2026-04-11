@@ -13,49 +13,80 @@
     <div class="scanline"></div>
     <nav>
         <div class="nav-content">
-            <a href="/" class="logo">مفقود AI</a>
+            <a href="/" class="logo">
+                <i class="fa-solid fa-hands-holding-child" style="margin-left: 0.5rem;"></i>
+                مفقود <span class="tech-font" style="font-size: 0.8rem; font-weight: 300; opacity: 0.7;">للبحث
+                    الإنساني</span>
+            </a>
             <div class="nav-links">
-                <a href="{% url 'report_page' %}">إرسال بلاغ</a>
-                <a href="{% url 'search_page' %}" class="active">بحث الوجه</a>
-                <a href="{% url 'video_search_page' %}">تحليل الفيديو</a>
+                <a href="{% url 'report_page' %}"><i class="fa-solid fa-file-invoice"></i> إرسال بلاغ</a>
+                <a href="{% url 'search_page' %}" class="active"><i class="fa-solid fa-id-card"></i> بحث الوجه</a>
+                <a href="{% url 'video_search_page' %}"><i class="fa-solid fa-video"></i> تحليل الفيديو</a>
             </div>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container" style="padding-top: 5rem;">
         <main>
-            <div class="section-header">
-                <h1 class="tech-font">تحليل البصمة الحيوية للوجه</h1>
-                <p>قم برفع صورة الهدف للبدء في عملية المطابقة مع قاعدة البيانات المركزية.</p>
+            <div class="section-header" style="text-align: center; border-left: none; padding-left: 0;">
+                <h1 class="tech-font"
+                    style="font-size: 3rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                    البحث الذكي عن المفقودين
+                </h1>
+                <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: 0 auto;">قم برفع صورة
+                    الشخص المفقود للبدء في عملية المطابقة الفورية مع قاعدة البيانات للمساعدة في العثور عليه.</p>
             </div>
 
-            <div class="card" style="max-width: 800px; margin: 0 auto;">
+            <div class="card" style="max-width: 600px; margin: 3rem auto; border-color: hsla(182, 100%, 50%, 0.2);">
                 {% if errors %}
                 <div
-                    style="border: 1px solid var(--danger); color: var(--danger); padding: 1rem; margin-bottom: 2rem; font-family: 'Share Tech Mono';">
-                    [ ! ] خطأ في التحليل: يرجى التأكد من جودة الصورة المرفوعة.
+                    style="border-right: 4px solid var(--danger); background: hsla(0, 100%, 50%, 0.05); color: var(--danger); padding: 1.5rem; margin-bottom: 2.5rem; font-family: 'Share Tech Mono';">
+                    <i class="fa-solid fa-triangle-exclamation"></i> [ ERROR_ANALYTICS_FAILURE ]: يرجى التأكد من جودة
+                    الصورة المرفوعة ووضوح ملامح الوجه.
                 </div>
                 {% endif %}
 
                 <form id="search-form" action="/api/search/face/" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
-                        <div class="upload-area" onclick="document.getElementById('file-input').click()">
-                            <div class="upload-icon">🔍</div>
-                            <p class="tech-font">READY_FOR_SCAN</p>
+                        <div class="upload-area" onclick="document.getElementById('file-input').click()"
+                            style="border-radius: 12px; border-style: solid; border-width: 1px; border-color: var(--border-color); background: hsla(182, 100%, 50%, 0.02);">
+                            <div class="upload-icon" style="color: var(--primary);">
+                                <i class="fa-solid fa-heart-pulse"></i>
+                            </div>
+                            <p class="tech-font" style="color: var(--text); font-size: 1.1rem; margin-bottom: 0.5rem;">
+                                READY_FOR_SEARCH_SCAN</p>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">اسحب صورة الشخص المفقود هنا للاختيار
+                            </p>
                             <input type="file" id="file-input" name="file" accept="image/*" style="display: none;"
                                 onchange="previewImage(event)" required>
                             <img id="image-preview" src="#" alt="Preview"
-                                style="max-width: 100%; border: 1px solid var(--primary);">
+                                style="max-width: 100%; border-radius: 8px; border: 1px solid var(--primary); margin-top: 2rem; display: none; box-shadow: 0 0 20px var(--primary-glow);">
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-primary" style="width: 100%;">
-                        بدء عملية المطابقة الذكية
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1.5rem;">
+                        <i class="fa-solid fa-magnifying-glass"></i> بدء عملية البحث والتحقق
                     </button>
                 </form>
             </div>
         </main>
+    </div>
+
+    <!-- Loading Modal with Scanner -->
+    <div id="loadingModal" class="loading-modal">
+        <div class="scanner-container">
+            <div class="scanner-grid"></div>
+            <div class="scanner-line"></div>
+            <img id="scanner-preview" src="#" alt="Scanning...">
+        </div>
+        <div class="loading-text tech-font">
+            <h3>[ SCANNING_BIOMETRIC_DATA ]</h3>
+            <p>جاري المسح الضوئي والتحقق من السجلات... يرجى الانتظار</p>
+            <div style="margin-top: 1.5rem; color: var(--primary); font-size: 0.8rem; opacity: 0.8;" class="pulse">
+                INITIALIZING_DOMAIN_MATCH_QUERY...
+            </div>
+        </div>
     </div>
 
     <script>
@@ -69,6 +100,19 @@
             }
             if (file) reader.readAsDataURL(file);
         }
+
+        document.getElementById('search-form').onsubmit = function () {
+            const preview = document.getElementById('image-preview');
+            const scannerPreview = document.getElementById('scanner-preview');
+            const loadingModal = document.getElementById('loadingModal');
+
+            if (preview.src && preview.src !== window.location.href) {
+                scannerPreview.src = preview.src;
+                loadingModal.style.display = 'flex';
+                setTimeout(() => loadingModal.classList.add('show'), 10);
+            }
+            return true;
+        };
     </script>
 </body>
 

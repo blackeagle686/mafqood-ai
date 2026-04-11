@@ -13,54 +13,85 @@
     <div class="scanline"></div>
     <nav>
         <div class="nav-content">
-            <a href="/" class="logo">مفقود AI <span class="tech-font"
-                    style="font-size: 0.8rem; font-weight: 300;">HUB</span></a>
+            <a href="/" class="logo">
+                <i class="fa-solid fa-hands-holding-child" style="margin-left: 0.5rem;"></i>
+                مفقود <span class="tech-font" style="font-size: 0.8rem; font-weight: 300; opacity: 0.7;">للبحث
+                    الإنساني</span>
+            </a>
             <div class="nav-links">
-                <a href="{% url 'report_page' %}">إرسال بلاغ</a>
-                <a href="{% url 'search_page' %}">بحث الوجه</a>
-                <a href="{% url 'video_search_page' %}">تحليل الفيديو</a>
+                <a href="{% url 'report_page' %}"><i class="fa-solid fa-file-invoice"></i> إرسال بلاغ</a>
+                <a href="{% url 'search_page' %}"><i class="fa-solid fa-id-card"></i> بحث الوجه</a>
+                <a href="{% url 'video_search_page' %}"><i class="fa-solid fa-video"></i> تحليل الفيديو</a>
             </div>
         </div>
     </nav>
 
-    <div class="container" style="padding-top: 5rem;">
+    <div class="container" style="padding-top: 6rem;">
         <main>
-            <div class="card pulse" style="text-align: center; padding: 5rem 2rem; border-color: var(--primary);">
-                <div class="tech-font" style="color: var(--primary); margin-bottom: 1rem; font-size: 0.9rem;">[ SYSTEM
-                    STATUS: OPERATIONAL ]</div>
-                <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem; line-height: 1.1;">منصة مفقود للتحليل الاستخباري
+            <div class="card pulse"
+                style="text-align: center; padding: 6rem 2rem; border-color: var(--primary); background: radial-gradient(circle at center, hsla(182, 100%, 50%, 0.05) 0%, transparent 70%);">
+                <div class="tech-font"
+                    style="color: var(--primary); margin-bottom: 1.5rem; font-size: 1rem; letter-spacing: 3px;">
+                    <i class="fa-solid fa-heart-pulse"></i> [ DATABASE STATUS: ACTIVE & SYNCED ]
+                </div>
+                <h1
+                    style="font-size: 4rem; margin-bottom: 2rem; line-height: 1.2; font-weight: 800; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                    منصة مفقود للمساعدة في العثور على الغائبين
                 </h1>
-                <p style="color: var(--text-muted); max-width: 700px; margin: 0 auto 3rem; font-size: 1.2rem;">نستخدم
-                    خوارزميات HNSW المتقدمة والذكاء الاصطناعي لمطابقة الملامح في أجزاء من الثانية.</p>
+                <p
+                    style="color: var(--text-muted); max-width: 800px; margin: 0 auto 4rem; font-size: 1.4rem; font-weight: 300;">
+                    نوظف أحدث تقنيات التعرف البصري والذكاء الاصطناعي للمساهمة في لم شمل العائلات والعثور على المفقودين
+                    بسرعة ودقة.
+                </p>
 
-                <div style="display: flex; gap: 1.5rem; justify-content: center;">
-                    <a href="{% url 'search_page' %}" class="btn-primary">بدء المسح الضوئي</a>
-                    <a href="{% url 'report_page' %}" class="btn-primary"
-                        style="border-color: var(--secondary); color: var(--secondary);">إضافة سجل جديد</a>
+                <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="{% url 'search_page' %}" class="btn-primary">
+                        <i class="fa-solid fa-crosshairs"></i> بدء المسح الضوئي
+                    </a>
+                    <a href="{% url 'report_page' %}" class="btn-secondary">
+                        <i class="fa-solid fa-plus"></i> إضافة سجل جديد
+                    </a>
                 </div>
             </div>
 
-            <div style="margin-top: 6rem;">
-                <div class="section-header">
-                    <h2 class="tech-font">Protocol_v2.0 // نظام العمل</h2>
+            <div style="margin-top: 8rem;">
+                <div class="section-header" style="text-align: center; border-left: none; padding-left: 0;">
+                    <span class="tech-font" style="color: var(--accent); font-size: 1rem; letter-spacing: 2px;">كيف
+                        نساعدك؟</span>
+                    <h2 style="font-size: 2.5rem; margin-top: 1rem;">آلية البحث والتحقق الذكي</h2>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; margin-top: 4rem;">
                     <div class="card">
-                        <i class="fa-solid fa-camera upload-icon" style="color: var(--primary);"></i>
-                        <h3 class="tech-font">01_المدخلات</h3>
-                        <p style="color: var(--text-muted);">رفع صور عالية الدقة أو فيديوهات مراقبة (CCTV) للتحليل.</p>
+                        <div class="card-icon"
+                            style="width: 60px; height: 60px; background: hsla(182, 100%, 50%, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+                            <i class="fa-solid fa-upload" style="color: var(--primary); font-size: 1.5rem;"></i>
+                        </div>
+                        <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--primary);">
+                            01_توفير البيانات</h3>
+                        <p style="color: var(--text-muted); font-size: 1.1rem;">رفع صور أو مقاطع فيديو للمفقود ليقوم
+                            النظام بتحليل ملامحه بدقة فائق الفعالية.</p>
                     </div>
                     <div class="card">
-                        <i class="fa-solid fa-microchip upload-icon" style="color: var(--accent);"></i>
-                        <h3 class="tech-font">02_المعالجة</h3>
-                        <p style="color: var(--text-muted);">تحويل الملامح الحيوية إلى بصمات رقمية مشفرة في فضاء شعاعي.
-                        </p>
+                        <div class="card-icon"
+                            style="width: 60px; height: 60px; background: hsla(313, 100%, 50%, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+                            <i class="fa-solid fa-microchip" style="color: var(--accent); font-size: 1.5rem;"></i>
+                        </div>
+                        <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--accent);">
+                            02_المعالجة الذكية</h3>
+                        <p style="color: var(--text-muted); font-size: 1.1rem;">تدقيق الصور باستخدام نماذج ذكاء اصطناعي
+                            متطورة لمطابقتها مع السجلات المتاحة بدقة.</p>
                     </div>
                     <div class="card">
-                        <i class="fa-solid fa-magnifying-glass-chart upload-icon" style="color: var(--secondary);"></i>
-                        <h3 class="tech-font">03_المطابقة</h3>
-                        <p style="color: var(--text-muted);">البحث في ملايين السجلات باستخدام تقنية HNSW فائقة السرعة.
-                        </p>
+                        <div class="card-icon"
+                            style="width: 60px; height: 60px; background: hsla(266, 100%, 50%, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+                            <i class="fa-solid fa-magnifying-glass-chart"
+                                style="color: var(--secondary); font-size: 1.5rem;"></i>
+                        </div>
+                        <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--secondary);">
+                            03_لم الشمل</h3>
+                        <p style="color: var(--text-muted); font-size: 1.1rem;">توفير نتائج المطابقة والمساعدة في الوصول
+                            إلى الأشخاص المفقودين في أسرع وقت ممكن.</p>
                     </div>
                 </div>
             </div>

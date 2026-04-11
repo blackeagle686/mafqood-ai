@@ -35,3 +35,24 @@ class ExtractEntitiesSerializer(serializers.Serializer):
             "(e.g., clothing description, age estimation)."
         ),
     )
+
+
+class MatchPostRequestSerializer(serializers.Serializer):
+    """Input schema for connecting with the .NET backend post evaluation."""
+
+    postId = serializers.IntegerField(
+        required=True,
+        help_text="The ID of the post in the .NET backend."
+    )
+    userId = serializers.CharField(
+        required=True,
+        help_text="The ID of the user who created the post."
+    )
+    imageUrl = serializers.CharField(
+        required=True,
+        help_text="The relative or absolute path/URL to the post image."
+    )
+    postType = serializers.IntegerField(
+        required=True,
+        help_text="0 for Lost (Missing), 1 for Found."
+    )
