@@ -13,61 +13,84 @@
     <div class="scanline"></div>
     <nav>
         <div class="nav-content">
-            <a href="/" class="logo">مفقود AI</a>
+            <a href="/" class="logo">
+                <i class="fa-solid fa-hands-holding-child" style="margin-left: 0.5rem;"></i>
+                مفقود <span class="tech-font" style="font-size: 0.8rem; font-weight: 300; opacity: 0.7;">للبحث
+                    الإنساني</span>
+            </a>
             <div class="nav-links">
-                <a href="{% url 'report_page' %}" class="active">إرسال بلاغ</a>
-                <a href="{% url 'search_page' %}">بحث الوجه</a>
-                <a href="{% url 'video_search_page' %}">تحليل الفيديو</a>
+                <a href="{% url 'report_page' %}" class="active"><i class="fa-solid fa-file-invoice"></i> إرسال بلاغ</a>
+                <a href="{% url 'search_page' %}"><i class="fa-solid fa-id-card"></i> بحث الوجه</a>
+                <a href="{% url 'video_search_page' %}"><i class="fa-solid fa-video"></i> تحليل الفيديو</a>
             </div>
         </div>
     </nav>
 
-    <div class="container" style="max-width: 800px;">
-        <header class="section-header">
-            <h1 class="tech-font">تسجيل بلاغ مفقود جديد</h1>
-            <p>إدخال بيانات حيوية جديدة في قاعدة البيانات الاستخبارية (HNSW INDEX).</p>
+    <div class="container" style="max-width: 800px; padding-top: 5rem;">
+        <header class="section-header" style="text-align: center; border-left: none; padding-left: 0;">
+            <h1 class="tech-font"
+                style="font-size: 3rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                تسجيل بلاغ عن مفقود
+            </h1>
+            <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: 0 auto;">إضافة معلومات
+                الشخص
+                المفقود لمساعدتنا في عملية البحث ولم شمل العائلة.</p>
         </header>
 
         {% if status == 'success' %}
-        <div class="card" style="border-color: var(--success); text-align: center; margin-bottom: 3rem;">
-            <h2 class="tech-font" style="color: var(--success);">[ SUCCESS_REPORT_ENQUEUED ]</h2>
-            <p style="margin-top: 1rem;">تم استلام البلاغ وجاري معالجته في الخلفية.</p>
-            <a href="{% url 'index' %}" class="btn-primary"
-                style="margin-top: 2rem; display: inline-block; text-decoration: none;">العودة للرئيسية</a>
+        <div class="card"
+            style="border-color: var(--success); text-align: center; margin: 4rem 0; background: hsla(157, 100%, 50%, 0.05);">
+            <div class="upload-icon" style="color: var(--success); font-size: 4rem; margin-bottom: 2rem;">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h2 class="tech-font" style="color: var(--success); font-size: 1.5rem; letter-spacing: 2px;">[
+                REPORT_RECEIVED_SUCCESSFULLY ]</h2>
+            <p style="margin-top: 1.5rem; font-size: 1.1rem; color: var(--text);">تم استلام البلاغ بنجاح وجاري البدء في
+                معالجة البيانات للمساعدة في عملية البحث.</p>
+            <div style="margin-top: 3rem;">
+                <a href="{% url 'index' %}" class="btn-primary">العودة للوحة التحكم</a>
+            </div>
         </div>
         {% else %}
-        <div class="card">
+        <div class="card" style="margin-top: 4rem; border-color: hsla(182, 100%, 50%, 0.2);">
             <form id="report-form" action="/api/people/report/" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label class="tech-font">TARGET_FULL_NAME</label>
-                    <input type="text" name="name" required placeholder="أدخل اسم الشخص المفقود">
+                    <label class="tech-font"><i class="fa-solid fa-signature"></i> MISSING_PERSON_NAME</label>
+                    <input type="text" name="name" required placeholder="أدخل اسم الشخص المفقود بالكامل">
                 </div>
 
                 <div class="form-group">
-                    <label class="tech-font">LAST_KNOWN_LOCATION</label>
-                    <input type="text" name="last_seen" placeholder="أين ومتى شوهد لآخر مرة؟" required>
+                    <label class="tech-font"><i class="fa-solid fa-location-dot"></i> LAST_SEEN_LOCATION</label>
+                    <input type="text" name="last_seen" placeholder="آخر مكان شوهد فيه الشخص، والظروف المحيطة" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="tech-font">SUBJECT_METADATA / DETAILS</label>
-                    <textarea name="details" rows="4" placeholder="أي علامات مميزة، تفاصيل الملابس، إلخ..."></textarea>
+                    <label class="tech-font"><i class="fa-solid fa-scroll"></i> ADDITIONAL_DETAILS</label>
+                    <textarea name="details" rows="4"
+                        placeholder="العلامات المميزة، الملابس، الحالة الصحية، أو أي معلومات قد تساعد في التعرف عليه..."></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label class="tech-font">IDENTIFICATION_PHOTO</label>
-                    <div class="upload-area" onclick="document.getElementById('file-input').click()">
-                        <div class="upload-icon">📷</div>
-                        <p class="tech-font">UPLOAD_TARGET_BIO_DATA</p>
+                    <label class="tech-font"><i class="fa-solid fa-camera-retro"></i> RECENT_PHOTO</label>
+                    <div class="upload-area" onclick="document.getElementById('file-input').click()"
+                        style="border-radius: 12px; border-style: solid; border-width: 1px; border-color: var(--border-color); background: hsla(182, 100%, 50%, 0.02);">
+                        <div class="upload-icon" style="color: var(--primary);">
+                            <i class="fa-solid fa-id-badge"></i>
+                        </div>
+                        <p class="tech-font" style="color: var(--text); font-size: 1.1rem; margin-bottom: 0.5rem;">
+                            SECURE_DATA_UPLOAD</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">ارفع أوضح صورة متاحة للمفقود لزيادة فرص
+                            التعرف عليه</p>
                         <input type="file" id="file-input" name="file" accept="image/*" style="display: none;"
                             onchange="previewImage(event)" required>
                         <img id="image-preview" src="#" alt="Preview"
-                            style="max-width: 100%; margin-top: 1rem; border: 1px solid var(--primary); display: none;">
+                            style="max-width: 100%; margin-top: 2rem; border-radius: 8px; border: 1px solid var(--primary); display: none; box-shadow: 0 0 20px var(--primary-glow);">
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary" style="width: 100%;">
-                    تشفير وحفظ في قاعدة البيانات
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 2rem;">
+                    <i class="fa-solid fa-database"></i> حفظ البلاغ في قاعدة البيانات
                 </button>
             </form>
         </div>

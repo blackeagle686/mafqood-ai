@@ -3,8 +3,9 @@ import logging
 import os
 import shutil
 import uuid
-from typing import Tuple
+from typing import Tuple, Optional
 from fastapi import UploadFile
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -98,3 +99,42 @@ def cleanup_temp_file(file_path: str) -> bool:
     except Exception as e:
         logger.error(f"Error cleaning up temp file {file_path}: {e}")
         return False
+
+
+def download_remote_image(url: str, temp_upload_dir: str = "./temp_uploads") -> Optional[str]:
+    """
+    Download an image from a remote URL to the temp directory.
+    
+    Args:
+        url: The remote URL of the image
+        temp_upload_dir: Directory to save the downloaded file
+        
+    Returns:
+        Absolute path to the downloaded file, or None if download failed
+    """
+    try:
+        os.makedirs(temp_upload_dir, exist_ok=True)
+        
+        # Determine extension from URL or default to .jpg
+        ext = os.path.splitext(url.split('?')[0])[1]
+        if not ext or len(ext) > 5:
+            ext = ".jpg"
+            
+        from utils.file_utils import generate_temp_filename # Local import to avoid circularity if any
+        temp_filename = generate_temp_filename(prefix="remote", file_extension=ext)
+        temp_path = os.path.join(temp_upload_dir, temp_filename)
+        
+        import httpx
+        with httpx.Client(follow_redirects=True, timeout=10.0) as client:
+            response = client.get(url)
+            response.raise_for_status()
+            
+            with open(temp_path, "wb") as f:
+                f.write(response.content)
+                
+        logger.info(f"Downloaded remote image from {url} to {temp_path}")
+        return os.path.abspath(temp_path)
+        
+    except Exception as e:
+        logger.error(f"Failed to download remote image from {url}: {e}")
+        return None

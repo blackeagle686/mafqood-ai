@@ -13,45 +13,81 @@
     <div class="scanline"></div>
     <nav>
         <div class="nav-content">
-            <a href="/" class="logo">مفقود AI</a>
+            <a href="/" class="logo">
+                <i class="fa-solid fa-hands-holding-child" style="margin-left: 0.5rem;"></i>
+                مفقود <span class="tech-font" style="font-size: 0.8rem; font-weight: 300; opacity: 0.7;">للبحث
+                    الإنساني</span>
+            </a>
             <div class="nav-links">
-                <a href="{% url 'report_page' %}">إرسال بلاغ</a>
-                <a href="{% url 'search_page' %}">بحث الوجه</a>
-                <a href="{% url 'video_search_page' %}" class="active">تحليل الفيديو</a>
+                <a href="{% url 'report_page' %}"><i class="fa-solid fa-file-invoice"></i> إرسال بلاغ</a>
+                <a href="{% url 'search_page' %}"><i class="fa-solid fa-id-card"></i> بحث الوجه</a>
+                <a href="{% url 'video_search_page' %}" class="active"><i class="fa-solid fa-video"></i> تحليل
+                    الفيديو</a>
             </div>
         </div>
     </nav>
 
-    <main class="container">
-        <header class="section-header">
-            <h1 class="tech-font">تحليل فيديوهات المراقبة (CCTV)</h1>
-            <p>يتم استخدام خوارزميات التتبع والتعرف المتقدمة لتمشيط ملفات الفيديو واستخراج الأهداف المحتملة.</p>
+    <main class="container" style="padding-top: 5rem;">
+        <header class="section-header" style="text-align: center; border-left: none; padding-left: 0;">
+            <h1 class="tech-font"
+                style="font-size: 3rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                البحث الذكي في الفيديوهات
+            </h1>
+            <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 800px; margin: 0 auto;">استخدام تقنيات
+                الذكاء الاصطناعي لمسح مقاطع الفيديو والتعرف على الأشخاص المفقودين للمساعدة في عملية البحث الميداني.</p>
         </header>
 
-        <section class="upload-section card">
+        <section class="upload-section card"
+            style="max-width: 700px; margin: 3rem auto; border-color: hsla(266, 100%, 50%, 0.2);">
             <form id="videoUploadForm" action="/api/search/video/" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="upload-area" id="dropZone">
+                <div class="upload-area" id="dropZone"
+                    style="border-radius: 12px; border-style: solid; border-width: 1px; border-color: hsla(266, 100%, 50%, 0.2); background: hsla(266, 100%, 50%, 0.02);">
                     <input type="file" id="videoFile" name="file" accept="video/*" hidden required>
-                    <div class="upload-icon">📹</div>
-                    <p class="tech-font">UPLOAD_VIDEO_FOR_ANALYSIS</p>
-                    <small>MP4 / AVI / MOV</small>
+                    <div class="upload-icon" style="color: var(--secondary);">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <p class="tech-font" style="color: var(--text); font-size: 1.1rem; margin-bottom: 0.5rem;">
+                        READY_FOR_VIDEO_SEARCH</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">اسحب مقطع الفيديو هنا (MP4, AVI, MOV)</p>
                 </div>
 
-                <div class="form-group" style="margin-top: 30px;">
-                    <label class="tech-font">Sampling_Rate [Frames to Skip]</label>
-                    <input type="number" id="sampling_rate" name="sampling_rate" value="15" min="1">
+                <div class="form-group" style="margin-top: 3rem;">
+                    <label class="tech-font" style="color: var(--secondary);"><i class="fa-solid fa-gauge-high"></i>
+                        Sampling_Rate [Frames to Skip]</label>
+                    <input type="number" id="sampling_rate" name="sampling_rate" value="15" min="1"
+                        style="background: hsla(266, 100%, 50%, 0.05); border-color: hsla(266, 100%, 50%, 0.2);">
+                    <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">كلما زاد الرقم زادت
+                        سرعة المسح ولكن قد تقل الدقة في رصد الوجوه العابرة.</small>
                 </div>
 
-                <button type="submit" class="btn-primary" id="submitBtn" style="width: 100%;">بدء التحليل
-                    الاستخباري</button>
+                <button type="submit" class="btn-secondary" id="submitBtn" style="width: 100%; margin-top: 2rem;">
+                    <i class="fa-solid fa-magnifying-glass"></i> بدء عملية البحث الذكي
+                </button>
             </form>
 
-            <div id="statusArea" style="display: none; margin-top: 30px; text-align: center;">
-                <div class="tech-font" style="color: var(--primary); margin-bottom: 1rem;">[ PROCESSING_VIDEO_STREAM...
-                    ]</div>
-                <p id="statusMessage" style="color: var(--text-muted);">نظام الذكاء الاصطناعي يقوم حالياً بمسح الإطارات
-                    ومطابقتها...</p>
+            <!-- Loading Modal for Video -->
+            <div id="loadingModal" class="loading-modal">
+                <div class="scanner-container" style="border-color: var(--secondary);">
+                    <div class="scanner-grid"
+                        style="background-image: linear-gradient(rgba(131, 0, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(131, 0, 255, 0.1) 1px, transparent 1px);">
+                    </div>
+                    <div class="scanner-line"
+                        style="background: linear-gradient(to bottom, transparent, var(--secondary), transparent); box-shadow: 0 0 15px var(--secondary);">
+                    </div>
+                    <div
+                        style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: hsla(266, 100%, 50%, 0.1);">
+                        <i class="fa-solid fa-film" style="font-size: 5rem; color: var(--secondary); opacity: 0.5;"></i>
+                    </div>
+                </div>
+                <div class="loading-text tech-font">
+                    <h3 style="color: var(--secondary);">[ ANALYZING_VIDEO_STREAM ]</h3>
+                    <p>جاري مسح إطارات الفيديو والتحقق من سجلات المفقودين...</p>
+                    <div style="margin-top: 1.5rem; color: var(--secondary); font-size: 0.8rem; opacity: 0.8;"
+                        class="pulse">
+                        FRAME_EXTRACTION_IN_PROGRESS...
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -73,8 +109,10 @@
         form.onsubmit = () => {
             if (fileInput.files.length > 0) {
                 submitBtn.disabled = true;
-                submitBtn.innerText = 'جاري التحليل...';
-                statusArea.style.display = 'block';
+                submitBtn.innerText = 'جاري التحضير...';
+                const loadingModal = document.getElementById('loadingModal');
+                loadingModal.style.display = 'flex';
+                setTimeout(() => loadingModal.classList.add('show'), 10);
                 return true;
             }
             return false;
