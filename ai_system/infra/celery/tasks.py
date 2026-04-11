@@ -107,3 +107,18 @@ def search_faces_task(self, image_path: str, n_results: int = 5, use_age_progres
         except self.MaxRetriesExceededError:
             logger.error(f"Max retries exceeded for face search task.")
             return {"status": "failure", "error": str(e)}
+
+@shared_task(bind=True)
+def background_cross_match_task(self, batch_size: int = 50):
+    """
+    Background Task: Triggers the cross-match reconciliation job.
+    Iterates through missing items and cross-checks them against found items.
+    """
+    logger.info("Starting background cross-match reconciliation task...")
+    try:
+        search_service = FaceSearchService()
+        search_service.cross_match_background(batch_size=batch_size)
+        return {"status": "success", "message": "Reconciliation completed"}
+    except Exception as e:
+        logger.error(f"Error in background reconciliation task: {e}")
+        return {"status": "failure", "error": str(e)}

@@ -46,16 +46,17 @@ class VectorDB:
             logger.error(f"Error during upsert: {e}")
             return False
 
-    def search(self, query_embedding: List[float], n_results: int = 5) -> Dict[str, Any]:
+    def search(self, query_embedding: List[float], n_results: int = 5, where: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Search for the most similar embeddings."""
         try:
             results = self.collection.query(
                 query_embeddings=[query_embedding],
-                n_results=n_results
+                n_results=n_results,
+                where=where
             )
             return results
         except Exception as e:
-            logger.error(f"Error during search: {e}")
+            logger.error(f"Error during search with filter {where}: {e}")
             return {"ids": [], "distances": [], "metadatas": []}
 
     def delete(self, ids: List[str]):
@@ -71,3 +72,16 @@ class VectorDB:
     def get_count(self) -> int:
         """Return the number of items in the collection."""
         return self.collection.count()
+
+    def get_vectors(self, where: Optional[Dict[str, Any]] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> Dict[str, Any]:
+        """Retrieve items from the collection with optional filtering."""
+        try:
+            return self.collection.get(
+                where=where,
+                limit=limit,
+                offset=offset,
+                include=["embeddings", "metadatas"]
+            )
+        except Exception as e:
+            logger.error(f"Error getting vectors with filter {where}: {e}")
+            return {"ids": [], "embeddings": [], "metadatas": []}

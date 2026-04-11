@@ -15,6 +15,7 @@ from services.face_search_service import FaceSearchService
 from .serializers import ModerateTextSerializer, ExtractEntitiesSerializer, MatchPostRequestSerializer
 from infra.external.llm_client import LLMService
 from utils.file_utils import download_remote_image, cleanup_temp_file
+from infra.celery.tasks import background_cross_match_task
 
 logger = logging.getLogger(__name__)
 
@@ -274,3 +275,61 @@ class MatchPostView(APIView):
                 "hasData": False,
                 "error": str(exc)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LostPeopleListView(APIView):
+    """
+    Endpoint to retrieve all indexed individuals marked as 'missing'.
+    """
+    def get(self, request):
+        try:
+            face_service = _get_face_service()
+            limit = int(request.query_params.get('limit', 100))
+            offset = int(request.query_params.get('offset', 0))
+            
+            people = face_service.get_people_by_status('missing', limit=limit, offset=offset)
+            return Response({
+                "isSuccess": True,
+                "count": len(people),
+                "data": people
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"isSuccess": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FoundPeopleListView(APIView):
+    """
+    Endpoint to retrieve all indexed individuals marked as 'found'.
+    """
+    def get(self, request):
+        try:
+            face_service = _get_face_service()
+            limit = int(request.query_params.get('limit', 100))
+            offset = int(request.query_params.get('offset', 0))
+            
+            people = face_service.get_people_by_status('found', limit=limit, offset=offset)
+            return Response({
+                "isSuccess": True,
+                "count": len(people),
+                "data": people
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"isSuccess": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CrossMatchActionView(APIView):
+    """
+    Endpoint to manually trigger the background cross-match reconciliation job.
+    """
+    def post(self, request):
+        try:
+            batch_size = int(request.data.get('batchSize', 50))
+            # Trigger celery task
+            background_cross_match_task.delay(batch_size=batch_size)
+            
+            return Response({
+                "isSuccess": True,
+                "message": "Background cross-match reconciliation task triggered."
+            }, status=status.HTTP_202_ACCEPTED)
+        except Exception as e:
+            return Response({"isSuccess": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
