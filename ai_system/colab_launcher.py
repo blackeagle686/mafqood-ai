@@ -39,25 +39,56 @@ run_command("cd app && python3 manage.py migrate")
 # 5. Open Tunnel
 print("\n🌐 Creating Ngrok tunnel...")
 public_url = ngrok.connect("127.0.0.1:8000", bind_tls=True).public_url
-print(f"\n✨ Your application will be live at: {public_url}")
 
 # 6. Launch Subsystems
 print("\n👷 Starting Celery worker in background...")
 os.chdir("app")
 celery_process = subprocess.Popen(
     ["celery", "-A", "mafqood_project", "worker", "--loglevel=info"],
-    stdout=subprocess.DEVNULL, # Keep logs clean, or redirect to a file
+    stdout=subprocess.DEVNULL,
     stderr=subprocess.STDOUT
 )
+
+def wait_for_port(port, timeout=60):
+    import socket
+    import time
+    start_time = time.time()
+    while True:
+        try:
+            with socket.create_connection(('127.0.0.1', port), timeout=1):
+                return True
+        except (OSError, ConnectionRefusedError):
+            time.sleep(2)
+            if time.time() - start_time > timeout:
+                return False
 
 print("\n🔥 Launching Mafqood AI...")
 # Start Django
 try:
-    print("⏳ Starting Django server...")
-    run_command("python3 manage.py runserver --noreload 127.0.0.1:8000")
+    # Run server in background so we can wait for it
+    django_process = subprocess.Popen(
+        ["python3", "manage.py", "runserver", "--noreload", "127.0.0.1:8000"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+    
+    print("⏳ Waiting for Django to boot (this usually takes 15-30s)...")
+    if wait_for_port(8000):
+        print(f"\n✨ SUCCESS! Your application is live at: {public_url}")
+        print("🚀 You can now start sending requests to the API.")
+    else:
+        print("\n❌ Error: Django took too long to start.")
+    
+    # Stream Django logs to console
+    for line in django_process.stdout:
+        print(line, end='')
+
 except KeyboardInterrupt:
     print("\n🛑 Stopping subsystems...")
 finally:
+    try: django_process.terminate()
+    except: pass
     celery_process.terminate()
     ngrok.disconnect(public_url)
     print("👋 Shutdown complete.")

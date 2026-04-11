@@ -170,13 +170,19 @@ class MatchPostView(APIView):
                 "errors": serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        post_id = serializer.validated_data["postId"]
-        user_id = serializer.validated_data["userId"]
-        image_url = serializer.validated_data["imageUrl"]
-        post_type = serializer.validated_data["postType"]
+        post_id = serializer.validated_data.get('postId')
+        user_id = serializer.validated_data.get('userId')
+        image_url = serializer.validated_data.get('imageUrl')
+        post_type = serializer.validated_data.get('postType')
 
-        # Map postType: 0 -> "missing", 1 -> "found"
+        # Map postType to status: 0 -> missing, 1 -> found
         status_str = "missing" if post_type == 0 else "found"
+        
+        query_metadata = {
+            "postId": post_id,
+            "userId": user_id,
+            "status": status_str
+        }
 
         # Resolve image path
         # If imageUrl is a URL, download it
@@ -233,7 +239,7 @@ class MatchPostView(APIView):
                 image_path=abs_image_path,
                 n_results=5,
                 cleanup=False, # We handle cleanup below to ensure it happens after response
-                query_metadata={"status": status_str}
+                query_metadata=query_metadata
             )
 
             # Cleanup temp file if we downloaded it
