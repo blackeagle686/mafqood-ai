@@ -13,7 +13,7 @@ def run_command(cmd):
 print("🚀 Starting Colab Deployment...")
 
 # 0. Set Environment Variables
-os.environ["CELERY_ALWAYS_EAGER"] = "True"
+# Removed CELERY_ALWAYS_EAGER=True to allow real background processing
 
 # 1. Install System Dependencies
 print("\n📦 Installing Redis...")
@@ -27,7 +27,7 @@ run_command("pip install -r app/requirements.txt")
 
 # 3. Setup Ngrok
 print("\n🌐 Setting up Ngrok...")
-authtoken = getpass("Enter your Ngrok Authtoken (from https://dashboard.ngrok.com/): ")
+authtoken = getpass("Enter your Ngrok Authtoken: ")
 from pyngrok import ngrok
 ngrok.set_auth_token(authtoken)
 
@@ -38,22 +38,26 @@ run_command("cd app && python3 manage.py migrate")
 
 # 5. Open Tunnel
 print("\n🌐 Creating Ngrok tunnel...")
-# Using 127.0.0.1 explicitly to avoid IPv6 issues
 public_url = ngrok.connect("127.0.0.1:8000", bind_tls=True).public_url
 print(f"\n✨ Your application will be live at: {public_url}")
-print("⚠️  IMPORTANT: Wait until you see 'Quit the server with CONTROL-C' before clicking the link!")
 
-# 6. Launch Django
-print("\n🔥 Launching Mafqood AI...")
-# Add current paths to PYTHONPATH
+# 6. Launch Subsystems
+print("\n👷 Starting Celery worker in background...")
 os.chdir("app")
+celery_process = subprocess.Popen(
+    ["celery", "-A", "mafqood_project", "worker", "--loglevel=info"],
+    stdout=subprocess.DEVNULL, # Keep logs clean, or redirect to a file
+    stderr=subprocess.STDOUT
+)
 
+print("\n🔥 Launching Mafqood AI...")
 # Start Django
 try:
-    print("⏳ Starting Django server (this may take 10-20 seconds)...")
-    # Using --noreload to avoid double-startup issues on Colab
+    print("⏳ Starting Django server...")
     run_command("python3 manage.py runserver --noreload 127.0.0.1:8000")
 except KeyboardInterrupt:
-    print("\n🛑 Stopping server...")
+    print("\n🛑 Stopping subsystems...")
 finally:
+    celery_process.terminate()
     ngrok.disconnect(public_url)
+    print("👋 Shutdown complete.")

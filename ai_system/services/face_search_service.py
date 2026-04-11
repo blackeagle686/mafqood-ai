@@ -7,6 +7,9 @@ from utils.file_utils import cleanup_temp_file
 from infra.external.webhook_notifier import WebhookNotifier
 from services.age_progression_service import AgeProgressionGAN
 
+from datetime import datetime
+from app.ai.models import FaceMatch
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,6 +18,18 @@ class FaceSearchService:
     Service class for handling face search and vector database operations.
     Encapsulates all face recognition and vector DB logic.
     """
+    
+    @staticmethod
+    def compute_match_score(face_sim: float, time_diff_days: float, location_sim: float) -> float:
+        """
+        Intelligence Layer: Computes a weighted match score.
+        70% Face Similarity + 20% Time Context + 10% Location Context.
+        """
+        # Time score: decay over time (e.g., 1.0 at 0 days, 0.5 at 30 days)
+        time_score = max(0.0, 1.0 - (time_diff_days / 60.0)) 
+        
+        # Combined weighted score
+        return (0.7 * face_sim) + (0.2 * time_score) + (0.1 * location_sim)
     
     def __init__(self):
         """Initialize the face search service with CV pipeline and vector DB."""
@@ -62,6 +77,12 @@ class FaceSearchService:
             success = self.vdb.upsert(ids=ids, embeddings=embeddings, metadatas=metadatas)
             
             if success:
+                # Event-driven matching: Trigger cross-match for each new face
+                status_str = metadata.get("status", "unknown")
+                if status_str in ["missing", "found"]:
+                    for emb in embeddings:
+                        self.match_on_insert(emb, status_str, metadata)
+                
                 return {"status": "success", "faces_found": len(results), "ids": ids}
             else:
                 return {"status": "error", "message": "Failed to upsert embeddings to vector DB"}
@@ -69,6 +90,72 @@ class FaceSearchService:
         except Exception as e:
             logger.error(f"Error indexing image {image_path}: {e}")
             raise e
+
+    def match_on_insert(self, embedding: List[float], status: str, metadata: Dict[str, Any]):
+        """
+        Event-driven matching triggered on new post insertion.
+        Searches for the cross-status (missing vs found) to find potential matches.
+        """
+        target_status = "found" if status == "missing" else "missing"
+        
+        # 1. Search Vector DB with status filter
+        results = self.vdb.search(
+            query_embedding=embedding,
+            n_results=5,
+            where={"status": target_status}
+        )
+        
+        if not results or not results.get("ids") or not results["ids"][0]:
+            return
+            
+        # 2. Process matches with intelligence score
+        ids = results["ids"][0]
+        distances = results["distances"][0]
+        metadatas = results["metadatas"][0]
+        
+        current_post_id = metadata.get("postId")
+        current_loc = metadata.get("location")
+        
+        for i in range(len(ids)):
+            match_meta = metadatas[i]
+            match_post_id = match_meta.get("postId")
+            
+            if not current_post_id or not match_post_id:
+                continue
+                
+            face_sim = max(0.0, 1.0 - distances[i])
+            loc_sim = 1.0 if current_loc and current_loc == match_meta.get("location") else 0.0
+            
+            # Compute intelligence score
+            combined_score = self.compute_match_score(face_sim, 0.0, loc_sim)
+            
+            if combined_score > 0.50:
+                # 3. Deduplication Layer
+                p1, p2 = (current_post_id, match_post_id) if status == "missing" else (match_post_id, current_post_id)
+                
+                from django.db import IntegrityError
+                try:
+                    FaceMatch.objects.create(
+                        missing_post_id=p1,
+                        found_post_id=p2,
+                        combined_score=combined_score,
+                        face_similarity=face_sim,
+                        time_score=1.0, 
+                        location_score=loc_sim
+                    )
+                    
+                    # 4. Trigger Webhook
+                    match_data = {
+                        "missing_post_id": p1,
+                        "found_post_id": p2,
+                        "score": combined_score,
+                        "metadata": match_meta
+                    }
+                    WebhookNotifier.send_high_confidence_match_alert(match_data)
+                    logger.info(f"MATCH FOUND AND ALERTED: Missing {p1} <-> Found {p2} (Score: {combined_score:.2f})")
+                except Exception:
+                    # Likely a Duplicate Key error, which means we already notified for this pair
+                    pass
             
     def _apply_weighting_and_webhooks(self, search_res: Dict[str, Any], query_metadata: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """
@@ -364,3 +451,47 @@ class FaceSearchService:
                 "status": "error",
                 "message": str(e)
             }
+
+    def get_people_by_status(self, status: str, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+        """Retrieve people by their status (missing/found)."""
+        results = self.vdb.get_vectors(where={"status": status}, limit=limit, offset=offset)
+        
+        people = []
+        if not results or not results.get("ids"):
+            return people
+            
+        for i in range(len(results["ids"])):
+            people.append({
+                "id": results["ids"][i],
+                "metadata": results["metadatas"][i]
+            })
+        return people
+
+    def cross_match_background(self, batch_size: int = 50):
+        """
+        Background Reconciliation Job: Iterates through all missing posts
+        and searches against found posts to ensure no matches were missed.
+        """
+        offset = 0
+        logger.info(f"Starting background cross-match reconciliation...")
+        
+        while True:
+            # Batch missing posts
+            missing_batch = self.vdb.get_vectors(where={"status": "missing"}, limit=batch_size, offset=offset)
+            
+            if not missing_batch or not missing_batch.get("ids") or len(missing_batch["ids"]) == 0:
+                break
+                
+            ids = missing_batch["ids"]
+            embeddings = missing_batch["embeddings"]
+            metadatas = missing_batch["metadatas"]
+            
+            for i in range(len(ids)):
+                # Perform the same matching logic as on_insert
+                self.match_on_insert(embeddings[i], "missing", metadatas[i])
+                
+            offset += batch_size
+            if len(ids) < batch_size:
+                break
+        
+        logger.info("Background cross-match reconciliation completed.")
