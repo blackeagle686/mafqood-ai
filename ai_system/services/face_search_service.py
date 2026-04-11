@@ -93,22 +93,20 @@ class FaceSearchService:
 
     def match_on_insert(self, embedding: List[float], status: str, metadata: Dict[str, Any]):
         """
-        Event-driven matching triggered on new post insertion.
-        Searches for the cross-status (missing vs found) to find potential matches.
+        Matching logic triggered on new post insertion.
+        Searches ALL people to find similarities, but only alerts on cross-status matches.
         """
-        target_status = "found" if status == "missing" else "missing"
         
-        # 1. Search Vector DB with status filter
+        # 1. Search Vector DB (NO status filter here to allow finding duplicates or same-status matches)
         results = self.vdb.search(
             query_embedding=embedding,
-            n_results=5,
-            where={"status": target_status}
+            n_results=10
         )
         
         if not results or not results.get("ids") or not results["ids"][0]:
             return
             
-        # 2. Process matches with intelligence score
+        # 2. Process matches
         ids = results["ids"][0]
         distances = results["distances"][0]
         metadatas = results["metadatas"][0]
@@ -119,21 +117,28 @@ class FaceSearchService:
         for i in range(len(ids)):
             match_meta = metadatas[i]
             match_post_id = match_meta.get("postId")
+            match_status = match_meta.get("status", "unknown").lower()
             
-            if not current_post_id or not match_post_id:
+            if not current_post_id or not match_post_id or current_post_id == match_post_id:
                 continue
                 
-            face_sim = max(0.0, 1.0 - distances[i])
+            # Improved Similarity Mapping: 0.6 distance -> ~70% similarity
+            # Using a scale where 0.8 distance is the "limit" of identity
+            face_sim = max(0.0, 1.0 - (distances[i] / 0.8))
+            
             loc_sim = 1.0 if current_loc and current_loc == match_meta.get("location") else 0.0
             
             # Compute intelligence score
             combined_score = self.compute_match_score(face_sim, 0.0, loc_sim)
             
-            if combined_score > 0.50:
-                # 3. Deduplication Layer
+            # 3. Alerting Logic (Cross-Status Only)
+            is_cross_match = (status == "missing" and match_status == "found") or \
+                             (status == "found" and match_status == "missing")
+            
+            if is_cross_match and combined_score > 0.40: # Lowered threshold slightly for better recall
+                # Deduplication Layer
                 p1, p2 = (current_post_id, match_post_id) if status == "missing" else (match_post_id, current_post_id)
                 
-                from django.db import IntegrityError
                 try:
                     FaceMatch.objects.create(
                         missing_post_id=p1,
@@ -144,7 +149,7 @@ class FaceSearchService:
                         location_score=loc_sim
                     )
                     
-                    # 4. Trigger Webhook
+                    # Trigger Webhook
                     match_data = {
                         "missing_post_id": p1,
                         "found_post_id": p2,
@@ -152,9 +157,7 @@ class FaceSearchService:
                         "metadata": match_meta
                     }
                     WebhookNotifier.send_high_confidence_match_alert(match_data)
-                    logger.info(f"MATCH FOUND AND ALERTED: Missing {p1} <-> Found {p2} (Score: {combined_score:.2f})")
                 except Exception:
-                    # Likely a Duplicate Key error, which means we already notified for this pair
                     pass
             
     def _apply_weighting_and_webhooks(self, search_res: Dict[str, Any], query_metadata: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
@@ -175,20 +178,21 @@ class FaceSearchService:
             dist = distances[i]
             meta = metadatas[i]
             
-            similarity = round(100 * max(0.0, 1 - dist), 1)
+            # Improved Similarity Mapping: 0.6 distance -> ~70% similarity
+            # Using a scale where 0.8 distance is the "limit" of identity
+            similarity = round(100 * max(0.0, 1.0 - (dist / 0.8)), 1)
             
             # --- START WEIGHTING LOGIC ---
             if query_metadata:
                 db_status = meta.get("status", "unknown").lower()
                 query_status = query_metadata.get("status", "unknown").lower()
                 
-                # Cross-matching missing and found
+                # Cross-matching missing and found: boost score slightly
                 if (query_status == "missing" and db_status == "found") or (query_status == "found" and db_status == "missing"):
-                    similarity += 3.0
+                    similarity += 5.0
                     
                 db_loc = meta.get("location")
                 query_loc = query_metadata.get("location")
-                # Stub logical distance location check
                 if db_loc and query_loc and db_loc == query_loc:
                      similarity += 5.0
                      
