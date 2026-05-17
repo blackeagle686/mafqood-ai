@@ -210,3 +210,5 @@ dist
 !temp_uploads/.gitkeep
 !chroma_db/.gitkeep
 !logs/.gitkeep
+
+smart_git.py
