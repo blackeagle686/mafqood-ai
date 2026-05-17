@@ -47,7 +47,7 @@ if ! command -v redis-server &> /dev/null; then
     fi
 fi
 
-if nc -z localhost 6379 2>/dev/null; then
+if python -c "import socket; s = socket.socket(); s.connect(('127.0.0.1', 6379))" 2>/dev/null; then
     echo "[+] Local Redis instance is running."
 else
     echo "[!] Redis is NOT running on port 6379."
@@ -65,7 +65,7 @@ else
     fi
     
     # Re-verify or fall back to docker
-    if nc -z localhost 6379 2>/dev/null; then
+    if python -c "import socket; s = socket.socket(); s.connect(('127.0.0.1', 6379))" 2>/dev/null; then
         echo "[+] Redis successfully launched and active."
     else
         echo "    Attempting to start Redis using docker-compose..."
@@ -118,8 +118,8 @@ if ! command -v ngrok &> /dev/null && [ ! -f "./ngrok" ]; then
             if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
             $SUDO_CMD rm -f /etc/apt/sources.list.d/ngrok.list /etc/apt/trusted.gpg.d/ngrok.asc 2>/dev/null || true
             
-            # Download stable linux amd64 release from ngrok CDN
-            curl -s -o ngrok.tgz https://bin.equinox.io/c/bNy8Qzbqg7i/ngrok-v3-stable-linux-amd64.tgz
+            # Download stable linux amd64 release from ngrok CDN (following redirects with -L)
+            curl -sL -o ngrok.tgz https://bin.equinox.io/c/bNy8Qzbqg7i/ngrok-v3-stable-linux-amd64.tgz
             tar -xzf ngrok.tgz
             rm ngrok.tgz
             chmod +x ngrok
