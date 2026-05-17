@@ -56,3 +56,45 @@ class MatchPostRequestSerializer(serializers.Serializer):
         required=True,
         help_text="0 for Lost (Missing), 1 for Found."
     )
+
+
+class PostIntegrationSerializer(serializers.Serializer):
+    """
+    Serializer for the main Create, Update, and Delete post endpoints.
+    """
+    userId = serializers.CharField(
+        required=True,
+        help_text="The ID of the user who created the post."
+    )
+    postId = serializers.IntegerField(
+        required=True,
+        help_text="Unique post identifier in the Mafqood database."
+    )
+    postType = serializers.IntegerField(
+        required=True,
+        help_text="0 = Lost, 1 = Found."
+    )
+    imageUrl = serializers.CharField(
+        required=True,
+        help_text="Public URL or path of the item image."
+    )
+
+    def validate_postType(self, value):
+        if value not in (0, 1):
+            raise serializers.ValidationError("postType must be 0 (Lost) or 1 (Found).")
+        return value
+
+
+class MarkResolvedIntegrationSerializer(serializers.Serializer):
+    """
+    Serializer for marking a post as resolved.
+    """
+    userId = serializers.CharField(
+        required=True,
+        help_text="The ID of the user who created the post."
+    )
+    postId = serializers.IntegerField(
+        required=True,
+        help_text="Unique post identifier in the Mafqood database."
+    )
+

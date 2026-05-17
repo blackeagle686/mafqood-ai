@@ -12,12 +12,22 @@ from rest_framework import status
 from django.conf import settings
 import os
 from services.face_search_service import FaceSearchService
-from .serializers import ModerateTextSerializer, ExtractEntitiesSerializer, MatchPostRequestSerializer
+from .serializers import (
+    ModerateTextSerializer, 
+    ExtractEntitiesSerializer, 
+    MatchPostRequestSerializer,
+    PostIntegrationSerializer,
+    MarkResolvedIntegrationSerializer
+)
+from .models import Post
+from .permissions import MafqoodAPIKeyAuthentication
 from infra.external.llm_client import LLMService
 from utils.file_utils import download_remote_image, cleanup_temp_file
 from infra.celery.tasks import background_cross_match_task
+from infra.repositories.vector_db_repo import VectorDB
 
 logger = logging.getLogger(__name__)
+
 
 # Shared singletons
 _llm_service = None
@@ -339,3 +349,216 @@ class CrossMatchActionView(APIView):
             }, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
             return Response({"isSuccess": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ManagePostView(APIView):
+    """
+    Main integration endpoint for Create, Update, and Delete post operations from .NET.
+    Protected by MafqoodAPIKeyAuthentication.
+    """
+    authentication_classes = [MafqoodAPIKeyAuthentication]
+    permission_classes = []
+
+    def post(self, request):
+        """
+        Create Post:
+        Saves to SQLite, downloads image, indexes in ChromaDB, matches and dispatches webhooks.
+        """
+        serializer = PostIntegrationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        userId = serializer.validated_data['userId']
+        postId = serializer.validated_data['postId']
+        postType = serializer.validated_data['postType']
+        imageUrl = serializer.validated_data['imageUrl']
+
+        # 1. Update/Create Post in local SQLite
+        post, created = Post.objects.update_or_create(
+            post_id=postId,
+            defaults={
+                'user_id': userId,
+                'post_type': postType,
+                'image_url': imageUrl,
+                'is_resolved': False
+            }
+        )
+
+        # 2. Resolve image path (Download if remote URL)
+        local_path = None
+        if imageUrl.startswith(('http://', 'https://')):
+            local_path = download_remote_image(imageUrl)
+        else:
+            # Check local file relative paths (for tests/local use)
+            if os.path.exists(imageUrl):
+                local_path = os.path.abspath(imageUrl)
+            else:
+                local_path = os.path.abspath(os.path.join(settings.BASE_DIR, imageUrl))
+
+        if not local_path or not os.path.exists(local_path):
+            return Response({
+                "error": f"Failed to download or locate image: {imageUrl}"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3. Index face embeddings in ChromaDB
+        face_service = _get_face_service()
+        status_str = "missing" if postType == 0 else "found"
+        
+        try:
+            index_res = face_service.index_image(
+                local_path,
+                metadata={
+                    "postId": postId,
+                    "userId": userId,
+                    "status": status_str,
+                    "is_resolved": False,
+                    "original_image": imageUrl
+                }
+            )
+        except Exception as e:
+            cleanup_temp_file(local_path)
+            return Response({"error": f"Failed to index face: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # 4. Search and match against opposite status
+        try:
+            # Search for best face matches
+            search_res = face_service.search_face_by_image(
+                local_path, 
+                n_results=10, 
+                cleanup=False
+            )
+        finally:
+            cleanup_temp_file(local_path)
+
+        # 5. Filter active matches & calculate confidence decimals
+        filtered_results = []
+        search_results = search_res.get("search_results", []) if search_res.get("status") == "success" else []
+        
+        for res in search_results:
+            match_meta = res.get("metadata", {})
+            match_post_id = match_meta.get("postId")
+            match_user_id = match_meta.get("userId")
+
+            if not match_post_id or not match_user_id:
+                continue
+
+            # Verify that the matched post actually exists and is active/unresolved
+            try:
+                opposite_post = Post.objects.get(post_id=match_post_id)
+                if opposite_post.is_resolved or opposite_post.post_type == postType:
+                    continue
+            except Post.DoesNotExist:
+                # If opposite is missing in SQLite, fallback to matching by status string
+                if match_meta.get("status") == status_str:
+                    continue
+
+            # similarity value is out of 100.0; mapping confidenceScore to range [0.0, 1.0]
+            confidence_score = round(res.get("similarity", 0.0) / 100.0, 2)
+
+            filtered_results.append({
+                "userId": match_user_id,
+                "postId": match_post_id,
+                "confidenceScore": confidence_score
+            })
+
+        # 6. Dispatch Webhook Callback
+        if filtered_results:
+            from infra.celery.tasks import send_webhook_task
+            
+            if postType == 0:  # Current is Lost post, send its direct matches
+                payload = {
+                    "userId": userId,
+                    "postId": postId,
+                    "matchedResults": filtered_results
+                }
+                send_webhook_task.delay(payload)
+            else:  # Current is Found post, notify owners of each matched Lost post
+                for lost_hit in filtered_results:
+                    payload = {
+                        "userId": lost_hit["userId"],
+                        "postId": lost_hit["postId"],
+                        "matchedResults": [
+                            {
+                                "userId": userId,
+                                "postId": postId,
+                                "confidenceScore": lost_hit["confidenceScore"]
+                            }
+                        ]
+                    }
+                    send_webhook_task.delay(payload)
+
+        return Response({"isSuccess": True, "message": "Post successfully received and queued for matching."}, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        """
+        Update Post:
+        Deletes old vector embeddings, updates SQLite record, indexes new image, and runs matching.
+        """
+        serializer = PostIntegrationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        postId = serializer.validated_data['postId']
+
+        # Delete old embeddings from ChromaDB
+        vdb = VectorDB()
+        vectors = vdb.get_vectors(where={"postId": postId})
+        if vectors and vectors.get("ids"):
+            vdb.delete(ids=vectors["ids"])
+
+        # Delegate to self.post for creating the updated instance & re-running matches
+        return self.post(request)
+
+    def delete(self, request):
+        """
+        Delete Post:
+        Permanently removes post embeddings from ChromaDB and deletes the SQLite Post record.
+        """
+        serializer = PostIntegrationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        postId = serializer.validated_data['postId']
+
+        # Delete embeddings from ChromaDB
+        vdb = VectorDB()
+        vectors = vdb.get_vectors(where={"postId": postId})
+        if vectors and vectors.get("ids"):
+            vdb.delete(ids=vectors["ids"])
+
+        # Delete from SQLite
+        Post.objects.filter(post_id=postId).delete()
+
+        return Response({"isSuccess": True, "message": "Post deleted successfully."}, status=status.HTTP_200_OK)
+
+
+class MarkPostResolvedView(APIView):
+    """
+    Endpoint to confirm an item has been recovered.
+    Flags SQLite record as is_resolved and deletes face embeddings from ChromaDB.
+    """
+    authentication_classes = [MafqoodAPIKeyAuthentication]
+    permission_classes = []
+
+    def post(self, request):
+        serializer = MarkResolvedIntegrationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        postId = serializer.validated_data['postId']
+
+        try:
+            post = Post.objects.get(post_id=postId)
+            post.is_resolved = True
+            post.save()
+            
+            # Delete embeddings from ChromaDB to stop including in future matching operations
+            vdb = VectorDB()
+            vectors = vdb.get_vectors(where={"postId": postId})
+            if vectors and vectors.get("ids"):
+                vdb.delete(ids=vectors["ids"])
+
+            return Response({"isSuccess": True, "message": f"Post {postId} marked as resolved, vector index cleaned."}, status=status.HTTP_200_OK)
+        except Post.DoesNotExist:
+            return Response({"error": f"Post {postId} not found in local database."}, status=status.HTTP_404_NOT_FOUND)
+

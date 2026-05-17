@@ -122,3 +122,23 @@ def background_cross_match_task(self, batch_size: int = 50):
     except Exception as e:
         logger.error(f"Error in background reconciliation task: {e}")
         return {"status": "failure", "error": str(e)}
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=10)
+def send_webhook_task(self, payload: Dict[str, Any]):
+    """
+    Background task to deliver a match results callback payload to the Mafqood system.
+    Supports retries on failure.
+    """
+    from infra.external.webhook_notifier import WebhookNotifier
+    logger.info(f"Asynchronously triggering webhook notification payload: {payload}")
+    
+    success = WebhookNotifier.send_match_results_to_mafqood(payload)
+    if not success:
+        # Retry with exponential backoff
+        countdown = 2 ** self.request.retries * 10
+        logger.warning(f"Webhook delivery failed, scheduling retry in {countdown} seconds...")
+        self.retry(countdown=countdown)
+    
+    return {"status": "success"}
+
