@@ -124,68 +124,34 @@ celery -A celery_app -C app beat --loglevel=info > logs/celery_beat.log 2>&1 &
 echo "[+] Celery Beat scheduler launched. Logs: logs/celery_beat.log"
 
 # 7. Start ngrok tunnel for public exposure
-echo "[*] Setting up ngrok tunnel..."
-NGROK_TOKEN="3DqGR1alEbozJwsc2X1qhKUAJtC_4CEjQRnaypvLAz8jPoMgW"
+echo "[*] Setting up ngrok tunnel via pyngrok SDK..."
 
-# Auto-install ngrok standalone binary if missing
-if ! command -v ngrok &> /dev/null && [ ! -f "./ngrok" ]; then
-    if [[ "$OSTYPE" != "msys" && "$OSTYPE" != "cygwin" && "$OSTYPE" != "win32" ]]; then
-        echo "[!] ngrok command not found. Attempting automatic standalone binary installation..."
-        if command -v curl &> /dev/null; then
-            # Clean up old source list entry to prevent APT error warnings on next commands
-            SUDO_CMD=""
-            if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
-            $SUDO_CMD rm -f /etc/apt/sources.list.d/ngrok.list /etc/apt/trusted.gpg.d/ngrok.asc 2>/dev/null || true
-            
-            # Download stable linux amd64 release from ngrok CDN (following redirects with -L)
-            curl -sL -o ngrok.tgz https://bin.equinox.io/c/bNy8Qzbqg7i/ngrok-v3-stable-linux-amd64.tgz
-            tar -xzf ngrok.tgz
-            rm ngrok.tgz
-            chmod +x ngrok
-            echo "[+] Standalone ngrok binary downloaded and prepared."
-        else
-            echo "[WARNING] curl not found. Skipping automatic ngrok installation."
-        fi
-    fi
+# Clean up lingering ngrok instances to avoid conflicts
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    taskkill //IM "ngrok.exe" //F 2>/dev/null || true
+else
+    pkill -f "infra/ngrok_tunnel.py" 2>/dev/null || true
+    pkill -f "ngrok http" 2>/dev/null || true
 fi
 
-# Resolve binary path
-NGROK_BIN="ngrok"
-if [ -f "./ngrok" ]; then
-    NGROK_BIN="./ngrok"
-fi
+# Run the python-native ngrok tunnel manager in the background
+python infra/ngrok_tunnel.py > logs/ngrok.log 2>&1 &
 
-if command -v $NGROK_BIN &> /dev/null || [ -f "$NGROK_BIN" ]; then
-    echo "[*] Configuring ngrok authtoken..."
-    $NGROK_BIN config add-authtoken "$NGROK_TOKEN"
-    
-    echo "[*] Cleaning up lingering ngrok instances..."
-    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-        taskkill //IM "ngrok.exe" //F 2>/dev/null || true
+# Wait for tunnel initialization
+sleep 4
+
+# Extract and display the live public URL from logs
+if [ -f "logs/ngrok.log" ]; then
+    PUBLIC_URL=$(grep -o "http[s]://[^ ]*" logs/ngrok.log | head -n 1 || true)
+    if [ ! -z "$PUBLIC_URL" ]; then
+        echo "[+] Public ngrok URL: $PUBLIC_URL"
     else
-        pkill -f "ngrok http" 2>/dev/null || true
-    fi
-    
-    echo "[*] Launching ngrok HTTP tunnel on port 8000..."
-    $NGROK_BIN http 8000 > logs/ngrok.log 2>&1 &
-    
-    # Wait for ngrok to establish tunnel connection
-    sleep 3
-    
-    # Extract and display the live public URL
-    if command -v curl &> /dev/null; then
-        PUBLIC_URL=$(curl -s http://localhost:4040/api/tunnels | python -c "import sys, json; print(json.load(sys.stdin)['tunnels'][0]['public_url'])" 2>/dev/null || true)
-        if [ ! -z "$PUBLIC_URL" ]; then
-            echo "[+] Public ngrok URL: $PUBLIC_URL"
-        else
-            echo "[+] ngrok tunnel launched in background. Check http://localhost:4040 or logs/ngrok.log for URL."
-        fi
-    else
-        echo "[+] ngrok tunnel launched in background. Check http://localhost:4040 or logs/ngrok.log for URL."
+        echo "[+] ngrok tunnel launched in background. Check logs/ngrok.log for details."
     fi
 else
-    echo "[WARNING] ngrok command or binary not found. Skipping public tunnel exposure."
+    echo "[+] ngrok tunnel launched in background."
 fi
+
 
 
 # 8. Start Django App development server

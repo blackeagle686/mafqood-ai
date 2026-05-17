@@ -24,3 +24,4 @@ beautifulsoup4>=4.12.2
 django>=6.0.3
 djangorestframework>=3.17.1
 django-environ>=0.13.0
+pyngrok>=7.1.0
