@@ -28,6 +28,25 @@ else
     echo "[!] Virtual environment '$VENV_DIR' not found. Proceeding with system python..."
 fi
 
+# 1.5. Automatic Dependency Check & Installation
+echo "[*] Checking python dependencies..."
+if ! python -c "import django" &>/dev/null; then
+    echo "[!] Django or required libraries not found in active python environment."
+    if [ -f "requirements.txt" ]; then
+        echo "[*] Installing dependencies from requirements.txt..."
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt
+    else
+        echo "[*] Installing core dependencies manually..."
+        python -m pip install --upgrade pip
+        python -m pip install django djangorestframework django-environ celery redis httpx
+    fi
+    echo "[+] Dependencies successfully installed."
+else
+    echo "[+] All python dependencies are satisfied."
+fi
+
+
 # 2. Apply migrations
 echo "[*] Applying SQLite database migrations..."
 python app/manage.py makemigrations
