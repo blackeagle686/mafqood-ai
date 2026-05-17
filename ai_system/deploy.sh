@@ -36,19 +36,48 @@ echo "[+] Database schemas are up-to-date."
 
 # 3. Verify Redis Broker Connectivity
 echo "[*] Verifying Redis connection on port 6379..."
+
+# Auto-install Redis if missing in Linux (Debian/Ubuntu) environments
+if ! command -v redis-server &> /dev/null; then
+    if command -v apt-get &> /dev/null; then
+        echo "[!] redis-server command not found. Attempting automatic installation..."
+        SUDO_CMD=""
+        if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
+        $SUDO_CMD apt-get update && $SUDO_CMD apt-get install -y redis-server
+    fi
+fi
+
 if nc -z localhost 6379 2>/dev/null; then
     echo "[+] Local Redis instance is running."
 else
     echo "[!] Redis is NOT running on port 6379."
-    echo "    Attempting to start Redis using docker-compose..."
-    if command -v docker-compose &> /dev/null; then
-        docker-compose up -d redis
-        echo "[+] Successfully launched Redis container via docker-compose."
-    elif command -v docker &> /dev/null; then
-        docker run -d --name mafqood-redis -p 6379:6379 redis:alpine
-        echo "[+] Successfully launched Redis container via raw docker."
+    # Attempt to start local redis-server
+    if command -v redis-server &> /dev/null; then
+        echo "[*] Launching local redis-server in background..."
+        SUDO_CMD=""
+        if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
+        if command -v service &> /dev/null; then
+            $SUDO_CMD service redis-server start || true
+        else
+            redis-server --daemonize yes || redis-server &
+        fi
+        sleep 2
+    fi
+    
+    # Re-verify or fall back to docker
+    if nc -z localhost 6379 2>/dev/null; then
+        echo "[+] Redis successfully launched and active."
     else
-        echo "[WARNING] Docker/docker-compose not found. Celery task queue might fail if Redis is unreachable."
+        echo "    Attempting to start Redis using docker-compose..."
+        if command -v docker-compose &> /dev/null; then
+            docker-compose up -d redis
+            echo "[+] Successfully launched Redis container via docker-compose."
+        elif command -v docker &> /dev/null; then
+            docker run -d --name mafqood-redis -p 6379:6379 redis:alpine
+            echo "[+] Successfully launched Redis container via raw docker."
+        else
+            echo "[WARNING] Could not start Redis. Celery task queue might fail if Redis is unreachable."
+        fi
     fi
 fi
 
@@ -78,6 +107,22 @@ echo "[+] Celery Beat scheduler launched. Logs: logs/celery_beat.log"
 # 7. Start ngrok tunnel for public exposure
 echo "[*] Setting up ngrok tunnel..."
 NGROK_TOKEN="3DqGR1alEbozJwsc2X1qhKUAJtC_4CEjQRnaypvLAz8jPoMgW"
+
+# Auto-install ngrok if missing in Linux (Debian/Ubuntu) environments
+if ! command -v ngrok &> /dev/null; then
+    if command -v apt-get &> /dev/null; then
+        echo "[!] ngrok command not found. Attempting automatic installation..."
+        SUDO_CMD=""
+        if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
+        if command -v curl &> /dev/null; then
+            curl -s https://ngrok-agent.s3.amazonaws.com/files.keys.gpg | $SUDO_CMD tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+            echo "deb https://ngrok-agent.s3.amazonaws.com/ buster main" | $SUDO_CMD tee /etc/apt/sources.list.d/ngrok.list
+            $SUDO_CMD apt-get update && $SUDO_CMD apt-get install -y ngrok
+        else
+            echo "[WARNING] curl not found. Skipping automatic ngrok installation."
+        fi
+    fi
+fi
 
 if command -v ngrok &> /dev/null; then
     echo "[*] Configuring ngrok authtoken..."
