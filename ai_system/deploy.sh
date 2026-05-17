@@ -108,32 +108,37 @@ echo "[+] Celery Beat scheduler launched. Logs: logs/celery_beat.log"
 echo "[*] Setting up ngrok tunnel..."
 NGROK_TOKEN="3DqGR1alEbozJwsc2X1qhKUAJtC_4CEjQRnaypvLAz8jPoMgW"
 
-# Auto-install ngrok if missing in Linux (Debian/Ubuntu) environments
-if ! command -v ngrok &> /dev/null; then
-    if command -v apt-get &> /dev/null; then
-        echo "[!] ngrok command not found. Attempting automatic installation..."
-        SUDO_CMD=""
-        if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
+# Auto-install ngrok standalone binary if missing
+if ! command -v ngrok &> /dev/null && [ ! -f "./ngrok" ]; then
+    if [[ "$OSTYPE" != "msys" && "$OSTYPE" != "cygwin" && "$OSTYPE" != "win32" ]]; then
+        echo "[!] ngrok command not found. Attempting automatic standalone binary installation..."
         if command -v curl &> /dev/null; then
-            # Clean up old non-secure configuration files to prevent warnings/errors
-            $SUDO_CMD rm -f /etc/apt/sources.list.d/ngrok.list /etc/apt/trusted.gpg.d/ngrok.asc
+            # Clean up old source list entry to prevent APT error warnings on next commands
+            SUDO_CMD=""
+            if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
+            $SUDO_CMD rm -f /etc/apt/sources.list.d/ngrok.list /etc/apt/trusted.gpg.d/ngrok.asc 2>/dev/null || true
             
-            # Fetch GPG key and add signed-by deb repository
-            curl -s https://ngrok-agent.s3.amazonaws.com/files.keys.gpg | $SUDO_CMD tee /usr/share/keyrings/ngrok.gpg >/dev/null
-            echo "deb [signed-by=/usr/share/keyrings/ngrok.gpg] https://ngrok-agent.s3.amazonaws.com/ buster main" | $SUDO_CMD tee /etc/apt/sources.list.d/ngrok.list
-            
-            # Run update and install
-            $SUDO_CMD apt-get update && $SUDO_CMD apt-get install -y ngrok
+            # Download stable linux amd64 release from ngrok CDN
+            curl -s -o ngrok.tgz https://bin.equinox.io/c/bNy8Qzbqg7i/ngrok-v3-stable-linux-amd64.tgz
+            tar -xzf ngrok.tgz
+            rm ngrok.tgz
+            chmod +x ngrok
+            echo "[+] Standalone ngrok binary downloaded and prepared."
         else
             echo "[WARNING] curl not found. Skipping automatic ngrok installation."
         fi
     fi
 fi
 
+# Resolve binary path
+NGROK_BIN="ngrok"
+if [ -f "./ngrok" ]; then
+    NGROK_BIN="./ngrok"
+fi
 
-if command -v ngrok &> /dev/null; then
+if command -v $NGROK_BIN &> /dev/null || [ -f "$NGROK_BIN" ]; then
     echo "[*] Configuring ngrok authtoken..."
-    ngrok config add-authtoken "$NGROK_TOKEN"
+    $NGROK_BIN config add-authtoken "$NGROK_TOKEN"
     
     echo "[*] Cleaning up lingering ngrok instances..."
     if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
@@ -143,7 +148,7 @@ if command -v ngrok &> /dev/null; then
     fi
     
     echo "[*] Launching ngrok HTTP tunnel on port 8000..."
-    ngrok http 8000 > logs/ngrok.log 2>&1 &
+    $NGROK_BIN http 8000 > logs/ngrok.log 2>&1 &
     
     # Wait for ngrok to establish tunnel connection
     sleep 3
@@ -160,8 +165,9 @@ if command -v ngrok &> /dev/null; then
         echo "[+] ngrok tunnel launched in background. Check http://localhost:4040 or logs/ngrok.log for URL."
     fi
 else
-    echo "[WARNING] ngrok command not found. Skipping public tunnel exposure."
+    echo "[WARNING] ngrok command or binary not found. Skipping public tunnel exposure."
 fi
+
 
 # 8. Start Django App development server
 echo "[*] Starting Django application server..."
