@@ -115,14 +115,21 @@ if ! command -v ngrok &> /dev/null; then
         SUDO_CMD=""
         if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
         if command -v curl &> /dev/null; then
-            curl -s https://ngrok-agent.s3.amazonaws.com/files.keys.gpg | $SUDO_CMD tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-            echo "deb https://ngrok-agent.s3.amazonaws.com/ buster main" | $SUDO_CMD tee /etc/apt/sources.list.d/ngrok.list
+            # Clean up old non-secure configuration files to prevent warnings/errors
+            $SUDO_CMD rm -f /etc/apt/sources.list.d/ngrok.list /etc/apt/trusted.gpg.d/ngrok.asc
+            
+            # Fetch GPG key and add signed-by deb repository
+            curl -s https://ngrok-agent.s3.amazonaws.com/files.keys.gpg | $SUDO_CMD tee /usr/share/keyrings/ngrok.gpg >/dev/null
+            echo "deb [signed-by=/usr/share/keyrings/ngrok.gpg] https://ngrok-agent.s3.amazonaws.com/ buster main" | $SUDO_CMD tee /etc/apt/sources.list.d/ngrok.list
+            
+            # Run update and install
             $SUDO_CMD apt-get update && $SUDO_CMD apt-get install -y ngrok
         else
             echo "[WARNING] curl not found. Skipping automatic ngrok installation."
         fi
     fi
 fi
+
 
 if command -v ngrok &> /dev/null; then
     echo "[*] Configuring ngrok authtoken..."
