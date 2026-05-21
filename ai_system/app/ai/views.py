@@ -21,6 +21,8 @@ from .serializers import (
 )
 from .models import Post
 from .permissions import MafqoodAPIKeyAuthentication
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from infra.external.llm_client import LLMService
 from utils.file_utils import download_remote_image, cleanup_temp_file
 from infra.celery.tasks import background_cross_match_task
@@ -351,6 +353,7 @@ class CrossMatchActionView(APIView):
             return Response({"isSuccess": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ManagePostView(APIView):
     """
     Main integration endpoint for Create, Update, and Delete post operations from .NET.
@@ -532,6 +535,7 @@ class ManagePostView(APIView):
         return Response({"isSuccess": True, "message": "Post deleted successfully."}, status=status.HTTP_200_OK)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class MarkPostResolvedView(APIView):
     """
     Endpoint to confirm an item has been recovered.
