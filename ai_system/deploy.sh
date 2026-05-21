@@ -66,6 +66,24 @@ if ! command -v redis-server &> /dev/null; then
     fi
 fi
 
+# Auto-install system Celery if missing
+CELERY_CMD=""
+if command -v celery &> /dev/null; then
+    CELERY_CMD="celery"
+elif python -c "import celery" &> /dev/null; then
+    CELERY_CMD="python -m celery"
+elif command -v apt-get &> /dev/null; then
+    echo "[!] Celery command not found. Attempting automatic installation..."
+    SUDO_CMD=""
+    if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
+    $SUDO_CMD apt-get update && $SUDO_CMD apt-get install -y python3-celery
+    if command -v celery &> /dev/null; then
+        CELERY_CMD="celery"
+    elif python -c "import celery" &> /dev/null; then
+        CELERY_CMD="python -m celery"
+    fi
+fi
+
 if python -c "import socket; s = socket.socket(); s.connect(('127.0.0.1', 6379))" 2>/dev/null; then
     echo "[+] Local Redis instance is running."
 else
