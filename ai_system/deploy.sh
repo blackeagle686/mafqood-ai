@@ -234,17 +234,17 @@ start_services() {
     # 1. Start Celery Worker
     echo -e "${BLUE}[*] Starting Celery worker...${NC}"
     if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-        $CELERY_CMD -A app.celery_app worker --loglevel=info -P solo > logs/celery_worker.log 2>&1 &
+        PYTHONPATH=app $CELERY_CMD -A app.celery_app worker --loglevel=info -P solo > logs/celery_worker.log 2>&1 &
         echo $! > logs/celery_worker.pid
     else
-        $CELERY_CMD -A app.celery_app worker --loglevel=info > logs/celery_worker.log 2>&1 &
+        PYTHONPATH=app $CELERY_CMD -A app.celery_app worker --loglevel=info > logs/celery_worker.log 2>&1 &
         echo $! > logs/celery_worker.pid
     fi
     echo -e "${GREEN}[+] Celery worker process started (PID $(cat logs/celery_worker.pid)).${NC}"
 
     # 2. Start Celery Beat
     echo -e "${BLUE}[*] Starting Celery Beat scheduler...${NC}"
-    $CELERY_CMD -A app.celery_app beat --loglevel=info > logs/celery_beat.log 2>&1 &
+    PYTHONPATH=app $CELERY_CMD -A app.celery_app beat --loglevel=info > logs/celery_beat.log 2>&1 &
     echo $! > logs/celery_beat.pid
     echo -e "${GREEN}[+] Celery Beat process started (PID $(cat logs/celery_beat.pid)).${NC}"
 
