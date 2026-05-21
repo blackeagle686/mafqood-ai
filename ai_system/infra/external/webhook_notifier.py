@@ -7,7 +7,7 @@ from typing import Dict, Any
 logger = logging.getLogger(__name__)
 
 # Usually this would be in config.py
-DOTNET_SYSTEM_WEBHOOK_URL = os.getenv("DOTNET_WEBHOOK_URL", "http://dotnet-system:5000/api/webhooks/mafqood-match")
+DOTNET_SYSTEM_WEBHOOK_URL = os.getenv("DOTNET_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/match-results")
 
 class WebhookNotifier:
     """
