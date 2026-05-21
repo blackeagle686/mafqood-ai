@@ -230,34 +230,11 @@ fi
 echo "[+] Mafqood API Key (X-Api-Key): mafqood-ai-secure-token-2026"
 echo "----------------------------------------------------"
 
-port_free() {
-    python -c "import socket, sys; s=socket.socket(); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1);\ntry: s.bind(('0.0.0.0', int(sys.argv[1]))); s.close(); sys.exit(0)\nexcept OSError: sys.exit(1)" "$1" 2>/dev/null
-}
-
-find_available_port() {
-    local start_port=${1:-8000}
-    local end_port=${2:-8100}
-    for port in $(seq "$start_port" "$end_port"); do
-        if port_free "$port"; then
-            echo "$port"
-            return 0
-        fi
-    done
-    return 1
-}
-
-RUNSERVER_PORT=${DJANGO_PORT:-8025}
-if port_free "$RUNSERVER_PORT"; then
-    echo "[+] Using Django port: $RUNSERVER_PORT"
-else
-    echo "[!] Port $RUNSERVER_PORT is already in use. Searching for an available port..."
-    RUNSERVER_PORT=$(find_available_port 8000 8100)
-    if [ -z "$RUNSERVER_PORT" ]; then
-        echo "[ERROR] No available port found between 8000 and 8100. Please free a port or set DJANGO_PORT."
-        exit 1
-    fi
-    echo "[+] Selected alternative Django port: $RUNSERVER_PORT"
-fi
+# 8. Start Django App development server
+echo "[*] Starting Django application server..."
+echo "[+] Mafqood AI local endpoints will be available at: http://localhost:$RUNSERVER_PORT"
+echo "----------------------------------------------------"
+python app/manage.py runserver 0.0.0.0:$RUNSERVER_PORT
 
 # 8. Start Django App development server
 echo "[*] Starting Django application server..."
