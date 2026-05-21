@@ -11,7 +11,7 @@ venv.bak/
 *.egg-info
 dist
 build
-
+mafqood_venv/
 # ============================================================================
 # Python
 # ============================================================================
@@ -212,3 +212,16 @@ dist
 !logs/.gitkeep
 
 smart_git.py
+
+
+# ---------- logs ----------
+logs/django.log
+logs/celery.log
+logs/beat.log
+logs/ngrok.log
+logs/
+
+
+#  chroma db 
+chroma_db_test/
+chroma_db/

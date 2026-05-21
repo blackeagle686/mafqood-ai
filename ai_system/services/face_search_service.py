@@ -6,7 +6,7 @@ from infra.repositories.vector_db_repo import VectorDB
 from utils.file_utils import cleanup_temp_file
 from infra.external.webhook_notifier import WebhookNotifier
 from services.age_progression_service import AgeProgressionGAN
-
+import os
 from datetime import datetime
 from app.ai.models import FaceMatch
 
@@ -48,7 +48,6 @@ class FaceSearchService:
         Returns:
             Dictionary with indexing status and results
         """
-        import os
         try:
             results = self.pipeline.process_image(image_path)
             
