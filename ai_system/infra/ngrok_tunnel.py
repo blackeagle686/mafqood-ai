@@ -1,16 +1,17 @@
+import os
 import sys
 import time
 from pyngrok import ngrok
 
 def main():
-    token = "3DqGR1alEbozJwsc2X1qhKUAJtC_4CEjQRnaypvLAz8jPoMgW"
+    token = os.getenv("NGROK_AUTHTOKEN", "3E2ijNAk9Jj7Wr2WDftflTw51qp_3PTrGmivVSWQjnubWTsWc")
     print("[*] Launching ngrok tunnel natively via pyngrok SDK...")
     try:
         # Set custom authentication token
         ngrok.set_auth_token(token)
         
         # Connect public HTTP tunnel to local port 8000
-        tunnel = ngrok.connect(8000)
+        tunnel = ngrok.connect(8000, options={"pooling_enabled": "true"})
         
         # Print the live public URL (deploy.sh will parse this)
         print(f"[+] Public ngrok URL: {tunnel.public_url}", flush=True)
