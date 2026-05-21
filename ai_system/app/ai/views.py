@@ -367,8 +367,10 @@ class ManagePostView(APIView):
         Create Post:
         Saves to SQLite, downloads image, indexes in ChromaDB, matches and dispatches webhooks.
         """
+        logger.info(f"Incoming POST to /api/ai/posts. Headers: {dict(request.headers)}. Data: {request.data}")
         serializer = PostIntegrationSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.error(f"Validation failed for POST /api/ai/posts. Errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         userId = serializer.validated_data['userId']
@@ -497,8 +499,10 @@ class ManagePostView(APIView):
         Update Post:
         Deletes old vector embeddings, updates SQLite record, indexes new image, and runs matching.
         """
+        logger.info(f"Incoming PUT to /api/ai/posts. Headers: {dict(request.headers)}. Data: {request.data}")
         serializer = PostIntegrationSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.error(f"Validation failed for PUT /api/ai/posts. Errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         postId = serializer.validated_data['postId']
@@ -517,8 +521,10 @@ class ManagePostView(APIView):
         Delete Post:
         Permanently removes post embeddings from ChromaDB and deletes the SQLite Post record.
         """
+        logger.info(f"Incoming DELETE to /api/ai/posts. Headers: {dict(request.headers)}. Data: {request.data}")
         serializer = PostIntegrationSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.error(f"Validation failed for DELETE /api/ai/posts. Errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         postId = serializer.validated_data['postId']
@@ -545,8 +551,10 @@ class MarkPostResolvedView(APIView):
     permission_classes = []
 
     def post(self, request):
+        logger.info(f"Incoming POST to /api/ai/posts/mark-resolved. Headers: {dict(request.headers)}. Data: {request.data}")
         serializer = MarkResolvedIntegrationSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.error(f"Validation failed for POST /api/ai/posts/mark-resolved. Errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         postId = serializer.validated_data['postId']

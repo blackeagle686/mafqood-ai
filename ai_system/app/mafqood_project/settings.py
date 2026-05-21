@@ -12,9 +12,17 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path=BASE_DIR.parent / '.env')
+
+# API Key Authentication
+MAFQOOD_API_KEY = os.getenv('MAFQOOD_API_KEY', 'mafqood-shared-secret-key-2026')
+
 
 
 # Quick-start development settings - unsuitable for production

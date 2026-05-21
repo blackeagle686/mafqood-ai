@@ -52,7 +52,7 @@ class WebhookNotifier:
         from django.conf import settings
         
         webhook_url = os.getenv("MAFQOOD_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/match-results")
-        api_key = getattr(settings, 'MAFQOOD_API_KEY', os.getenv('MAFQOOD_API_KEY', 'mafqood-shared-secret-key-2026'))
+        api_key = getattr(settings, 'MAFQOOD_API_KEY', 'mafqood-shared-secret-key-2026')
         
         logger.info(f"Dispatching match callback to Mafqood at {webhook_url}")
         
