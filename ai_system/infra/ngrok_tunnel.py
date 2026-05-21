@@ -5,13 +5,14 @@ from pyngrok import ngrok
 
 def main():
     token = os.getenv("NGROK_AUTHTOKEN", "3E2jOmRZkQ1RcYDCf2NpGuY18fd_49f6p422kjcp9bNPDWHZf")
+    port = int(os.getenv("NGROK_PORT", os.getenv("DJANGO_PORT", "8001")))
     print("[*] Launching ngrok tunnel natively via pyngrok SDK...")
     try:
         # Set custom authentication token
         ngrok.set_auth_token(token)
         
-        # Connect public HTTP tunnel to local port 8000
-        tunnel = ngrok.connect(8025)
+        # Connect public HTTP tunnel to the active Django port
+        tunnel = ngrok.connect(port)
         
         # Print the live public URL (deploy.sh will parse this)
         print(f"[+] Public ngrok URL: {tunnel.public_url}", flush=True)

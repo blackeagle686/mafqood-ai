@@ -154,6 +154,46 @@ echo "[*] Starting Celery Beat scheduler..."
 $CELERY_CMD -A app.celery_app beat --loglevel=info > logs/celery_beat.log 2>&1 &
 echo "[+] Celery Beat scheduler launched. Logs: logs/celery_beat.log"
 
+port_free() {
+    python - <<'PY' 2>/dev/null
+import socket, sys
+s = socket.socket()
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+try:
+    s.bind(('0.0.0.0', int(sys.argv[1])))
+    s.close()
+    sys.exit(0)
+except OSError:
+    sys.exit(1)
+PY
+}
+
+find_available_port() {
+    local start_port=${1:-8001}
+    local end_port=${2:-8100}
+    for port in $(seq "$start_port" "$end_port"); do
+        if port_free "$port"; then
+            echo "$port"
+            return 0
+        fi
+    done
+    return 1
+}
+
+RUNSERVER_PORT=${DJANGO_PORT:-8001}
+if port_free "$RUNSERVER_PORT"; then
+    echo "[+] Using Django port: $RUNSERVER_PORT"
+else
+    echo "[!] Port $RUNSERVER_PORT is already in use. Searching for an available port..."
+    RUNSERVER_PORT=$(find_available_port 8001 8100)
+    if [ -z "$RUNSERVER_PORT" ]; then
+        echo "[ERROR] No available port found between 8001 and 8100. Please free a port or set DJANGO_PORT."
+        exit 1
+    fi
+    echo "[+] Selected alternative Django port: $RUNSERVER_PORT"
+fi
+export NGROK_PORT="$RUNSERVER_PORT"
+
 # 7. Start ngrok tunnel for public exposure
 echo "[*] Setting up ngrok tunnel via pyngrok SDK..."
 
