@@ -190,22 +190,15 @@ fi
 echo "[+] Mafqood API Key (X-Api-Key): mafqood-ai-secure-token-2026"
 echo "----------------------------------------------------"
 
+port_free() {
+    python -c "import socket, sys; s=socket.socket(); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1);\ntry: s.bind(('0.0.0.0', int(sys.argv[1]))); s.close(); sys.exit(0)\nexcept OSError: sys.exit(1)" "$1" 2>/dev/null
+}
+
 find_available_port() {
     local start_port=${1:-8000}
     local end_port=${2:-8100}
     for port in $(seq "$start_port" "$end_port"); do
-        if python - <<'PY' 2>/dev/null
-import socket
-s = socket.socket()
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-try:
-    s.bind(('0.0.0.0', int($port)))
-    s.close()
-    print('free')
-except OSError:
-    pass
-PY
- | grep -q '^free$'; then
+        if port_free "$port"; then
             echo "$port"
             return 0
         fi
@@ -214,18 +207,7 @@ PY
 }
 
 RUNSERVER_PORT=${DJANGO_PORT:-8000}
-if ! python - <<'PY' 2>/dev/null
-import socket
-s = socket.socket()
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-try:
-    s.bind(('0.0.0.0', int($RUNSERVER_PORT)))
-    s.close()
-    print('free')
-except OSError:
-    pass
-PY
- | grep -q '^free$'; then
+if port_free "$RUNSERVER_PORT"; then
     echo "[+] Using Django port: $RUNSERVER_PORT"
 else
     echo "[!] Port $RUNSERVER_PORT is already in use. Searching for an available port..."
