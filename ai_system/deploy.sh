@@ -206,7 +206,7 @@ find_available_port() {
     return 1
 }
 
-RUNSERVER_PORT=${DJANGO_PORT:-8001}
+RUNSERVER_PORT=${DJANGO_PORT:-8025}
 if port_free "$RUNSERVER_PORT"; then
     echo "[+] Using Django port: $RUNSERVER_PORT"
 else
