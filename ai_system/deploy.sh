@@ -236,9 +236,3 @@ echo "[+] Mafqood AI local endpoints will be available at: http://localhost:$RUN
 echo "----------------------------------------------------"
 python app/manage.py runserver 0.0.0.0:$RUNSERVER_PORT
 
-# 8. Start Django App development server
-echo "[*] Starting Django application server..."
-echo "[+] Mafqood AI local endpoints will be available at: http://localhost:$RUNSERVER_PORT"
-echo "----------------------------------------------------"
-python app/manage.py runserver 0.0.0.0:$RUNSERVER_PORT
-
