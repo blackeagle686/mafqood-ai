@@ -1,238 +1,348 @@
 #!/bin/bash
 # ====================================================================
-#         Mafqood AI System Deployment & Startup Orchestrator         
+#         Mafqood AI System Deployment & Startup Orchestrator
 # ====================================================================
-# Coordinates the virtualenv, database migrations, Redis broker,
-# Celery worker, Celery beat, and the Django REST server.
+# Coordinates:
+# - Virtual Environment
+# - Dependency Installation
+# - Database Migrations
+# - Redis Broker
+# - Celery Worker
+# - Celery Beat
+# - ngrok Tunnel
+# - Django Development Server
+#
+# Safe for running alongside production services.
+# Production on port 8000 will NOT be touched.
+# ====================================================================
 
-set -e # Exit immediately on error
+set -e
 
 echo "===================================================="
-echo "         Mafqood AI System Orchestrator Script      "
+echo "         Mafqood AI System Orchestrator             "
 echo "===================================================="
 
-# Create logs directory if it doesn't exist
+# --------------------------------------------------------------------
+# Prevent duplicate orchestrator instances
+# --------------------------------------------------------------------
+LOCKFILE="/tmp/mafqood_orchestrator.lock"
+
+if [ -f "$LOCKFILE" ]; then
+    echo "[!] Another orchestrator instance is already running."
+    exit 1
+fi
+
+trap "rm -f $LOCKFILE" EXIT
+touch "$LOCKFILE"
+
+# --------------------------------------------------------------------
+# Create logs directory
+# --------------------------------------------------------------------
 mkdir -p logs
 
-# 1. Virtual Environment Activation
+# --------------------------------------------------------------------
+# Virtual Environment Activation
+# --------------------------------------------------------------------
 VENV_DIR="mafqood_venv"
+
 if [ -d "$VENV_DIR" ]; then
     echo "[*] Activating virtual environment..."
+
     if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-        source $VENV_DIR/Scripts/activate
+        source "$VENV_DIR/Scripts/activate"
     else
-        source $VENV_DIR/bin/activate
+        source "$VENV_DIR/bin/activate"
     fi
-    echo "[+] Virtual environment successfully activated."
+
+    echo "[+] Virtual environment activated."
 else
-    echo "[!] Virtual environment '$VENV_DIR' not found. Proceeding with system python..."
+    echo "[!] Virtual environment '$VENV_DIR' not found."
+    echo "[!] Proceeding with system Python..."
 fi
 
-# 1.5. Automatic Dependency Check & Installation
-echo "[*] Checking python dependencies..."
+# --------------------------------------------------------------------
+# Dependency Check
+# --------------------------------------------------------------------
+echo "[*] Checking Python dependencies..."
+
 if ! python -c "import django" &>/dev/null; then
-    echo "[!] Django or required libraries not found in active python environment."
+
+    echo "[!] Required dependencies missing."
+
+    python -m pip install --upgrade pip
+
     if [ -f "requirements.txt" ]; then
-        echo "[*] Installing dependencies from requirements.txt..."
-        python -m pip install --upgrade pip
+        echo "[*] Installing from requirements.txt..."
         python -m pip install -r requirements.txt
     else
-        echo "[*] Installing core dependencies manually..."
-        python -m pip install --upgrade pip
-        python -m pip install django djangorestframework django-environ celery redis httpx
+        echo "[*] Installing core dependencies..."
+        python -m pip install \
+            django \
+            djangorestframework \
+            django-environ \
+            celery \
+            redis \
+            httpx \
+            pyngrok
     fi
-    echo "[+] Dependencies successfully installed."
+
+    echo "[+] Dependencies installed."
 else
-    echo "[+] All python dependencies are satisfied."
+    echo "[+] Dependencies already satisfied."
 fi
 
+# --------------------------------------------------------------------
+# Database Migrations
+# --------------------------------------------------------------------
+echo "[*] Applying database migrations..."
 
-# 2. Apply migrations
-echo "[*] Applying SQLite database migrations..."
 python app/manage.py makemigrations
 python app/manage.py migrate
-echo "[+] Database schemas are up-to-date."
 
-# 3. Verify Redis Broker Connectivity
+echo "[+] Database is up-to-date."
+
+# --------------------------------------------------------------------
+# Redis Check
+# --------------------------------------------------------------------
 echo "[*] Verifying Redis connection on port 6379..."
 
-# Auto-install Redis if missing in Linux (Debian/Ubuntu) environments
-if ! command -v redis-server &> /dev/null; then
-    if command -v apt-get &> /dev/null; then
-        echo "[!] redis-server command not found. Attempting automatic installation..."
+if ! command -v redis-server &>/dev/null; then
+
+    if command -v apt-get &>/dev/null; then
+
+        echo "[!] redis-server not found. Installing..."
+
         SUDO_CMD=""
-        if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
-        $SUDO_CMD apt-get update && $SUDO_CMD apt-get install -y redis-server
+        if command -v sudo &>/dev/null; then
+            SUDO_CMD="sudo"
+        fi
+
+        $SUDO_CMD apt-get update
+        $SUDO_CMD apt-get install -y redis-server
     fi
 fi
 
-# Auto-install system Celery if missing
+# --------------------------------------------------------------------
+# Celery Command Detection
+# --------------------------------------------------------------------
 CELERY_CMD=""
-if command -v celery &> /dev/null; then
+
+if command -v celery &>/dev/null; then
     CELERY_CMD="celery"
-elif python -c "import celery" &> /dev/null; then
+
+elif python -c "import celery" &>/dev/null; then
     CELERY_CMD="python -m celery"
-elif command -v apt-get &> /dev/null; then
-    echo "[!] Celery command not found. Attempting automatic installation..."
-    SUDO_CMD=""
-    if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
-    $SUDO_CMD apt-get update && $SUDO_CMD apt-get install -y python3-celery
-    if command -v celery &> /dev/null; then
-        CELERY_CMD="celery"
-    elif python -c "import celery" &> /dev/null; then
-        CELERY_CMD="python -m celery"
-    fi
-fi
 
-if python -c "import socket; s = socket.socket(); s.connect(('127.0.0.1', 6379))" 2>/dev/null; then
-    echo "[+] Local Redis instance is running."
-else
-    echo "[!] Redis is NOT running on port 6379."
-    # Attempt to start local redis-server
-    if command -v redis-server &> /dev/null; then
-        echo "[*] Launching local redis-server in background..."
-        SUDO_CMD=""
-        if command -v sudo &> /dev/null; then SUDO_CMD="sudo"; fi
-        if command -v service &> /dev/null; then
-            $SUDO_CMD service redis-server start || true
-        else
-            redis-server --daemonize yes || redis-server &
-        fi
-        sleep 2
-    fi
-    
-    # Re-verify or fall back to docker
-    if python -c "import socket; s = socket.socket(); s.connect(('127.0.0.1', 6379))" 2>/dev/null; then
-        echo "[+] Redis successfully launched and active."
-    else
-        echo "    Attempting to start Redis using docker-compose..."
-        if command -v docker-compose &> /dev/null; then
-            docker-compose up -d redis
-            echo "[+] Successfully launched Redis container via docker-compose."
-        elif command -v docker &> /dev/null; then
-            docker run -d --name mafqood-redis -p 6379:6379 redis:alpine
-            echo "[+] Successfully launched Redis container via raw docker."
-        else
-            echo "[WARNING] Could not start Redis. Celery task queue might fail if Redis is unreachable."
-        fi
-    fi
-fi
-
-# 4. Stop lingering Celery worker & beat instances
-echo "[*] Cleaning up lingering Celery workers..."
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    taskkill //IM "celery.exe" //F 2>/dev/null || true
-else
-    pkill -f "celery" 2>/dev/null || true
-    pkill -f "python -m celery" 2>/dev/null || true
 fi
 
 if [ -z "$CELERY_CMD" ]; then
-    echo "[!] Celery is not available on this system. Trying to use python -m celery if installed..."
-    if python -c "import celery" &> /dev/null; then
-        CELERY_CMD="python -m celery"
-    else
-        echo "[ERROR] Celery is not installed. Please install Celery using pip or apt-get."
-        exit 1
+    echo "[ERROR] Celery is not installed."
+    exit 1
+fi
+
+echo "[+] Using Celery command: $CELERY_CMD"
+
+# --------------------------------------------------------------------
+# Check Redis Socket
+# --------------------------------------------------------------------
+if python - <<'PY'
+import socket
+
+s = socket.socket()
+
+try:
+    s.connect(("127.0.0.1", 6379))
+    print("Redis reachable")
+    exit(0)
+
+except Exception:
+    exit(1)
+PY
+then
+    echo "[+] Redis is running."
+else
+
+    echo "[!] Redis is NOT running."
+    echo "[*] Attempting to start Redis..."
+
+    if command -v service &>/dev/null; then
+
+        SUDO_CMD=""
+        if command -v sudo &>/dev/null; then
+            SUDO_CMD="sudo"
+        fi
+
+        $SUDO_CMD service redis-server start || true
+
+    elif command -v redis-server &>/dev/null; then
+
+        redis-server --daemonize yes
+
     fi
-else
-    echo "[+] Using Celery command: $CELERY_CMD"
+
+    sleep 2
 fi
 
-# 5. Start Celery worker in the background
-echo "[*] Starting Celery background worker..."
+# --------------------------------------------------------------------
+# Cleanup old Celery instances ONLY for current project
+# --------------------------------------------------------------------
+echo "[*] Cleaning old Celery processes..."
+
+pkill -f "app.celery_app worker" 2>/dev/null || true
+pkill -f "app.celery_app beat" 2>/dev/null || true
+
+# --------------------------------------------------------------------
+# Start Celery Worker
+# --------------------------------------------------------------------
+echo "[*] Starting Celery worker..."
+
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    # On Windows Celery requires the -P solo execution pool to process background tasks without spawning locks
-    $CELERY_CMD -A app.celery_app worker --loglevel=info -P solo > logs/celery_worker.log 2>&1 &
+
+    $CELERY_CMD -A app.celery_app worker \
+        --loglevel=info \
+        -P solo \
+        > logs/celery_worker.log 2>&1 &
+
 else
-    $CELERY_CMD -A app.celery_app worker --loglevel=info > logs/celery_worker.log 2>&1 &
+
+    $CELERY_CMD -A app.celery_app worker \
+        --loglevel=info \
+        > logs/celery_worker.log 2>&1 &
 fi
-echo "[+] Celery worker launched. Logs: logs/celery_worker.log"
 
-# 6. Start Celery Beat scheduler in the background
-echo "[*] Starting Celery Beat scheduler..."
-$CELERY_CMD -A app.celery_app beat --loglevel=info > logs/celery_beat.log 2>&1 &
-echo "[+] Celery Beat scheduler launched. Logs: logs/celery_beat.log"
+echo "[+] Celery worker started."
 
+# --------------------------------------------------------------------
+# Start Celery Beat
+# --------------------------------------------------------------------
+echo "[*] Starting Celery Beat..."
+
+$CELERY_CMD -A app.celery_app beat \
+    --loglevel=info \
+    > logs/celery_beat.log 2>&1 &
+
+echo "[+] Celery Beat started."
+
+# --------------------------------------------------------------------
+# Port Utilities
+# --------------------------------------------------------------------
 port_free() {
-    python - <<'PY' 2>/dev/null
-import socket, sys
+
+    python - "$1" <<'PY' 2>/dev/null
+import socket
+import sys
+
+port = int(sys.argv[1])
+
 s = socket.socket()
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
 try:
-    s.bind(('0.0.0.0', int(sys.argv[1])))
+    s.bind(("0.0.0.0", port))
     s.close()
-    sys.exit(0)
+    exit(0)
+
 except OSError:
-    sys.exit(1)
+    exit(1)
 PY
 }
 
 find_available_port() {
+
     local start_port=${1:-8001}
     local end_port=${2:-8100}
+
     for port in $(seq "$start_port" "$end_port"); do
+
         if port_free "$port"; then
             echo "$port"
             return 0
         fi
+
     done
+
     return 1
 }
 
+# --------------------------------------------------------------------
+# Dynamic Django Port Selection
+# --------------------------------------------------------------------
 RUNSERVER_PORT=${DJANGO_PORT:-8001}
+
 if port_free "$RUNSERVER_PORT"; then
+
     echo "[+] Using Django port: $RUNSERVER_PORT"
+
 else
-    echo "[!] Port $RUNSERVER_PORT is already in use. Searching for an available port..."
+
+    echo "[!] Port $RUNSERVER_PORT already in use."
+    echo "[*] Searching for another port..."
+
     RUNSERVER_PORT=$(find_available_port 8001 8100)
+
     if [ -z "$RUNSERVER_PORT" ]; then
-        echo "[ERROR] No available port found between 8001 and 8100. Please free a port or set DJANGO_PORT."
+        echo "[ERROR] No free ports available."
         exit 1
     fi
-    echo "[+] Selected alternative Django port: $RUNSERVER_PORT"
+
+    echo "[+] Selected alternative port: $RUNSERVER_PORT"
 fi
+
 export NGROK_PORT="$RUNSERVER_PORT"
 
-# 7. Start ngrok tunnel for public exposure
-echo "[*] Setting up ngrok tunnel via pyngrok SDK..."
+# --------------------------------------------------------------------
+# ngrok Setup
+# --------------------------------------------------------------------
+echo "[*] Setting up ngrok tunnel..."
 
-# Clean up lingering ngrok instances to avoid conflicts
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    taskkill //IM "ngrok.exe" //F 2>/dev/null || true
-else
-    pkill -f "infra/ngrok_tunnel.py" 2>/dev/null || true
-    pkill -f "ngrok http" 2>/dev/null || true
-fi
+# Kill ONLY current project tunnel manager
+pkill -f "infra/ngrok_tunnel.py" 2>/dev/null || true
 
-# Run the python-native ngrok tunnel manager in the background
-python infra/ngrok_tunnel.py > logs/ngrok.log 2>&1 &
+python infra/ngrok_tunnel.py \
+    > logs/ngrok.log 2>&1 &
 
-# Wait for tunnel initialization and retrieve the URL (handles first-time download delay)
-echo "[*] Waiting for ngrok tunnel to establish..."
+# --------------------------------------------------------------------
+# Wait for ngrok URL
+# --------------------------------------------------------------------
+echo "[*] Waiting for ngrok tunnel..."
+
 PUBLIC_URL=""
+
 for i in {1..20}; do
+
     if [ -f "logs/ngrok.log" ]; then
-        PUBLIC_URL=$(grep -o -E "https://[a-zA-Z0-9.-]+\.ngrok-free\.app" logs/ngrok.log | head -n 1 || true)
+
+        PUBLIC_URL=$(grep -o -E \
+            "https://[a-zA-Z0-9.-]+\.ngrok-free\.app" \
+            logs/ngrok.log | head -n 1 || true)
+
         if [ ! -z "$PUBLIC_URL" ]; then
             break
         fi
     fi
+
     sleep 1
 done
 
+# --------------------------------------------------------------------
+# Summary
+# --------------------------------------------------------------------
 echo "----------------------------------------------------"
+
 if [ ! -z "$PUBLIC_URL" ]; then
-    echo "[+] Public ngrok URL: $PUBLIC_URL"
+    echo "[+] Public URL: $PUBLIC_URL"
 else
-    echo "[+] ngrok tunnel launched in background. Check logs/ngrok.log for URL."
+    echo "[!] ngrok started but URL not detected yet."
 fi
-echo "[+] Mafqood API Key (X-Api-Key): mafqood-ai-secure-token-2026"
+
+echo "[+] Local URL: http://localhost:$RUNSERVER_PORT"
+echo "[+] API KEY: mafqood-ai-secure-token-2026"
+
 echo "----------------------------------------------------"
 
-# 8. Start Django App development server
-echo "[*] Starting Django application server..."
-echo "[+] Mafqood AI local endpoints will be available at: http://localhost:$RUNSERVER_PORT"
-echo "----------------------------------------------------"
+# --------------------------------------------------------------------
+# Start Django Server
+# --------------------------------------------------------------------
+echo "[*] Starting Django server..."
+
 python app/manage.py runserver 0.0.0.0:$RUNSERVER_PORT
-
