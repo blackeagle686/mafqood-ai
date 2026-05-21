@@ -123,22 +123,35 @@ echo "[*] Cleaning up lingering Celery workers..."
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
     taskkill //IM "celery.exe" //F 2>/dev/null || true
 else
-    pkill -f "celery -A celery_app" 2>/dev/null || true
+    pkill -f "celery" 2>/dev/null || true
+    pkill -f "python -m celery" 2>/dev/null || true
+fi
+
+if [ -z "$CELERY_CMD" ]; then
+    echo "[!] Celery is not available on this system. Trying to use python -m celery if installed..."
+    if python -c "import celery" &> /dev/null; then
+        CELERY_CMD="python -m celery"
+    else
+        echo "[ERROR] Celery is not installed. Please install Celery using pip or apt-get."
+        exit 1
+    fi
+else
+    echo "[+] Using Celery command: $CELERY_CMD"
 fi
 
 # 5. Start Celery worker in the background
 echo "[*] Starting Celery background worker..."
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
     # On Windows Celery requires the -P solo execution pool to process background tasks without spawning locks
-    celery -A celery_app -C app worker --loglevel=info -P solo > logs/celery_worker.log 2>&1 &
+    $CELERY_CMD -A app.celery_app worker --loglevel=info -P solo > logs/celery_worker.log 2>&1 &
 else
-    celery -A celery_app -C app worker --loglevel=info > logs/celery_worker.log 2>&1 &
+    $CELERY_CMD -A app.celery_app worker --loglevel=info > logs/celery_worker.log 2>&1 &
 fi
 echo "[+] Celery worker launched. Logs: logs/celery_worker.log"
 
 # 6. Start Celery Beat scheduler in the background
 echo "[*] Starting Celery Beat scheduler..."
-celery -A celery_app -C app beat --loglevel=info > logs/celery_beat.log 2>&1 &
+$CELERY_CMD -A app.celery_app beat --loglevel=info > logs/celery_beat.log 2>&1 &
 echo "[+] Celery Beat scheduler launched. Logs: logs/celery_beat.log"
 
 # 7. Start ngrok tunnel for public exposure
