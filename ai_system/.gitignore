@@ -225,3 +225,4 @@ logs/
 #  chroma db 
 chroma_db_test/
 chroma_db/
+chroma_db_test/*

@@ -7,6 +7,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+# Add the 'app' directory to sys.path to allow importing 'mafqood_project' directly
+APP_DIR = Path(__file__).resolve().parent
+if str(APP_DIR) not in sys.path:
+    sys.path.insert(0, str(APP_DIR))
+
 from celery import Celery
 
 # Set default Django settings module for 'celery' program.
