@@ -137,26 +137,31 @@ fi
 # Run the python-native ngrok tunnel manager in the background
 python infra/ngrok_tunnel.py > logs/ngrok.log 2>&1 &
 
-# Wait for tunnel initialization
-sleep 4
-
-# Extract and display the live public URL from logs
-if [ -f "logs/ngrok.log" ]; then
-    PUBLIC_URL=$(grep -o "http[s]://[^ ]*" logs/ngrok.log | head -n 1 || true)
-    if [ ! -z "$PUBLIC_URL" ]; then
-        echo "[+] Public ngrok URL: $PUBLIC_URL"
-    else
-        echo "[+] ngrok tunnel launched in background. Check logs/ngrok.log for details."
+# Wait for tunnel initialization and retrieve the URL (handles first-time download delay)
+echo "[*] Waiting for ngrok tunnel to establish..."
+PUBLIC_URL=""
+for i in {1..20}; do
+    if [ -f "logs/ngrok.log" ]; then
+        PUBLIC_URL=$(grep -o -E "https://[a-zA-Z0-9.-]+\.ngrok-free\.app" logs/ngrok.log | head -n 1 || true)
+        if [ ! -z "$PUBLIC_URL" ]; then
+            break
+        fi
     fi
+    sleep 1
+done
+
+echo "----------------------------------------------------"
+if [ ! -z "$PUBLIC_URL" ]; then
+    echo "[+] Public ngrok URL: $PUBLIC_URL"
 else
-    echo "[+] ngrok tunnel launched in background."
+    echo "[+] ngrok tunnel launched in background. Check logs/ngrok.log for URL."
 fi
-
-
+echo "[+] Mafqood API Key (X-Api-Key): mafqood-ai-secure-token-2026"
+echo "----------------------------------------------------"
 
 # 8. Start Django App development server
 echo "[*] Starting Django application server..."
-echo "[+] Mafqood AI endpoints will be available at: http://localhost:8000"
+echo "[+] Mafqood AI local endpoints will be available at: http://localhost:8000"
 echo "----------------------------------------------------"
 python app/manage.py runserver 0.0.0.0:8000
 
