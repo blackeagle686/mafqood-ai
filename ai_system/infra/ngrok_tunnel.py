@@ -11,7 +11,7 @@ def main():
         ngrok.set_auth_token(token)
         
         # Connect public HTTP tunnel to local port 8000
-        tunnel = ngrok.connect(8000)
+        tunnel = ngrok.connect(8001)
         
         # Print the live public URL (deploy.sh will parse this)
         print(f"[+] Public ngrok URL: {tunnel.public_url}", flush=True)
