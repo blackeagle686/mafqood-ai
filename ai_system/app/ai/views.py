@@ -267,12 +267,15 @@ class MatchPostView(APIView):
 
             matches = []
             for res in search_result.get("search_results", []):
+                similarity = res.get("similarity", 0.0)
+                if similarity < 60.0:
+                    continue
                 # Try to get postId from metadata, fallback to face ID if it looks like an ID
                 matched_id = res["metadata"].get("postId") or res["metadata"].get("post_id") or res["id"]
                 
                 matches.append({
                     "matchedPostId": matched_id,
-                    "confidenceScore": res["similarity"] / 100.0 # Convert 0-100 to 0-1
+                    "confidenceScore": round(similarity / 100.0, 2)
                 })
 
             response_data = {
@@ -378,18 +381,7 @@ class ManagePostView(APIView):
         postType = serializer.validated_data['postType']
         imageUrl = serializer.validated_data['imageUrl']
 
-        # 1. Update/Create Post in local SQLite
-        post, created = Post.objects.update_or_create(
-            post_id=postId,
-            defaults={
-                'user_id': userId,
-                'post_type': postType,
-                'image_url': imageUrl,
-                'is_resolved': False
-            }
-        )
-
-        # 2. Resolve image path (Download if remote URL)
+        # 1. Resolve image path (Download if remote URL)
         local_path = None
         if imageUrl.startswith(('http://', 'https://')):
             local_path = download_remote_image(imageUrl)
@@ -405,10 +397,58 @@ class ManagePostView(APIView):
                 "error": f"Failed to download or locate image: {imageUrl}"
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # 3. Index face embeddings in ChromaDB
         face_service = _get_face_service()
         status_str = "missing" if postType == 0 else "found"
-        
+
+        # 2. Pre-ingestion check for Lost posts (postType == 0)
+        pre_search_results = []
+        if postType == 0:
+            try:
+                search_res = face_service.search_face_by_image(
+                    local_path,
+                    n_results=10,
+                    cleanup=False
+                )
+                if search_res.get("status") == "success":
+                    pre_search_results = search_res.get("search_results", [])
+                    from django.utils import timezone
+                    from datetime import timedelta
+                    for res in pre_search_results:
+                        if res.get("similarity", 0.0) >= 60.0:
+                            match_meta = res.get("metadata", {})
+                            match_post_id = match_meta.get("postId")
+                            if match_post_id:
+                                try:
+                                    opposite_post = Post.objects.get(post_id=match_post_id)
+                                    if opposite_post.post_type == 1:  # Found post
+                                        duration = timezone.now() - opposite_post.created_at
+                                        if duration <= timedelta(days=30):
+                                            logger.warning(
+                                                f"Rejecting new Lost post {postId}: Matched Found post {match_post_id} "
+                                                f"created at {opposite_post.created_at} which is within 30 days."
+                                            )
+                                            cleanup_temp_file(local_path)
+                                            return Response({
+                                                "isSuccess": False,
+                                                "error": "A matching found post for this person was created within the last month. New lost post rejected."
+                                            }, status=status.HTTP_400_BAD_REQUEST)
+                                except Post.DoesNotExist:
+                                    pass
+            except Exception as e:
+                logger.error(f"Error in pre-ingestion check: {e}")
+
+        # 3. Update/Create Post in local SQLite
+        post, created = Post.objects.update_or_create(
+            post_id=postId,
+            defaults={
+                'user_id': userId,
+                'post_type': postType,
+                'image_url': imageUrl,
+                'is_resolved': False
+            }
+        )
+
+        # 4. Index face embeddings in ChromaDB
         try:
             index_res = face_service.index_image(
                 local_path,
@@ -424,22 +464,31 @@ class ManagePostView(APIView):
             cleanup_temp_file(local_path)
             return Response({"error": f"Failed to index face: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # 4. Search and match against opposite status
-        try:
-            # Search for best face matches
-            search_res = face_service.search_face_by_image(
-                local_path, 
-                n_results=10, 
-                cleanup=False
-            )
-        finally:
+        # 5. Search for matches (Reuse search results for Lost posts to avoid double inference)
+        search_results = []
+        if postType == 0:
+            search_results = pre_search_results
             cleanup_temp_file(local_path)
+        else:
+            try:
+                # Search for best face matches
+                search_res = face_service.search_face_by_image(
+                    local_path, 
+                    n_results=10, 
+                    cleanup=False
+                )
+                if search_res.get("status") == "success":
+                    search_results = search_res.get("search_results", [])
+            finally:
+                cleanup_temp_file(local_path)
 
-        # 5. Filter active matches & calculate confidence decimals
+        # 6. Filter active matches (Threshold >= 60.0) & calculate confidence decimals
         filtered_results = []
-        search_results = search_res.get("search_results", []) if search_res.get("status") == "success" else []
-        
         for res in search_results:
+            similarity = res.get("similarity", 0.0)
+            if similarity < 60.0:
+                continue
+
             match_meta = res.get("metadata", {})
             match_post_id = match_meta.get("postId")
             match_user_id = match_meta.get("userId")
@@ -458,7 +507,7 @@ class ManagePostView(APIView):
                     continue
 
             # similarity value is out of 100.0; mapping confidenceScore to range [0.0, 1.0]
-            confidence_score = round(res.get("similarity", 0.0) / 100.0, 2)
+            confidence_score = round(similarity / 100.0, 2)
 
             filtered_results.append({
                 "userId": match_user_id,
