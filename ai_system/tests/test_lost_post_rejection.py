@@ -189,3 +189,37 @@ class TestLostPostRejectionPolicy(TestCase):
         # Should be accepted successfully because similarity is < 60%
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Post.objects.filter(post_id=1001).exists())
+
+    @patch('app.ai.views._get_face_service')
+    @patch('app.ai.views.download_remote_image')
+    def test_post_creation_none_metadata_handled_safely(self, mock_download, mock_get_face):
+        mock_download.return_value = 'fake_image.jpg'
+        
+        # Mock face search to return metadata as None (which caused the AttributeError)
+        mock_face_service = MagicMock()
+        mock_face_service.search_face_by_image.return_value = {
+            "status": "success",
+            "search_results": [
+                {
+                    "similarity": 85.0,
+                    "metadata": None,
+                    "id": "some-face-id"
+                }
+            ]
+        }
+        mock_face_service.index_image.return_value = {"status": "success"}
+        mock_get_face.return_value = mock_face_service
+
+        payload = {
+            "userId": "user-lost-456",
+            "postId": 1001,
+            "postType": 0,
+            "imageUrl": "https://example.com/lost.jpg"
+        }
+
+        with patch('os.path.exists', return_value=True):
+            response = self.client.post(self.posts_url, payload, format='json')
+
+        # Should handle metadata=None safely and not throw AttributeError (returns 200 OK)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Post.objects.filter(post_id=1001).exists())

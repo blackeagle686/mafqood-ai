@@ -54,7 +54,8 @@ class WebhookNotifier:
         webhook_url = os.getenv("MAFQOOD_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/match-results")
         api_key = getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
         
-        logger.info(f"Dispatching match callback to Mafqood at {webhook_url}")
+        masked_key = f"{api_key[:4]}...{api_key[-4:]}" if api_key and len(api_key) > 8 else str(api_key)
+        logger.info(f"Dispatching match callback to Mafqood at {webhook_url} with API Key: '{masked_key}' (length: {len(api_key) if api_key else 0})")
         
         headers = {
             "X-Api-Key": api_key,

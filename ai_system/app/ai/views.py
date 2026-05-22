@@ -270,8 +270,9 @@ class MatchPostView(APIView):
                 similarity = res.get("similarity", 0.0)
                 if similarity < 60.0:
                     continue
+                match_meta = res.get("metadata") or {}
                 # Try to get postId from metadata, fallback to face ID if it looks like an ID
-                matched_id = res["metadata"].get("postId") or res["metadata"].get("post_id") or res["id"]
+                matched_id = match_meta.get("postId") or match_meta.get("post_id") or res["id"]
                 
                 matches.append({
                     "matchedPostId": matched_id,
@@ -415,7 +416,7 @@ class ManagePostView(APIView):
                     from datetime import timedelta
                     for res in pre_search_results:
                         if res.get("similarity", 0.0) >= 60.0:
-                            match_meta = res.get("metadata", {})
+                            match_meta = res.get("metadata") or {}
                             match_post_id = match_meta.get("postId")
                             if match_post_id:
                                 try:
@@ -489,7 +490,7 @@ class ManagePostView(APIView):
             if similarity < 60.0:
                 continue
 
-            match_meta = res.get("metadata", {})
+            match_meta = res.get("metadata") or {}
             match_post_id = match_meta.get("postId")
             match_user_id = match_meta.get("userId")
 
