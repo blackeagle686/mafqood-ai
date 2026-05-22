@@ -20,7 +20,17 @@ class WebhookNotifier:
         """
         Sends an alert when a high confidence face match is found.
         """
+        from django.conf import settings
+        
+        api_key = getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
+        
         logger.info(f"Triggering Webhook alert to .NET system at {DOTNET_SYSTEM_WEBHOOK_URL}")
+        
+        headers = {
+            "X-Api-Key": api_key,
+            "Content-Type": "application/json"
+        }
+        
         try:
             # We use a brief timeout so we don't block our celery tasks for too long
             with httpx.Client(timeout=5.0) as client:
@@ -29,7 +39,8 @@ class WebhookNotifier:
                     json={
                         "event_type": "high_confidence_match",
                         "payload": match_data
-                    }
+                    },
+                    headers=headers
                 )
                 
             if response.status_code in (200, 201, 202):

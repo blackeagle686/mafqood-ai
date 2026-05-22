@@ -28,13 +28,27 @@ def run_test():
         ]
     }
 
-    print(f"Payload to send: {payload}")
-    success = WebhookNotifier.send_match_results_to_mafqood(payload)
+    print(f"Testing send_match_results_to_mafqood...")
+    success1 = WebhookNotifier.send_match_results_to_mafqood(payload)
     
-    if success:
-        print("✅ Webhook delivered successfully and received a successful response from the .NET backend!")
+    print("\nTesting send_high_confidence_match_alert...")
+    match_data = {
+        "missing_post_id": 1001,
+        "found_post_id": 1002,
+        "score": 0.95,
+        "metadata": {"status": "missing"}
+    }
+    success2 = WebhookNotifier.send_high_confidence_match_alert(match_data)
+    
+    if success1:
+        print("✅ Match results webhook delivered successfully!")
     else:
-        print("❌ Webhook delivery failed. Check output logs above for response code/details.")
+        print("❌ Match results webhook delivery failed (check status/error above).")
+
+    if success2:
+        print("✅ High confidence match alert webhook delivered successfully!")
+    else:
+        print("❌ High confidence match alert webhook delivery failed (check status/error above).")
 
 if __name__ == "__main__":
     run_test()
