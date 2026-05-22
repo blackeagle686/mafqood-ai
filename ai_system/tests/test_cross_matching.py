@@ -60,7 +60,7 @@ class TestCrossMatching:
         # Verify SAME-status match (Missing 100 <-> Missing 101) was NOT saved as an alert match
         assert not FaceMatch.objects.filter(missing_post_id=100, found_post_id=101).exists()
         # Verify webhook called for the cross-match
-        assert face_service.mock_webhook.send_high_confidence_match_alert.called
+        assert face_service.mock_webhook.send_match_results_to_mafqood.called
 
     def test_match_on_insert_deduplication(self, face_service):
         # Pre-create match
@@ -84,13 +84,13 @@ class TestCrossMatching:
         metadata = {"postId": 100, "status": "missing"}
         
         # Reset mock before call
-        face_service.mock_webhook.send_high_confidence_match_alert.reset_mock()
+        face_service.mock_webhook.send_match_results_to_mafqood.reset_mock()
         
         # Call again
         face_service.match_on_insert(embedding, "missing", metadata)
         
         # Webhook should NOT be called again (deduplication)
-        assert not face_service.mock_webhook.send_high_confidence_match_alert.called
+        assert not face_service.mock_webhook.send_match_results_to_mafqood.called
 
 if __name__ == "__main__":
     pytest.main([__file__])

@@ -60,7 +60,9 @@ class TestDotNetIntegrationFlow(TestCase):
         # Configure API key
         self.client.credentials(HTTP_X_API_KEY=self.api_key)
 
-        # First, register the opposite post in SQLite (Found post)
+        # First, register the opposite post in SQLite (Found post, created > 30 days ago)
+        from django.utils import timezone
+        from datetime import timedelta
         opposite_post = Post.objects.create(
             post_id=1002,
             user_id='user-found-123',
@@ -68,6 +70,7 @@ class TestDotNetIntegrationFlow(TestCase):
             image_url='https://example.com/found.jpg',
             is_resolved=False
         )
+        Post.objects.filter(post_id=1002).update(created_at=timezone.now() - timedelta(days=35))
 
         # Create the Lost post (postType = 0)
         payload = {

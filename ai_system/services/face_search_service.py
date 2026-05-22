@@ -148,14 +148,32 @@ class FaceSearchService:
                         location_score=loc_sim
                     )
                     
-                    # Trigger Webhook
-                    match_data = {
-                        "missing_post_id": p1,
-                        "found_post_id": p2,
-                        "score": combined_score,
-                        "metadata": match_meta
-                    }
-                    WebhookNotifier.send_high_confidence_match_alert(match_data)
+                    # Trigger Webhook with .NET-compatible payload
+                    current_user_id = metadata.get("userId", "")
+                    match_user_id = match_meta.get("userId", "")
+                    
+                    # The Lost post owner receives the notification
+                    if status == "missing":
+                        webhook_payload = {
+                            "userId": current_user_id,
+                            "postId": current_post_id,
+                            "matchedResults": [{
+                                "userId": match_user_id,
+                                "postId": match_post_id,
+                                "confidenceScore": round(combined_score, 2)
+                            }]
+                        }
+                    else:
+                        webhook_payload = {
+                            "userId": match_user_id,
+                            "postId": match_post_id,
+                            "matchedResults": [{
+                                "userId": current_user_id,
+                                "postId": current_post_id,
+                                "confidenceScore": round(combined_score, 2)
+                            }]
+                        }
+                    WebhookNotifier.send_match_results_to_mafqood(webhook_payload)
                 except Exception:
                     pass
             
@@ -207,8 +225,8 @@ class FaceSearchService:
             enhanced_results.append(match_data)
             
             # --- START WEBHOOK LOGIC ---
-            if similarity >= 95.0:
-                 WebhookNotifier.send_high_confidence_match_alert(match_data)
+            # Note: High-confidence webhook dispatch is now handled by views.py
+            # via send_webhook_task with the correct .NET payload format.
             # --- END WEBHOOK LOGIC ---
             
         enhanced_results.sort(key=lambda x: x["similarity"], reverse=True)
