@@ -22,6 +22,7 @@ load_dotenv(dotenv_path=BASE_DIR.parent / '.env')
 
 # API Key Authentication
 MAFQOOD_API_KEY = os.getenv('MAFQOOD_API_KEY', 'mafqood-shared-secret-key-2026')
+MAFQOOD_WEBHOOK_API_KEY = os.getenv('MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
 
 
 
