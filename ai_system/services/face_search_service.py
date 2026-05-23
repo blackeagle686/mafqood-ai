@@ -30,6 +30,32 @@ class FaceSearchService:
         
         # Combined weighted score
         return (0.7 * face_sim) + (0.2 * time_score) + (0.1 * location_sim)
+        
+    @staticmethod
+    def map_distance_to_similarity(dist: float) -> float:
+        """
+        Maps a cosine distance (from ChromaDB) to a face similarity score [0.0, 1.0].
+        
+        For Cosine distance in ChromaDB:
+        - dist = 0.0 (identical vectors) -> 1.0
+        - dist <= 0.2 -> very strong match (same photo/conditions) -> [0.98, 1.0]
+        - dist = 0.35 -> strong match (same person, different photo/age) -> ~0.92
+        - dist = 0.40 -> match (same person, different photo) -> ~0.90
+        - dist = 0.60 -> threshold of identity match -> ~0.65
+        - dist >= 0.80 -> not a match -> 0.0
+        """
+        if dist < 0.0:
+            return 1.0
+        if dist <= 0.2:
+            return 1.0 - (dist / 0.2) * 0.02
+        elif dist <= 0.4:
+            return 0.98 - ((dist - 0.2) / 0.2) * 0.08
+        elif dist <= 0.6:
+            return 0.90 - ((dist - 0.4) / 0.2) * 0.25
+        elif dist <= 0.8:
+            return 0.65 - ((dist - 0.6) / 0.2) * 0.65
+        else:
+            return 0.0
     
     def __init__(self):
         """Initialize the face search service with CV pipeline and vector DB."""
@@ -121,9 +147,9 @@ class FaceSearchService:
             if not current_post_id or not match_post_id or current_post_id == match_post_id:
                 continue
                 
-            # Improved Similarity Mapping: 0.6 distance -> ~70% similarity
-            # Using a scale where 0.8 distance is the "limit" of identity
-            face_sim = max(0.0, 1.0 - (distances[i] / 0.8))
+            # Improved Similarity Mapping using piecewise linear interpolation
+            # where 0.40 distance is mapped to 90% similarity
+            face_sim = self.map_distance_to_similarity(distances[i])
             
             loc_sim = 1.0 if current_loc and current_loc == match_meta.get("location") else 0.0
             
@@ -195,9 +221,9 @@ class FaceSearchService:
             dist = distances[i]
             meta = metadatas[i]
             
-            # Improved Similarity Mapping: 0.6 distance -> ~70% similarity
-            # Using a scale where 0.8 distance is the "limit" of identity
-            similarity = round(100 * max(0.0, 1.0 - (dist / 0.8)), 1)
+            # Improved Similarity Mapping using piecewise linear interpolation
+            # where 0.40 distance is mapped to 90% similarity
+            similarity = round(100 * self.map_distance_to_similarity(dist), 1)
             
             # --- START WEIGHTING LOGIC ---
             if query_metadata:

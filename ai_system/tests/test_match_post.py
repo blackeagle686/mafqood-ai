@@ -119,8 +119,8 @@ class TestMatchPostEndpoint(TestCase):
         response = self.client.post(self.url, payload, format='json')
         
         assert response.status_code == 200
-        assert mock_download.called_once_with("https://example.com/photo.jpg")
-        assert mock_cleanup.called_once_with("/tmp/remote_image.jpg")
+        mock_download.assert_called_once_with("https://example.com/photo.jpg")
+        mock_cleanup.assert_called_once_with("/tmp/remote_image.jpg")
         assert response.json()["isSuccess"] is True
 
 if __name__ == "__main__":

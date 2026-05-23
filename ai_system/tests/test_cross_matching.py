@@ -37,6 +37,24 @@ class TestCrossMatching:
         score = face_service.compute_match_score(0.5, 0.0, 0.0)
         assert score == pytest.approx(0.55)
 
+    def test_map_distance_to_similarity(self, face_service):
+        # Exact/perfect matches
+        assert face_service.map_distance_to_similarity(0.0) == pytest.approx(1.0)
+        # Very close match (dist=0.1) -> 99%
+        assert face_service.map_distance_to_similarity(0.1) == pytest.approx(0.99)
+        # Threshold of very close match (dist=0.2) -> 98%
+        assert face_service.map_distance_to_similarity(0.2) == pytest.approx(0.98)
+        # Strong match (dist=0.3) -> 94%
+        assert face_service.map_distance_to_similarity(0.3) == pytest.approx(0.94)
+        # Old/new image of same person (dist=0.4) -> 90%
+        assert face_service.map_distance_to_similarity(0.4) == pytest.approx(0.90)
+        # Threshold of identity match (dist=0.6) -> 65%
+        assert face_service.map_distance_to_similarity(0.6) == pytest.approx(0.65)
+        # Far match/boundary (dist=0.8) -> 0%
+        assert face_service.map_distance_to_similarity(0.8) == pytest.approx(0.0)
+        # Completely non-matching (dist=0.9) -> 0%
+        assert face_service.map_distance_to_similarity(0.9) == pytest.approx(0.0)
+
     def test_match_on_insert_new_match(self, face_service):
         # Mock VectorDB search (returns all, including same-status)
         face_service.vdb.search.return_value = {
