@@ -92,15 +92,15 @@ activate_venv() {
 # --------------------------------------------------------------------
 check_dependencies() {
     echo -e "${BLUE}[*] Checking Python dependencies...${NC}"
-    if ! $PYTHON_CMD -c "import django" &>/dev/null || ! $PYTHON_CMD -c "import gunicorn" &>/dev/null; then
-        echo -e "${YELLOW}[!] Required dependencies or Gunicorn missing. Installing...${NC}"
+    if ! $PYTHON_CMD -c "import django" &>/dev/null || ! $PYTHON_CMD -c "import gunicorn" &>/dev/null || ! $PYTHON_CMD -c "import whitenoise" &>/dev/null; then
+        echo -e "${YELLOW}[!] Required dependencies or Gunicorn/Whitenoise missing. Installing...${NC}"
         $PYTHON_CMD -m pip install --upgrade pip
         if [ -f "requirements.txt" ]; then
             echo -e "${BLUE}[*] Installing dependencies from requirements.txt...${NC}"
             $PYTHON_CMD -m pip install -r requirements.txt
         fi
-        echo -e "${BLUE}[*] Installing production dependencies (Gunicorn, Celery, Redis, pyngrok)...${NC}"
-        $PYTHON_CMD -m pip install django djangorestframework django-environ celery redis httpx pyngrok gunicorn
+        echo -e "${BLUE}[*] Installing production dependencies (Gunicorn, Celery, Redis, pyngrok, Whitenoise)...${NC}"
+        $PYTHON_CMD -m pip install django djangorestframework django-environ celery redis httpx pyngrok gunicorn whitenoise
         echo -e "${GREEN}[+] Dependencies installed successfully.${NC}"
     else
         echo -e "${GREEN}[+] Dependencies already satisfied.${NC}"
