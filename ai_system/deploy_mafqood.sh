@@ -118,6 +118,15 @@ run_migrations() {
 }
 
 # --------------------------------------------------------------------
+# Collect Static Files
+# --------------------------------------------------------------------
+collect_static() {
+    echo -e "${BLUE}[*] Collecting static files...${NC}"
+    $PYTHON_CMD app/manage.py collectstatic --noinput
+    echo -e "${GREEN}[+] Static files collected successfully.${NC}"
+}
+
+# --------------------------------------------------------------------
 # Redis Connection & Daemonization Check
 # --------------------------------------------------------------------
 check_start_redis() {
@@ -212,6 +221,7 @@ start_services() {
     activate_venv
     check_dependencies
     run_migrations
+    collect_static
     check_start_redis
 
     # Detect Celery command
