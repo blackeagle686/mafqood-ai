@@ -232,3 +232,4 @@ chroma_db_test/*
 *.data
 *.onnx.data
 
+best_unet_model/
