@@ -91,3 +91,41 @@ class WebhookNotifier:
             logger.error(f"Failed to communicate with Mafqood webhook endpoint: {e}")
             return False
 
+    @staticmethod
+    def send_dna_match_results_to_mafqood(payload: Dict[str, Any]) -> bool:
+        """
+        Sends DNA match results to the .NET Mafqood backend.
+        Uses X-Api-Key authentication header.
+        """
+        from django.conf import settings
+        
+        webhook_url = os.getenv("MAFQOOD_DNA_WEBHOOK_URL", os.getenv("MAFQOOD_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/dna-match-results"))
+        api_key = getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
+        
+        masked_key = f"{api_key[:4]}...{api_key[-4:]}" if api_key and len(api_key) > 8 else str(api_key)
+        logger.info(f"Dispatching DNA match callback to Mafqood at {webhook_url} with API Key: '{masked_key}'")
+        
+        headers = {
+            "X-Api-Key": api_key,
+            "Content-Type": "application/json"
+        }
+        
+        try:
+            with httpx.Client(timeout=10.0) as client:
+                response = client.post(
+                    webhook_url,
+                    json=payload,
+                    headers=headers
+                )
+                
+            if response.status_code in (200, 201, 202):
+                logger.info(f"DNA Webhook delivered successfully: {response.status_code}")
+                return True
+            else:
+                logger.error(f"DNA Webhook delivery failed with status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            logger.error(f"Failed to communicate with Mafqood DNA webhook endpoint: {e}")
+            return False
+
+

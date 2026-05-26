@@ -226,3 +226,9 @@ logs/
 chroma_db_test/
 chroma_db/
 chroma_db_test/*
+
+# Model Weights (Large Files)
+*.pth
+*.data
+*.onnx.data
+

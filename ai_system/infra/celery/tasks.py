@@ -142,3 +142,163 @@ def send_webhook_task(self, payload: Dict[str, Any]):
     
     return {"status": "success"}
 
+
+@shared_task(bind=True)
+def background_dna_match_task(self, post_id: int):
+    """
+    Background task to compare a post's DNA profile against all active posts of the opposite status.
+    Saves high-confidence matches and dispatches webhook notifications.
+    """
+    from app.ai.models import Post, DNAProfile, DNAMatch
+    from services.dna_search_service import DNASearchService
+    
+    logger.info(f"Starting background DNA match reconciliation for postId: {post_id}")
+    
+    try:
+        # 1. Fetch current DNA profile and related post
+        current_profile = DNAProfile.objects.get(post__post_id=post_id)
+        current_post = current_profile.post
+        
+        # Don't match resolved posts
+        if current_post.is_resolved:
+            logger.info(f"Post {post_id} is already resolved. Skipping DNA matching.")
+            return {"status": "skipped", "message": "Post is resolved"}
+
+        # 2. Query opposite-status unresolved posts with DNA profiles
+        opposite_type = 1 if current_post.post_type == 0 else 0
+        opposite_profiles = DNAProfile.objects.filter(
+            post__post_type=opposite_type,
+            post__is_resolved=False
+        )
+        
+        if not opposite_profiles.exists():
+            logger.info(f"No opposite status DNA profiles found to compare with postId {post_id}.")
+            return {"status": "completed", "matches_found": 0}
+            
+        targets = []
+        for profile in opposite_profiles:
+            targets.append({
+                "id": profile.post.post_id,
+                "str_data": profile.str_data,
+                "metadata": {
+                    "userId": profile.post.user_id,
+                    "postType": profile.post.post_type,
+                    "gender": profile.gender
+                }
+            })
+            
+        # 3. Perform matching using DNASearchService
+        dna_service = DNASearchService()
+        
+        # Run direct matches
+        direct_results = dna_service.search_profiles(
+            query_profile=current_profile.str_data,
+            target_profiles=targets,
+            search_type="direct",
+            min_overlap=3
+        )
+        
+        # Run parent-child matches
+        kinship_results = dna_service.search_profiles(
+            query_profile=current_profile.str_data,
+            target_profiles=targets,
+            search_type="parent_child",
+            min_overlap=3
+        )
+        
+        matches_recorded = 0
+        
+        # Process direct matches
+        for res in direct_results:
+            if res["score"] == 1.0:
+                missing_id = post_id if current_post.post_type == 0 else res["target_id"]
+                found_id = res["target_id"] if current_post.post_type == 0 else post_id
+                
+                dna_match, created = DNAMatch.objects.get_or_create(
+                    missing_post_id=missing_id,
+                    found_post_id=found_id,
+                    defaults={
+                        "match_type": "direct",
+                        "overlap_loci_count": res["overlap_count"],
+                        "matching_loci_count": res["details"]["overlap_count"] - len(res["details"]["mismatches"]),
+                        "confidence_score": 1.0
+                    }
+                )
+                if created:
+                    matches_recorded += 1
+                    # Dispatch webhook
+                    payload = {
+                        "userId": current_post.user_id if current_post.post_type == 0 else res["metadata"]["userId"],
+                        "postId": missing_id,
+                        "matchedResults": [
+                            {
+                                "userId": res["metadata"]["userId"] if current_post.post_type == 0 else current_post.user_id,
+                                "postId": found_id,
+                                "confidenceScore": 1.0,
+                                "relationshipType": "direct"
+                            }
+                        ]
+                    }
+                    send_dna_webhook_task.delay(payload)
+                    
+        # Process kinship parent-child matches
+        for res in kinship_results:
+            if res["score"] == 1.0:
+                missing_id = post_id if current_post.post_type == 0 else res["target_id"]
+                found_id = res["target_id"] if current_post.post_type == 0 else post_id
+                
+                dna_match, created = DNAMatch.objects.get_or_create(
+                    missing_post_id=missing_id,
+                    found_post_id=found_id,
+                    defaults={
+                        "match_type": "kinship_parent_child",
+                        "overlap_loci_count": res["overlap_count"],
+                        "matching_loci_count": len(res["details"]["compatible_loci"]),
+                        "confidence_score": 1.0
+                    }
+                )
+                if created:
+                    matches_recorded += 1
+                    # Dispatch webhook
+                    payload = {
+                        "userId": current_post.user_id if current_post.post_type == 0 else res["metadata"]["userId"],
+                        "postId": missing_id,
+                        "matchedResults": [
+                            {
+                                "userId": res["metadata"]["userId"] if current_post.post_type == 0 else current_post.user_id,
+                                "postId": found_id,
+                                "confidenceScore": 1.0,
+                                "relationshipType": "kinship_parent_child"
+                            }
+                        ]
+                    }
+                    send_dna_webhook_task.delay(payload)
+
+        return {"status": "completed", "matches_found": matches_recorded}
+
+    except DNAProfile.DoesNotExist:
+        logger.error(f"DNA Profile for postId {post_id} not found.")
+        return {"status": "failed", "error": "Profile not found"}
+    except Exception as e:
+        logger.error(f"Error in background_dna_match_task: {e}")
+        return {"status": "failed", "error": str(e)}
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=10)
+def send_dna_webhook_task(self, payload: Dict[str, Any]):
+    """
+    Background task to deliver a DNA match results callback payload to the Mafqood system.
+    Supports retries on failure.
+    """
+    from infra.external.webhook_notifier import WebhookNotifier
+    logger.info(f"Asynchronously triggering DNA webhook notification payload: {payload}")
+    
+    success = WebhookNotifier.send_dna_match_results_to_mafqood(payload)
+    if not success:
+        countdown = 2 ** self.request.retries * 10
+        logger.warning(f"DNA Webhook delivery failed, scheduling retry in {countdown} seconds...")
+        self.retry(countdown=countdown)
+    
+    return {"status": "success"}
+
+

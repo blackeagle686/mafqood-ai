@@ -98,3 +98,54 @@ class MarkResolvedIntegrationSerializer(serializers.Serializer):
         help_text="Unique post identifier in the Mafqood database."
     )
 
+
+class DNAProfileIntegrationSerializer(serializers.Serializer):
+    """
+    Serializer for creating or updating DNA profiles from the backend.
+    """
+    userId = serializers.CharField(
+        required=True,
+        help_text="The ID of the user who created the post."
+    )
+    postId = serializers.IntegerField(
+        required=True,
+        help_text="Unique post identifier in the Mafqood database."
+    )
+    postType = serializers.IntegerField(
+        required=False,
+        default=0,
+        help_text="0 for Lost, 1 for Found."
+    )
+    strData = serializers.JSONField(
+        required=True,
+        help_text="Dictionary of STR loci mapped to list of alleles."
+    )
+    gender = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        max_length=10,
+        help_text="XX, XY, etc."
+    )
+
+
+class DNASearchSerializer(serializers.Serializer):
+    """
+    Serializer for DNA search queries.
+    """
+    strData = serializers.JSONField(
+        required=True,
+        help_text="Dictionary of STR loci mapped to list of alleles."
+    )
+    searchType = serializers.ChoiceField(
+        choices=["direct", "parent_child", "sibling"],
+        default="direct",
+        help_text="The relationship type to match against."
+    )
+    minOverlap = serializers.IntegerField(
+        required=False,
+        default=5,
+        help_text="Minimum overlapping STR loci required for matching."
+    )
+
+

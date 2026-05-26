@@ -12,20 +12,23 @@ from rest_framework import status
 from django.conf import settings
 import os
 from services.face_search_service import FaceSearchService
+from services.dna_search_service import DNASearchService
 from .serializers import (
     ModerateTextSerializer, 
     ExtractEntitiesSerializer, 
     MatchPostRequestSerializer,
     PostIntegrationSerializer,
-    MarkResolvedIntegrationSerializer
+    MarkResolvedIntegrationSerializer,
+    DNAProfileIntegrationSerializer,
+    DNASearchSerializer
 )
-from .models import Post
+from .models import Post, DNAProfile, DNAMatch
 from .permissions import MafqoodAPIKeyAuthentication
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from infra.external.llm_client import LLMService
 from utils.file_utils import download_remote_image, cleanup_temp_file
-from infra.celery.tasks import background_cross_match_task
+from infra.celery.tasks import background_cross_match_task, background_dna_match_task
 from infra.repositories.vector_db_repo import VectorDB
 
 logger = logging.getLogger(__name__)
@@ -34,6 +37,7 @@ logger = logging.getLogger(__name__)
 # Shared singletons
 _llm_service = None
 _face_service = None
+_dna_service = None
 
 
 def _get_llm_service() -> LLMService:
@@ -48,6 +52,13 @@ def _get_face_service() -> FaceSearchService:
     if _face_service is None:
         _face_service = FaceSearchService()
     return _face_service
+
+
+def _get_dna_service() -> DNASearchService:
+    global _dna_service
+    if _dna_service is None:
+        _dna_service = DNASearchService()
+    return _dna_service
 
 
 class ModerateTextView(APIView):
@@ -623,4 +634,130 @@ class MarkPostResolvedView(APIView):
             return Response({"isSuccess": True, "message": f"Post {postId} marked as resolved, vector index cleaned."}, status=status.HTTP_200_OK)
         except Post.DoesNotExist:
             return Response({"error": f"Post {postId} not found in local database."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ManageDNAProfileView(APIView):
+    """
+    POST /api/ai/dna/posts
+    Creates or updates the DNA STR profile associated with a post,
+    then triggers background matching.
+
+    DELETE /api/ai/dna/posts
+    Deletes the DNA STR profile associated with a post.
+    """
+    authentication_classes = [MafqoodAPIKeyAuthentication]
+    permission_classes = []
+
+    def post(self, request):
+        logger.info(f"Incoming POST to /api/ai/dna/posts. Headers: {dict(request.headers)}")
+        serializer = DNAProfileIntegrationSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.error(f"Validation failed for POST /api/ai/dna/posts. Errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        postId = serializer.validated_data['postId']
+        userId = serializer.validated_data['userId']
+        postType = serializer.validated_data.get('postType', 0)
+        str_data = serializer.validated_data['strData']
+        gender = serializer.validated_data.get('gender')
+
+        # Validate STR profile structure
+        dna_service = _get_dna_service()
+        is_valid, validation_errors = dna_service.validate_profile(str_data)
+        if not is_valid:
+            logger.error(f"Invalid STR data structure for postId {postId}. Errors: {validation_errors}")
+            return Response({"error": "Invalid STR data structure.", "details": validation_errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get or create local Post object to link the DNAProfile to
+        post, post_created = Post.objects.get_or_create(
+            post_id=postId,
+            defaults={
+                'user_id': userId,
+                'post_type': postType,
+                'image_url': '',
+                'is_resolved': False
+            }
+        )
+        if not post_created and (post.user_id != userId or post.post_type != postType):
+            post.user_id = userId
+            post.post_type = postType
+            post.save()
+
+        dna_profile, created = DNAProfile.objects.update_or_create(
+            post=post,
+            defaults={
+                'str_data': str_data,
+                'gender': gender
+            }
+        )
+
+        logger.info(f"DNA profile {'created' if created else 'updated'} for post {postId}. Triggering background matching task.")
+        
+        # Trigger Celery background matching task
+        background_dna_match_task.delay(postId)
+
+        return Response({
+            "isSuccess": True,
+            "message": f"DNA profile for post {postId} indexed successfully. Match process started in background."
+        }, status=status.HTTP_202_ACCEPTED)
+
+    def delete(self, request):
+        logger.info(f"Incoming DELETE to /api/ai/dna/posts. Headers: {dict(request.headers)}. Params: {request.query_params}")
+        postId = request.query_params.get('postId') or request.data.get('postId')
+        if not postId:
+            return Response({"error": "postId parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            profile = DNAProfile.objects.get(post__post_id=postId)
+            profile.delete()
+            return Response({"isSuccess": True, "message": f"DNA Profile for post {postId} deleted successfully."}, status=status.HTTP_200_OK)
+        except DNAProfile.DoesNotExist:
+            return Response({"error": f"DNA Profile for post {postId} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class DNASearchView(APIView):
+    """
+    POST /api/ai/dna/search/
+    Submits a query DNA profile to find matching candidates in the database.
+    """
+    authentication_classes = [MafqoodAPIKeyAuthentication]
+    permission_classes = []
+
+    def post(self, request):
+        logger.info(f"Incoming POST to /api/ai/dna/search/. Headers: {dict(request.headers)}")
+        serializer = DNASearchSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        query_str_data = serializer.validated_data['strData']
+        search_type = serializer.validated_data['searchType']
+        min_overlap = serializer.validated_data.get('minOverlap', 5)
+
+        # Retrieve all unresolved DNA profiles from the database
+        db_profiles = DNAProfile.objects.filter(post__is_resolved=False)
+        targets = []
+        for profile in db_profiles:
+            targets.append({
+                "id": profile.post.post_id,
+                "str_data": profile.str_data,
+                "metadata": {
+                    "userId": profile.post.user_id,
+                    "postType": profile.post.post_type,
+                    "gender": profile.gender
+                }
+            })
+
+        dna_service = _get_dna_service()
+        results = dna_service.search_profiles(
+            query_profile=query_str_data,
+            target_profiles=targets,
+            search_type=search_type,
+            min_overlap=min_overlap
+        )
+
+        return Response({
+            "isSuccess": True,
+            "results": results
+        }, status=status.HTTP_200_OK)
+
 

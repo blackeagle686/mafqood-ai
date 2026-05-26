@@ -43,3 +43,48 @@ class Post(models.Model):
         status_str = "Resolved" if self.is_resolved else "Active"
         return f"Post {self.post_id} ({post_type_str}) by User {self.user_id} - {status_str}"
 
+
+class DNAProfile(models.Model):
+    """
+    Stores an STR DNA profile associated with a Post.
+    """
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='dna_profile')
+    str_data = models.JSONField(help_text="STR loci keys mapped to list of alleles.")
+    gender = models.CharField(max_length=10, blank=True, null=True, help_text="XX, XY, etc.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "DNA Profile"
+        verbose_name_plural = "DNA Profiles"
+
+    def __str__(self):
+        return f"DNA Profile for Post {self.post.post_id}"
+
+
+class DNAMatch(models.Model):
+    """
+    Records high-confidence DNA matches (Direct or Kinship).
+    """
+    MATCH_TYPES = [
+        ('direct', 'Direct (Identical Person)'),
+        ('kinship_parent_child', 'Parent-Child Relation'),
+        ('kinship_sibling', 'Sibling Relation'),
+    ]
+    
+    missing_post_id = models.IntegerField(db_index=True)
+    found_post_id = models.IntegerField(db_index=True)
+    match_type = models.CharField(max_length=30, choices=MATCH_TYPES)
+    overlap_loci_count = models.IntegerField()
+    matching_loci_count = models.IntegerField()
+    confidence_score = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('missing_post_id', 'found_post_id')
+        verbose_name = "DNA Match"
+        verbose_name_plural = "DNA Matches"
+
+    def __str__(self):
+        return f"DNA Match: Missing {self.missing_post_id} <-> Found {self.found_post_id} (Type: {self.match_type}, Score: {self.confidence_score:.2f})"
+
+
