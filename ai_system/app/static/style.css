@@ -594,3 +594,197 @@ textarea:focus {
     color: var(--text-muted);
     font-size: 0.9rem;
 }
+
+/* --- LANDING PAGE OVERHAUL --- */
+
+.hero-section {
+    position: relative;
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding-top: 4rem; /* Offset for nav */
+}
+
+/* The interactive network canvas */
+#network-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.8;
+}
+
+/* Background image wrappers with blend modes */
+.bg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: -2;
+    pointer-events: none;
+}
+
+.bg-dna {
+    background-image: url('/static/images/dna_bg.png');
+    opacity: 0.15;
+    mix-blend-mode: screen;
+}
+
+.bg-face {
+    background-image: url('/static/images/face_mesh.png');
+    opacity: 0.1;
+    mix-blend-mode: color-dodge;
+    background-position: right center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+/* Overlay gradient to ensure text readability */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(10, 15, 25, 0.4) 0%, rgba(5, 10, 15, 0.95) 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 1000px;
+    padding: 2rem;
+    animation: fadeInUp 1s ease-out;
+}
+
+.hero-title {
+    font-size: 5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: -2px;
+    text-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
+}
+
+.hero-subtitle {
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-bottom: 4rem;
+}
+
+.stat-item {
+    background: hsla(220, 25%, 10%, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem 2.5rem;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.stat-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 2.5rem;
+    color: var(--primary);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 15px var(--primary-glow);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.floating-element {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.glitch-text {
+    position: relative;
+}
+.glitch-text::before,
+.glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+}
+.glitch-text::before {
+    left: 2px;
+    text-shadow: -2px 0 var(--accent);
+    animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+    left: -2px;
+    text-shadow: -2px 0 var(--primary);
+    animation: glitch-anim 3s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+    0% { clip-path: inset(20% 0 80% 0); }
+    20% { clip-path: inset(60% 0 10% 0); }
+    40% { clip-path: inset(40% 0 50% 0); }
+    60% { clip-path: inset(80% 0 5% 0); }
+    80% { clip-path: inset(10% 0 70% 0); }
+    100% { clip-path: inset(30% 0 20% 0); }
+}
