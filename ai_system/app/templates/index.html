@@ -34,41 +34,47 @@
             <div class="hero-overlay"></div>
 
             <div class="hero-content">
-                <div class="tech-font pulse" style="color: var(--primary); margin-bottom: 1.5rem; font-size: 1.2rem; letter-spacing: 4px;">
-                    <i class="fa-solid fa-satellite-dish"></i> [ SYSTEM ONLINE // BIOMETRIC ACTIVE ]
+                <div class="hero-overline pulse">
+                    <i class="fa-solid fa-microchip"></i> AI-POWERED HUMANITARIAN PLATFORM
                 </div>
                 
                 <h1 class="hero-title glitch-text" data-text="MAFQOOD-AI">MAFQOOD-AI</h1>
-                <h2 class="hero-subtitle">Modern Futures &amp; The Great Work of Humanitarian AI</h2>
+                <h2 class="hero-subtitle">
+                    Advanced Biometric Analysis &amp; Neural Age Progression
+                </h2>
                 
-                <p style="color: var(--text-muted); max-width: 800px; margin: 0 auto 3rem; font-size: 1.2rem; font-weight: 300;">
-                    نوظف أحدث تقنيات التعرف البصري والذكاء الاصطناعي للمساهمة في لم شمل العائلات والعثور على المفقودين
-                    بسرعة ودقة فائقة.
+                <p style="color: var(--text-muted); margin-bottom: 3rem; font-size: 1.1rem; font-weight: 300;">
+                    نوظف أحدث تقنيات التعرف البصري والذكاء الاصطناعي (مطابقة الحمض النووي، تحليل الوجوه، وتوقع العمر) 
+                    للمساهمة في لم شمل العائلات بدقة لا مثيل لها.
                 </p>
 
                 <div class="hero-stats">
                     <div class="stat-item floating-element" style="animation-delay: 0s;">
                         <div class="stat-value">99.8%</div>
-                        <div class="stat-label">دقة المطابقة</div>
+                        <div class="stat-label">Face Match</div>
                     </div>
                     <div class="stat-item floating-element" style="animation-delay: 1s;">
-                        <div class="stat-value">0.5s</div>
-                        <div class="stat-label">سرعة التحليل</div>
+                        <div class="stat-value">GAN</div>
+                        <div class="stat-label">Age Progression</div>
                     </div>
                     <div class="stat-item floating-element" style="animation-delay: 2s;">
-                        <div class="stat-value">256pt</div>
-                        <div class="stat-label">نقاط الوجه</div>
+                        <div class="stat-value">DNA</div>
+                        <div class="stat-label">Neural Sync</div>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
-                    <a href="{% url 'search_page' %}" class="btn-primary" style="font-size: 1.2rem; padding: 1.5rem 3rem;">
-                        <i class="fa-solid fa-crosshairs"></i> بدء المسح الضوئي الذكي
+                <div style="display: flex; gap: 1.5rem; justify-content: flex-start; flex-wrap: wrap;">
+                    <a href="{% url 'search_page' %}" class="btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem; border-radius: 50px;">
+                        <i class="fa-solid fa-crosshairs"></i> بدء التحليل الذكي
                     </a>
-                    <a href="{% url 'video_search_page' %}" class="btn-secondary" style="font-size: 1.2rem; padding: 1.5rem 3rem;">
+                    <a href="{% url 'video_search_page' %}" class="btn-secondary" style="font-size: 1.1rem; padding: 1rem 2rem; border-radius: 50px;">
                         <i class="fa-solid fa-video"></i> تحليل الفيديو
                     </a>
                 </div>
+            </div>
+            
+            <div class="hero-visual">
+                <img src="/static/images/hero_visual.png" alt="Mafqood AI Analysis">
             </div>
         </section>
 
@@ -78,26 +84,26 @@
                 <h2 style="font-size: 3rem; margin-top: 1rem; text-shadow: 0 0 20px hsla(266, 100%, 50%, 0.3);">آلية البحث والتحقق الذكي</h2>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; margin-top: 4rem;">
-                <div class="card">
+                <div class="card" style="border-top: 3px solid var(--primary);">
                     <div class="card-icon" style="width: 60px; height: 60px; background: hsla(182, 100%, 50%, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
-                        <i class="fa-solid fa-upload" style="color: var(--primary); font-size: 1.5rem;"></i>
+                        <i class="fa-solid fa-fingerprint" style="color: var(--primary); font-size: 1.5rem;"></i>
                     </div>
-                    <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--primary);">01_توفير البيانات</h3>
-                    <p style="color: var(--text-muted); font-size: 1.1rem;">رفع صور أو مقاطع فيديو للمفقود ليقوم النظام بتحليل ملامحه بدقة فائق الفعالية.</p>
+                    <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--primary);">01_DNA Matching</h3>
+                    <p style="color: var(--text-muted); font-size: 1.1rem;">بحث جيني متقدم لربط السجلات البيولوجية بدقة وموثوقية عالية للمساعدة في لم الشمل.</p>
                 </div>
-                <div class="card">
+                <div class="card" style="border-top: 3px solid var(--accent);">
                     <div class="card-icon" style="width: 60px; height: 60px; background: hsla(313, 100%, 50%, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
-                        <i class="fa-solid fa-microchip" style="color: var(--accent); font-size: 1.5rem;"></i>
+                        <i class="fa-solid fa-face-viewfinder" style="color: var(--accent); font-size: 1.5rem;"></i>
                     </div>
-                    <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--accent);">02_المعالجة الذكية</h3>
-                    <p style="color: var(--text-muted); font-size: 1.1rem;">تدقيق الصور باستخدام نماذج ذكاء اصطناعي متطورة لمطابقتها مع السجلات المتاحة بدقة.</p>
+                    <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--accent);">02_Face Search</h3>
+                    <p style="color: var(--text-muted); font-size: 1.1rem;">تحليل بصري دقيق باستخدام شبكات عصبية متطورة لمطابقة ملامح الوجه من الصور والفيديو.</p>
                 </div>
-                <div class="card">
+                <div class="card" style="border-top: 3px solid var(--secondary);">
                     <div class="card-icon" style="width: 60px; height: 60px; background: hsla(266, 100%, 50%, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
-                        <i class="fa-solid fa-magnifying-glass-chart" style="color: var(--secondary); font-size: 1.5rem;"></i>
+                        <i class="fa-solid fa-child-reaching" style="color: var(--secondary); font-size: 1.5rem;"></i>
                     </div>
-                    <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--secondary);">03_لم الشمل</h3>
-                    <p style="color: var(--text-muted); font-size: 1.1rem;">توفير نتائج المطابقة والمساعدة في الوصول إلى الأشخاص المفقودين في أسرع وقت ممكن.</p>
+                    <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--secondary);">03_Age Progression</h3>
+                    <p style="color: var(--text-muted); font-size: 1.1rem;">توقع ذكي لتغيرات الملامح بمرور الزمن باستخدام تقنية GAN، مما يسهل التعرف على المفقودين لفترات طويلة.</p>
                 </div>
             </div>
         </div>
