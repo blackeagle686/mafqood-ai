@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مفقود - البحث بالذكاء الاصطناعي</title>
+    <meta name="description" content="منصة مفقود للبحث عن المفقودين بالذكاء الاصطناعي — مطابقة الحمض النووي، التعرف على الوجوه، وتوقع العمر بتقنية GAN">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -26,182 +27,330 @@
         </div>
     </nav>
 
-    <main style="margin: 0; padding: 0; max-width: 100%;">
-        <section class="hero-section">
+    <!-- ===================== HERO SECTION ===================== -->
+    <main class="landing-main">
+        <section class="hero-section" id="hero">
             <canvas id="network-canvas"></canvas>
             <div class="bg-layer bg-dna"></div>
             <div class="bg-layer bg-face"></div>
             <div class="hero-overlay"></div>
 
-            <div class="hero-content">
+            <div class="hero-content reveal">
                 <div class="hero-overline pulse">
                     <i class="fa-solid fa-microchip"></i> AI-POWERED HUMANITARIAN PLATFORM
                 </div>
-                
+
                 <h1 class="hero-title glitch-text" data-text="MAFQOOD-AI">MAFQOOD-AI</h1>
-                <h2 class="hero-subtitle">
-                    Advanced Biometric Analysis &amp; Neural Age Progression
-                </h2>
-                
-                <p style="color: var(--text-muted); margin-bottom: 3rem; font-size: 1.1rem; font-weight: 300;">
-                    نوظف أحدث تقنيات التعرف البصري والذكاء الاصطناعي (مطابقة الحمض النووي، تحليل الوجوه، وتوقع العمر) 
-                    للمساهمة في لم شمل العائلات بدقة لا مثيل لها.
+                <p class="hero-subtitle">
+                    نظام متقدم للتعرف البيومتري وتحليل الحمض النووي وتوقع العمر بالذكاء الاصطناعي — لإعادة لم شمل العائلات.
                 </p>
 
-                <div class="hero-stats">
-                    <div class="stat-item floating-element" style="animation-delay: 0s;">
-                        <div class="stat-value">99.8%</div>
-                        <div class="stat-label">Face Match</div>
-                    </div>
-                    <div class="stat-item floating-element" style="animation-delay: 1s;">
-                        <div class="stat-value">GAN</div>
-                        <div class="stat-label">Age Progression</div>
-                    </div>
-                    <div class="stat-item floating-element" style="animation-delay: 2s;">
-                        <div class="stat-value">DNA</div>
-                        <div class="stat-label">Neural Sync</div>
-                    </div>
+                <div class="hero-badges">
+                    <span class="hero-badge"><i class="fa-solid fa-dna"></i> DNA Matching</span>
+                    <span class="hero-badge"><i class="fa-solid fa-face-viewfinder"></i> Face Search</span>
+                    <span class="hero-badge"><i class="fa-solid fa-child-reaching"></i> Age GAN</span>
                 </div>
 
-                <div style="display: flex; gap: 1.5rem; justify-content: flex-start; flex-wrap: wrap;">
-                    <a href="{% url 'search_page' %}" class="btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem; border-radius: 50px;">
+                <div class="hero-cta-row">
+                    <a href="{% url 'search_page' %}" class="btn-hero-primary" id="cta-search">
                         <i class="fa-solid fa-crosshairs"></i> بدء التحليل الذكي
                     </a>
-                    <a href="{% url 'video_search_page' %}" class="btn-secondary" style="font-size: 1.1rem; padding: 1rem 2rem; border-radius: 50px;">
-                        <i class="fa-solid fa-video"></i> تحليل الفيديو
+                    <a href="{% url 'report_page' %}" class="btn-hero-outline" id="cta-report">
+                        <i class="fa-solid fa-plus"></i> إرسال بلاغ
                     </a>
                 </div>
             </div>
-            
-            <div class="hero-visual">
-                <img src="/static/images/hero_visual.png" alt="Mafqood AI Analysis">
+
+            <div class="hero-visual reveal" style="animation-delay: 0.4s;">
+                <div class="hero-visual-glow"></div>
+                <img src="/static/images/hero_visual.png" alt="Mafqood AI — DNA and Face Analysis">
+            </div>
+
+            <div class="scroll-indicator" id="scroll-indicator">
+                <span></span>
             </div>
         </section>
 
-        <div class="container" style="margin-top: 4rem; padding-bottom: 6rem;">
-            <div class="section-header" style="text-align: center; border-left: none; padding-left: 0;">
-                <span class="tech-font" style="color: var(--accent); font-size: 1.2rem; letter-spacing: 2px;">كيف نساعدك؟</span>
-                <h2 style="font-size: 3rem; margin-top: 1rem; text-shadow: 0 0 20px hsla(266, 100%, 50%, 0.3);">آلية البحث والتحقق الذكي</h2>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; margin-top: 4rem;">
-                <div class="card" style="border-top: 3px solid var(--primary);">
-                    <div class="card-icon" style="width: 60px; height: 60px; background: hsla(182, 100%, 50%, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
-                        <i class="fa-solid fa-fingerprint" style="color: var(--primary); font-size: 1.5rem;"></i>
-                    </div>
-                    <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--primary);">01_DNA Matching</h3>
-                    <p style="color: var(--text-muted); font-size: 1.1rem;">بحث جيني متقدم لربط السجلات البيولوجية بدقة وموثوقية عالية للمساعدة في لم الشمل.</p>
+        <!-- ===================== STATS TICKER ===================== -->
+        <section class="stats-ribbon" id="stats">
+            <div class="stats-ribbon-inner">
+                <div class="ribbon-stat reveal-stat">
+                    <span class="ribbon-stat-value counter" data-target="99.8">0</span><span class="ribbon-stat-unit">%</span>
+                    <span class="ribbon-stat-label">دقة مطابقة الوجوه</span>
                 </div>
-                <div class="card" style="border-top: 3px solid var(--accent);">
-                    <div class="card-icon" style="width: 60px; height: 60px; background: hsla(313, 100%, 50%, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
-                        <i class="fa-solid fa-face-viewfinder" style="color: var(--accent); font-size: 1.5rem;"></i>
-                    </div>
-                    <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--accent);">02_Face Search</h3>
-                    <p style="color: var(--text-muted); font-size: 1.1rem;">تحليل بصري دقيق باستخدام شبكات عصبية متطورة لمطابقة ملامح الوجه من الصور والفيديو.</p>
+                <div class="ribbon-divider"></div>
+                <div class="ribbon-stat reveal-stat">
+                    <span class="ribbon-stat-value counter" data-target="500">0</span><span class="ribbon-stat-unit">ms</span>
+                    <span class="ribbon-stat-label">سرعة التحليل</span>
                 </div>
-                <div class="card" style="border-top: 3px solid var(--secondary);">
-                    <div class="card-icon" style="width: 60px; height: 60px; background: hsla(266, 100%, 50%, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
-                        <i class="fa-solid fa-child-reaching" style="color: var(--secondary); font-size: 1.5rem;"></i>
-                    </div>
-                    <h3 class="tech-font" style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--secondary);">03_Age Progression</h3>
-                    <p style="color: var(--text-muted); font-size: 1.1rem;">توقع ذكي لتغيرات الملامح بمرور الزمن باستخدام تقنية GAN، مما يسهل التعرف على المفقودين لفترات طويلة.</p>
+                <div class="ribbon-divider"></div>
+                <div class="ribbon-stat reveal-stat">
+                    <span class="ribbon-stat-value counter" data-target="256">0</span><span class="ribbon-stat-unit">pt</span>
+                    <span class="ribbon-stat-label">نقاط رسم الوجه</span>
+                </div>
+                <div class="ribbon-divider"></div>
+                <div class="ribbon-stat reveal-stat">
+                    <span class="ribbon-stat-value">GAN</span>
+                    <span class="ribbon-stat-label">تقدم العمر العصبي</span>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- ===================== TECHNOLOGY CARDS ===================== -->
+        <section class="section-tech" id="tech">
+            <div class="container">
+                <div class="section-header reveal" style="text-align: center; border-left: none; padding-left: 0;">
+                    <span class="tech-font" style="color: var(--accent); font-size: 1rem; letter-spacing: 3px;">
+                        CORE TECHNOLOGY
+                    </span>
+                    <h2 style="font-size: 3rem; margin-top: 0.8rem;">التقنيات الأساسية</h2>
+                    <p style="color: var(--text-muted); max-width: 700px; margin: 1.5rem auto 0; font-size: 1.1rem;">ثلاثة محاور ذكاء اصطناعي متكاملة تعمل معًا لتقديم أدق النتائج</p>
+                </div>
+
+                <div class="tech-grid">
+                    <!-- Card 1: DNA -->
+                    <div class="tech-card reveal" id="card-dna">
+                        <div class="tech-card-glow" style="--glow-color: var(--primary);"></div>
+                        <div class="tech-card-number tech-font">01</div>
+                        <div class="tech-card-icon" style="background: hsla(182, 100%, 50%, 0.08); color: var(--primary);">
+                            <i class="fa-solid fa-dna"></i>
+                        </div>
+                        <h3>DNA Matching</h3>
+                        <p>بحث جيني متقدم لربط السجلات البيولوجية بدقة وموثوقية عالية باستخدام خوارزميات مقارنة التسلسل الجيني.</p>
+                        <div class="tech-card-tags">
+                            <span>Genome</span><span>Sequence</span><span>Bio-Link</span>
+                        </div>
+                    </div>
+                    <!-- Card 2: Face -->
+                    <div class="tech-card reveal" style="animation-delay: 0.15s;" id="card-face">
+                        <div class="tech-card-glow" style="--glow-color: var(--accent);"></div>
+                        <div class="tech-card-number tech-font">02</div>
+                        <div class="tech-card-icon" style="background: hsla(313, 100%, 50%, 0.08); color: var(--accent);">
+                            <i class="fa-solid fa-face-viewfinder"></i>
+                        </div>
+                        <h3>Face Search</h3>
+                        <p>تحليل بصري دقيق باستخدام شبكات عصبية تلافيفية عميقة لمطابقة ملامح الوجه من الصور والفيديو.</p>
+                        <div class="tech-card-tags">
+                            <span>CNN</span><span>ArcFace</span><span>Embeddings</span>
+                        </div>
+                    </div>
+                    <!-- Card 3: GAN -->
+                    <div class="tech-card reveal" style="animation-delay: 0.3s;" id="card-gan">
+                        <div class="tech-card-glow" style="--glow-color: var(--secondary);"></div>
+                        <div class="tech-card-number tech-font">03</div>
+                        <div class="tech-card-icon" style="background: hsla(266, 100%, 50%, 0.08); color: var(--secondary);">
+                            <i class="fa-solid fa-child-reaching"></i>
+                        </div>
+                        <h3>Age Progression</h3>
+                        <p>توقع ذكي لتغيرات الملامح بمرور الزمن باستخدام شبكات GAN التوليدية العميقة لتعقب المفقودين لسنوات.</p>
+                        <div class="tech-card-tags">
+                            <span>GAN</span><span>StyleGAN</span><span>Aging</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== HOW IT WORKS PIPELINE ===================== -->
+        <section class="section-pipeline" id="pipeline">
+            <div class="container">
+                <div class="section-header reveal" style="text-align: center; border-left: none; padding-left: 0;">
+                    <span class="tech-font" style="color: var(--primary); font-size: 1rem; letter-spacing: 3px;">
+                        WORKFLOW
+                    </span>
+                    <h2 style="font-size: 3rem; margin-top: 0.8rem;">كيف يعمل النظام؟</h2>
+                </div>
+
+                <div class="pipeline-track">
+                    <div class="pipeline-line"></div>
+
+                    <div class="pipeline-step reveal">
+                        <div class="pipeline-dot" style="--dot-color: var(--primary);"></div>
+                        <div class="pipeline-card">
+                            <div class="pipeline-icon" style="color: var(--primary);"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                            <h4>رفع البيانات</h4>
+                            <p>رفع صورة أو مقطع فيديو أو بيانات جينية عبر واجهة سهلة الاستخدام.</p>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-step reveal" style="animation-delay: 0.15s;">
+                        <div class="pipeline-dot" style="--dot-color: var(--accent);"></div>
+                        <div class="pipeline-card">
+                            <div class="pipeline-icon" style="color: var(--accent);"><i class="fa-solid fa-brain"></i></div>
+                            <h4>التحليل الذكي</h4>
+                            <p>النظام يعالج البيانات عبر نماذج AI متعددة (وجه + DNA + عمر) بالتوازي.</p>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-step reveal" style="animation-delay: 0.3s;">
+                        <div class="pipeline-dot" style="--dot-color: var(--secondary);"></div>
+                        <div class="pipeline-card">
+                            <div class="pipeline-icon" style="color: var(--secondary);"><i class="fa-solid fa-chart-line"></i></div>
+                            <h4>المطابقة والتقييم</h4>
+                            <p>مقارنة النتائج مع قاعدة البيانات وترتيب النتائج حسب نسبة التطابق.</p>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-step reveal" style="animation-delay: 0.45s;">
+                        <div class="pipeline-dot" style="--dot-color: var(--success);"></div>
+                        <div class="pipeline-card">
+                            <div class="pipeline-icon" style="color: var(--success);"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                            <h4>لم الشمل</h4>
+                            <p>عرض النتائج وتسهيل التواصل للمساعدة في إعادة الأسر معًا بأسرع وقت.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== CTA FOOTER ===================== -->
+        <section class="section-cta" id="cta">
+            <div class="container reveal" style="text-align: center;">
+                <div class="cta-glow"></div>
+                <span class="tech-font" style="color: var(--primary); letter-spacing: 3px; font-size: 0.9rem; display: block; margin-bottom: 1rem;">
+                    START NOW
+                </span>
+                <h2 style="font-size: 3rem; margin-bottom: 1.5rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+                    ابدأ رحلة البحث الآن
+                </h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 3rem; font-size: 1.15rem;">
+                    ارفع صورة أو أرسل بلاغًا ودع الذكاء الاصطناعي يساعدك في العثور على من تبحث عنه.
+                </p>
+                <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="{% url 'search_page' %}" class="btn-hero-primary" id="cta-bottom-search">
+                        <i class="fa-solid fa-crosshairs"></i> البحث بالصورة
+                    </a>
+                    <a href="{% url 'video_search_page' %}" class="btn-hero-outline" id="cta-bottom-video">
+                        <i class="fa-solid fa-video"></i> تحليل الفيديو
+                    </a>
+                    <a href="{% url 'report_page' %}" class="btn-hero-outline" id="cta-bottom-report" style="border-color: var(--accent); color: var(--accent);">
+                        <i class="fa-solid fa-file-circle-plus"></i> إرسال بلاغ
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== FOOTER ===================== -->
+        <footer class="site-footer">
+            <div class="container" style="text-align: center;">
+                <div class="footer-logo">
+                    <i class="fa-solid fa-hands-holding-child"></i> مفقود
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">
+                    منصة إنسانية مدعومة بالذكاء الاصطناعي — جميع الحقوق محفوظة © 2026
+                </p>
+            </div>
+        </footer>
     </main>
 
+    <!-- ===================== SCRIPTS ===================== -->
     <script>
-    // Canvas Network Script
+    /* ---- Interactive Particle Network ---- */
     const canvas = document.getElementById('network-canvas');
     const ctx = canvas.getContext('2d');
-    let width, height;
+    let W, H;
     let particles = [];
-    const particleCount = 120;
-    const connectionDistance = 160;
-    let mouse = { x: -1000, y: -1000 };
+    const PARTICLE_COUNT = 100;
+    const LINK_DIST = 150;
+    let mouse = { x: -9999, y: -9999 };
 
-    function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
+    function resizeCanvas() {
+        const hero = document.getElementById('hero');
+        W = canvas.width = hero.offsetWidth;
+        H = canvas.height = hero.offsetHeight;
     }
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resizeCanvas);
 
-    class Particle {
+    class Dot {
         constructor() {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.vx = (Math.random() - 0.5) * 1.2;
-            this.vy = (Math.random() - 0.5) * 1.2;
-            this.radius = Math.random() * 2 + 0.5;
+            this.x = Math.random() * W;
+            this.y = Math.random() * H;
+            this.vx = (Math.random() - 0.5) * 0.8;
+            this.vy = (Math.random() - 0.5) * 0.8;
+            this.r = Math.random() * 2 + 0.5;
         }
         update() {
             this.x += this.vx;
             this.y += this.vy;
-            if (this.x < 0 || this.x > width) this.vx *= -1;
-            if (this.y < 0 || this.y > height) this.vy *= -1;
-            
-            // Mouse interaction
+            if (this.x < 0 || this.x > W) this.vx *= -1;
+            if (this.y < 0 || this.y > H) this.vy *= -1;
             const dx = mouse.x - this.x;
             const dy = mouse.y - this.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 180) {
-                this.x -= dx * 0.015;
-                this.y -= dy * 0.015;
-            }
+            const d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 200) { this.x -= dx * 0.02; this.y -= dy * 0.02; }
         }
         draw() {
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 242, 255, 0.7)';
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 242, 255, 0.6)';
             ctx.fill();
         }
     }
 
-    function init() {
-        resize();
-        particles = [];
-        for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle());
-        }
-    }
+    function initDots() { resizeCanvas(); particles = []; for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Dot()); }
 
-    function animate() {
-        ctx.clearRect(0, 0, width, height);
-        
+    function loop() {
+        ctx.clearRect(0, 0, W, H);
         for (let i = 0; i < particles.length; i++) {
             particles[i].update();
             particles[i].draw();
-            
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
                 const dy = particles[i].y - particles[j].y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                
-                if (dist < connectionDistance) {
+                const d = Math.sqrt(dx * dx + dy * dy);
+                if (d < LINK_DIST) {
                     ctx.beginPath();
                     ctx.moveTo(particles[i].x, particles[i].y);
                     ctx.lineTo(particles[j].x, particles[j].y);
-                    const opacity = 1 - (dist / connectionDistance);
-                    ctx.strokeStyle = `rgba(0, 242, 255, ${opacity * 0.35})`;
-                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = `rgba(0, 242, 255, ${(1 - d / LINK_DIST) * 0.3})`;
+                    ctx.lineWidth = 0.8;
                     ctx.stroke();
                 }
             }
         }
-        requestAnimationFrame(animate);
+        requestAnimationFrame(loop);
     }
 
-    document.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = e.clientX - rect.left;
-        mouse.y = e.clientY - rect.top;
-    });
-    document.addEventListener('mouseleave', () => {
-        mouse.x = -1000;
-        mouse.y = -1000;
-    });
+    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    document.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+    initDots();
+    loop();
 
-    init();
-    animate();
+    /* ---- Scroll Reveal ---- */
+    const revealEls = document.querySelectorAll('.reveal, .reveal-stat');
+    const revealObs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); revealObs.unobserve(e.target); } });
+    }, { threshold: 0.15 });
+    revealEls.forEach(el => revealObs.observe(el));
+
+    /* ---- Counter Animation ---- */
+    const counters = document.querySelectorAll('.counter');
+    const counterObs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            const target = parseFloat(el.dataset.target);
+            const isFloat = target % 1 !== 0;
+            const duration = 2000;
+            const start = performance.now();
+            function tick(now) {
+                const progress = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = isFloat ? (target * eased).toFixed(1) : Math.floor(target * eased);
+                if (progress < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+            counterObs.unobserve(el);
+        });
+    }, { threshold: 0.5 });
+    counters.forEach(c => counterObs.observe(c));
+
+    /* ---- Hide scroll indicator on scroll ---- */
+    const scrollInd = document.getElementById('scroll-indicator');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 80) scrollInd.style.opacity = '0';
+        else scrollInd.style.opacity = '1';
+    }, { passive: true });
     </script>
 </body>
 
