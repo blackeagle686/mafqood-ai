@@ -269,19 +269,66 @@
                     const track = document.getElementById('tech-track');
                     const nextBtn = document.getElementById('tech-next');
                     const prevBtn = document.getElementById('tech-prev');
+                    const container = document.querySelector('.carousel-container');
                     
                     if (track && nextBtn && prevBtn) {
                         const scrollAmount = 350; // approximate card width + gap
+                        let autoPlayTimer;
                         
-                        nextBtn.addEventListener('click', () => {
-                            // In RTL, scrollLeft decreases (goes more negative) to scroll left visually
+                        const scrollNext = () => {
+                            // In RTL, scrollLeft goes negative to scroll left visually
                             track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                            
+                            // Check if reached the end, loop back
+                            // Due to RTL differences across browsers, checking absolute scroll position
+                            setTimeout(() => {
+                                if (Math.abs(track.scrollLeft) >= (track.scrollWidth - track.clientWidth - 10)) {
+                                    track.scrollTo({ left: 0, behavior: 'smooth' });
+                                }
+                            }, 500);
+                        };
+
+                        const scrollPrev = () => {
+                            track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                            setTimeout(() => {
+                                if (track.scrollLeft >= -10) {
+                                    track.scrollTo({ left: -(track.scrollWidth - track.clientWidth), behavior: 'smooth' });
+                                }
+                            }, 500);
+                        };
+
+                        nextBtn.addEventListener('click', () => {
+                            scrollNext();
+                            resetAutoPlay();
                         });
                         
                         prevBtn.addEventListener('click', () => {
-                            // In RTL, scrollLeft increases towards 0 to scroll right visually
-                            track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                            scrollPrev();
+                            resetAutoPlay();
                         });
+
+                        // Dynamic Motion: Auto-Play
+                        const startAutoPlay = () => {
+                            autoPlayTimer = setInterval(scrollNext, 3500);
+                        };
+                        
+                        const stopAutoPlay = () => {
+                            clearInterval(autoPlayTimer);
+                        };
+                        
+                        const resetAutoPlay = () => {
+                            stopAutoPlay();
+                            startAutoPlay();
+                        };
+
+                        // Pause animation when user is interacting
+                        container.addEventListener('mouseenter', stopAutoPlay);
+                        container.addEventListener('mouseleave', startAutoPlay);
+                        track.addEventListener('touchstart', stopAutoPlay, {passive: true});
+                        track.addEventListener('touchend', startAutoPlay, {passive: true});
+
+                        // Start dynamic motion
+                        startAutoPlay();
                     }
                 });
             </script>
