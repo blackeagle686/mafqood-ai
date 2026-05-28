@@ -31,40 +31,70 @@
         </div>
     </nav>
 
-    <div class="page-hero">
-        <span class="page-badge"><i class="fa-solid fa-film"></i> VIDEO_ANALYSIS</span>
-        <h1 class="page-hero-title page-hero-title--secondary">
-            تحليل الفيديو الذكي
-        </h1>
-        <p class="page-hero-subtitle">
-            قم برفع مقطع فيديو لنظامنا ليقوم بمسح كل إطار بحثاً عن الشخص المفقود.
-        </p>
-    </div>
+    <div class="container" style="padding-top: 6rem; min-height: calc(100vh - 150px); display: flex; align-items: center;">
+        <div class="split-layout-container">
+            <!-- Right Side (Info) -->
+            <div class="split-info-side">
+                <span class="page-badge"><i class="fa-solid fa-film"></i> VIDEO_ANALYSIS</span>
+                <h1 class="page-hero-title page-hero-title--secondary">
+                    تحليل الفيديو الذكي
+                </h1>
+                <p class="page-hero-subtitle">
+                    قم برفع مقطع فيديو لنظامنا ليقوم بمسح كل إطار بحثاً عن الشخص المفقود.
+                </p>
+                
+                <ul class="info-features">
+                    <li>
+                        <div class="feature-icon"><i class="fa-solid fa-layer-group"></i></div>
+                        <div class="feature-text">
+                            <strong>استخراج متقدم للإطارات</strong>
+                            <span>تحليل ديناميكي لاستخراج أوضح الوجوه من زوايا متعددة من الفيديو.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="feature-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                        <div class="feature-text">
+                            <strong>معدل فحص مخصص</strong>
+                            <span>اختر معدل المسح لموازنة السرعة مع الدقة حسب احتياجك الخاص.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="feature-icon"><i class="fa-solid fa-timeline"></i></div>
+                        <div class="feature-text">
+                            <strong>مسح زمني شامل</strong>
+                            <span>تتبع منهجي للمشاهد ورصد الأشخاص في الفيديوهات الطويلة بكفاءة عالية.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
 
-    <div class="container">
-        <div class="form-card">
-            <form id="videoUploadForm" action="/api/search/video/" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="upload-box" id="dropZone">
-                    <input type="file" id="videoFile" name="file" accept="video/*" hidden required>
-                    <div class="upload-box-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                    <p class="tech-font" style="color: var(--text); font-size: 1.05rem; margin-bottom: 0.5rem;">READY_FOR_VIDEO_SEARCH</p>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">اسحب مقطع الفيديو هنا أو اضغط للاختيار (MP4, AVI, MOV)</p>
-                    <div id="file-name" class="file-name-display"></div>
+            <!-- Left Side (Form) -->
+            <div class="split-form-side">
+                <div class="form-card">
+                    <form id="videoUploadForm" action="/api/search/video/" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="upload-box" id="dropZone">
+                            <input type="file" id="videoFile" name="file" accept="video/*" hidden required>
+                            <div class="upload-box-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                            <p class="tech-font" style="color: var(--text); font-size: 1.05rem; margin-bottom: 0.5rem;">READY_FOR_VIDEO_SEARCH</p>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">اسحب مقطع الفيديو هنا أو اضغط للاختيار (MP4, AVI, MOV)</p>
+                            <div id="file-name" class="file-name-display"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-label"><i class="fa-solid fa-gauge-high"></i> SAMPLING_RATE [FRAMES TO SKIP]</div>
+                            <input class="form-input" type="number" id="sampling_rate" name="sampling_rate" value="15" min="1">
+                            <small style="color: rgba(var(--text-rgb), 0.4); display: block; margin-top: 0.6rem; font-size: 0.85rem; line-height: 1.5;">
+                                <i class="fa-solid fa-circle-info" style="color: var(--secondary);"></i> كلما زاد الرقم زادت سرعة المسح ولكن قد تقل الدقة في رصد الوجوه العابرة.
+                            </small>
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <i class="fa-solid fa-microchip"></i> بدء تحليل إطارات الفيديو
+                        </button>
+                    </form>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-label"><i class="fa-solid fa-gauge-high"></i> SAMPLING_RATE [FRAMES TO SKIP]</div>
-                    <input class="form-input" type="number" id="sampling_rate" name="sampling_rate" value="15" min="1">
-                    <small style="color: rgba(var(--text-rgb), 0.4); display: block; margin-top: 0.6rem; font-size: 0.85rem; line-height: 1.5;">
-                        <i class="fa-solid fa-circle-info" style="color: var(--secondary);"></i> كلما زاد الرقم زادت سرعة المسح ولكن قد تقل الدقة في رصد الوجوه العابرة.
-                    </small>
-                </div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <i class="fa-solid fa-microchip"></i> بدء تحليل إطارات الفيديو
-                </button>
-            </form>
+            </div>
         </div>
     </div>
 
