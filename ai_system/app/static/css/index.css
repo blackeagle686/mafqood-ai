@@ -402,10 +402,10 @@
 
 .tech-card {
     position: relative;
-    background: rgba(15, 20, 25, 0.45);
+    background: var(--card-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
     border-radius: 16px;
     padding: 2.5rem 2rem;
     overflow: hidden;
@@ -453,7 +453,7 @@
     opacity: 1;
 }
 .tech-card:hover::after {
-    background: rgba(20, 25, 32, 0.85);
+    background: var(--surface);
 }
 .tech-card-glow {
     position: absolute;
@@ -483,8 +483,8 @@
     justify-content: center;
     font-size: 1.8rem;
     margin-bottom: 1.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s, box-shadow 0.4s;
 }
 
@@ -495,16 +495,16 @@
 }
 
 .tech-card#card-dna:hover .tech-card-icon {
-    background: rgba(0, 204, 255, 0.1);
-    box-shadow: 0 0 25px rgba(0, 204, 255, 0.3);
+    background: rgba(var(--primary-rgb), 0.1);
+    box-shadow: 0 0 25px rgba(var(--primary-rgb), 0.3);
 }
 .tech-card#card-face:hover .tech-card-icon {
-    background: rgba(255, 51, 102, 0.1);
-    box-shadow: 0 0 25px rgba(255, 51, 102, 0.3);
+    background: rgba(var(--accent-rgb), 0.1);
+    box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.3);
 }
 .tech-card#card-gan:hover .tech-card-icon {
-    background: rgba(153, 51, 255, 0.1);
-    box-shadow: 0 0 25px rgba(153, 51, 255, 0.3);
+    background: rgba(var(--secondary-rgb), 0.1);
+    box-shadow: 0 0 25px rgba(var(--secondary-rgb), 0.3);
 }
 .tech-card h3 {
     font-family: 'Outfit', sans-serif;
