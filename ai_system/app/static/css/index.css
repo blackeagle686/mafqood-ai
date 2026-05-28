@@ -632,3 +632,351 @@
     from { opacity: 0; }
     to { opacity: 1; }
 }
+/* ============ GLITCH ============ */
+.glitch-text { position: relative; }
+.glitch-text::before,
+.glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.8;
+    background: linear-gradient(135deg, var(--text) 30%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.glitch-text::before {
+    left: 2px;
+    text-shadow: -2px 0 var(--accent);
+    animation: glitch-anim 2.5s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+    left: -2px;
+    text-shadow: -2px 0 var(--primary);
+    animation: glitch-anim 3.5s infinite linear alternate-reverse;
+}
+@keyframes glitch-anim {
+    0% { clip-path: inset(20% 0 80% 0); }
+    20% { clip-path: inset(60% 0 10% 0); }
+    40% { clip-path: inset(40% 0 50% 0); }
+    60% { clip-path: inset(80% 0 5% 0); }
+    80% { clip-path: inset(10% 0 70% 0); }
+    100% { clip-path: inset(30% 0 20% 0); }
+}
+
+/* ============ GENERIC ANIMATIONS ============ */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============ DNA HELIX ANIMATION ============ */
+.dna-helix-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    min-height: 250px;
+    position: relative;
+    perspective: 1000px;
+    overflow: hidden;
+    margin: 2rem 0;
+    background: radial-gradient(circle, rgba(var(--primary-rgb), 0.05) 0%, transparent 70%);
+    border-radius: 12px;
+    border: 1px dashed rgba(var(--primary-rgb), 0.1);
+}
+
+.dna-helix {
+    position: relative;
+    width: 200px;
+    height: 100%;
+    transform-style: preserve-3d;
+    animation: spinHelix 8s linear infinite;
+}
+
+@keyframes spinHelix {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+}
+
+.dna-strand {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+}
+
+.dna-node {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.dna-node.a {
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.dna-node.b {
+    background: var(--secondary);
+    box-shadow: 0 0 10px var(--secondary-glow);
+}
+
+.dna-bar {
+    position: absolute;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.15);
+    left: 50%;
+    transform: translateX(-50%);
+    transform-origin: center;
+}
+
+/* ============ CINEMATIC SHOWCASE ============ */
+.cine-showcase {
+    position: relative;
+    width: 100%;
+    max-width: 950px;
+    margin: 0 auto;
+    aspect-ratio: 16/11;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #050a0e;
+    box-shadow:
+        0 0 0 1px rgba(var(--primary-rgb), 0.15),
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        0 0 80px -20px rgba(var(--primary-rgb), 0.2);
+}
+
+/* Holographic corner brackets */
+.cine-frame {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+.cine-corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-color: var(--primary);
+    border-style: solid;
+    opacity: 0.6;
+    transition: opacity 0.4s;
+}
+.cine-showcase:hover .cine-corner { opacity: 1; }
+.cine-corner--tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
+.cine-corner--tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
+.cine-corner--bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
+.cine-corner--br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
+
+/* Scanline overlay */
+.cine-scanline-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0, 0, 0, 0.08) 3px,
+        rgba(0, 0, 0, 0.08) 4px
+    );
+    mix-blend-mode: overlay;
+}
+
+/* Slide track */
+.cine-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.cine-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.12);
+    filter: blur(8px) brightness(0.3);
+    transition:
+        opacity 1s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 1.4s cubic-bezier(0.4, 0, 0.2, 1),
+        filter 1s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, transform, filter;
+}
+
+.cine-slide.active {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0) brightness(1);
+    z-index: 2;
+}
+
+.cine-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+/* Ken Burns zoom on active slide */
+.cine-slide.active img {
+    animation: cineKenBurns 7s ease-in-out infinite alternate;
+}
+
+@keyframes cineKenBurns {
+    0%   { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.06) translate(-0.5%, -0.5%); }
+}
+
+/* Gradient overlay on each slide */
+.cine-slide-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to top, rgba(5,10,14,0.95) 0%, rgba(5,10,14,0.3) 40%, transparent 65%),
+        linear-gradient(135deg, rgba(var(--primary-rgb), 0.03) 0%, transparent 50%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Caption */
+.cine-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 1.8rem 2.2rem;
+    z-index: 3;
+    transform: translateY(15px);
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s;
+}
+
+.cine-slide.active .cine-caption {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.cine-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--primary);
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
+    padding: 0.3rem 0.8rem;
+    border-radius: 3px;
+    background: rgba(var(--primary-rgb), 0.06);
+    margin-bottom: 0.8rem;
+}
+
+.cine-caption h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 0.4rem;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+}
+
+.cine-caption p {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.65);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* HUD top info */
+.cine-hud {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 5;
+}
+
+.cine-hud-item {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.45);
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.cine-hud-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    
+}
+
+/* Progress bar */
+.cine-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    z-index: 6;
+}
+
+.cine-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 12px var(--primary-glow);
+}
+
+/* Navigation arrows */
+.cine-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) scale(1);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    font-size: 0.85rem;
+    opacity: 0;
+}
+
+.cine-showcase:hover .cine-nav { opacity: 1; }
+
+.cine-nav:hover {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+    box-shadow: 0 0 20px var(--primary-glow);
+    transform: translateY(-50%) scale(1.15);
+}
+
+.cine-nav--prev { right: 12px; }
+.cine-nav--next { left: 12px; }
