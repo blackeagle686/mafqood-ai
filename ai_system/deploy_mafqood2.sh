@@ -406,7 +406,8 @@ stop_services_silent() {
         local pid=$(cat logs/ngrok.pid)
         kill "$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null
         rm -f logs/ngrok.pid
-    fi}
+    fi
+}
 
 # --------------------------------------------------------------------
 # Status Checker
