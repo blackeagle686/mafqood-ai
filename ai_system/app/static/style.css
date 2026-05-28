@@ -106,9 +106,9 @@ body::before {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-image:
+    /* background-image:
         linear-gradient(var(--grid-color) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px); */
     background-size: 30px 30px;
     z-index: -2;
     pointer-events: none;
