@@ -375,8 +375,6 @@ stop_services() {
         fi
         rm -f logs/ngrok.pid
     fi
-    pkill -f "infra/ngrok_tunnel.py" 2>/dev/null || true
-
     rm -f "$LOCKFILE"
     echo -e "${GREEN}[+] All services stopped successfully.${NC}"
 }
@@ -408,9 +406,7 @@ stop_services_silent() {
         local pid=$(cat logs/ngrok.pid)
         kill "$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null
         rm -f logs/ngrok.pid
-    fi
-    pkill -f "infra/ngrok_tunnel.py" 2>/dev/null || true
-}
+    fi}
 
 # --------------------------------------------------------------------
 # Status Checker
