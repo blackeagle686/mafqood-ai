@@ -41,7 +41,7 @@
                     <i class="fa-solid fa-microchip"></i> AI-POWERED HUMANITARIAN PLATFORM
                 </div>
 
-                <h1 class="hero-title glitch-text" data-text="MAFQOOD-AI-LAB">MAFQOOD  <br>AI-LAB </h1>
+                <h1 class="hero-title glitch-text" data-text="MAFQOOD <br> AI-LAB">MAFQOOD  <br>AI-LAB </h1>
                 <p class="hero-subtitle">
                     نظام متقدم للتعرف البيومتري وتحليل الحمض النووي وتوقع العمر بالذكاء الاصطناعي — لإعادة لم شمل العائلات.
                 </p>
@@ -64,36 +64,67 @@
 
             <div class="hero-visual reveal" style="animation-delay: 0.4s;">
                 <div class="hero-visual-glow"></div>
-                <!-- Cinematic Image Carousel -->
-                <div class="cinematic-carousel" id="hero-carousel">
-                    <div class="carousel-inner">
-                        <div class="carousel-item active">
+                <!-- Cinematic Showcase -->
+                <div class="cine-showcase" id="hero-carousel">
+                    <!-- Holographic frame decoration -->
+                    <div class="cine-frame">
+                        <span class="cine-corner cine-corner--tl"></span>
+                        <span class="cine-corner cine-corner--tr"></span>
+                        <span class="cine-corner cine-corner--bl"></span>
+                        <span class="cine-corner cine-corner--br"></span>
+                    </div>
+                    <!-- Scanline overlay -->
+                    <div class="cine-scanline-overlay"></div>
+
+                    <!-- Slides -->
+                    <div class="cine-track">
+                        <div class="cine-slide active" data-index="0">
                             <img src="/static/images/dna-img-3.jpg" alt="DNA Analysis">
-                            <div class="carousel-caption">
-                                <h4>تحليل الحمض النووي</h4>
-                                <p>دقة عالية في المطابقة الجينية</p>
+                            <div class="cine-slide-overlay"></div>
+                            <div class="cine-caption">
+                                <span class="cine-tag tech-font"><i class="fa-solid fa-dna"></i> GENOME_ANALYSIS</span>
+                                <h3>تحليل الحمض النووي</h3>
+                                <p>مطابقة جينية عالية الدقة لربط السجلات البيولوجية</p>
                             </div>
                         </div>
-                        <div class="carousel-item">
+                        <div class="cine-slide" data-index="1">
                             <img src="/static/images/face-ana-bg.jpg" alt="Face Analysis">
-                            <div class="carousel-caption">
-                                <h4>التعرف على الوجوه</h4>
-                                <p>مسح وتحديد الملامح بالذكاء الاصطناعي</p>
+                            <div class="cine-slide-overlay"></div>
+                            <div class="cine-caption">
+                                <span class="cine-tag tech-font"><i class="fa-solid fa-face-viewfinder"></i> FACE_RECOGNITION</span>
+                                <h3>التعرف على الوجوه</h3>
+                                <p>مسح وتحديد الملامح بشبكات عصبية تلافيفية عميقة</p>
+                            </div>
+                        </div>
+                        <div class="cine-slide" data-index="2">
+                            <img src="/static/images/dna-bg2.jpg" alt="Bio System">
+                            <div class="cine-slide-overlay"></div>
+                            <div class="cine-caption">
+                                <span class="cine-tag tech-font"><i class="fa-solid fa-child-reaching"></i> AGE_PROGRESSION</span>
+                                <h3>توقع تقدم العمر</h3>
+                                <p>شبكات GAN التوليدية لتعقب المفقودين عبر الزمن</p>
                             </div>
                         </div>
                     </div>
-                    
-                    <button class="carousel-control prev" onclick="moveCarousel(-1)">
+
+                    <!-- HUD Info -->
+                    <div class="cine-hud tech-font">
+                        <span class="cine-hud-item" id="cine-counter">01 / 03</span>
+                        <span class="cine-hud-item cine-hud-status"><i class="fa-solid fa-circle" style="font-size:6px; color: var(--success);"></i> LIVE</span>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div class="cine-progress">
+                        <div class="cine-progress-bar" id="cine-progress-bar"></div>
+                    </div>
+
+                    <!-- Navigation arrows -->
+                    <button class="cine-nav cine-nav--prev" onclick="moveCarousel(-1)" aria-label="Previous">
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
-                    <button class="carousel-control next" onclick="moveCarousel(1)">
+                    <button class="cine-nav cine-nav--next" onclick="moveCarousel(1)" aria-label="Next">
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
-                    
-                    <div class="carousel-indicators">
-                        <span class="indicator active" onclick="setCarousel(0)"></span>
-                        <span class="indicator" onclick="setCarousel(1)"></span>
-                    </div>
                 </div>
             </div>
 
