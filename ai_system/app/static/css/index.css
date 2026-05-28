@@ -980,3 +980,110 @@
 
 .cine-nav--prev { right: 12px; }
 .cine-nav--next { left: 12px; }
+/* ============ INDEX PAGE UTILITY CLASSES ============ */
+
+/* Section header overline text */
+.section-overline {
+    font-size: 1rem;
+    letter-spacing: 3px;
+}
+.section-overline--accent { color: var(--accent); }
+.section-overline--primary { color: var(--primary); }
+
+/* Section heading */
+.section-title {
+    font-size: 3rem;
+    margin-top: 0.8rem;
+}
+
+/* Section description */
+.section-desc {
+    color: var(--text-muted);
+    max-width: 700px;
+    margin: 1.5rem auto 0;
+    font-size: 1.1rem;
+}
+
+/* Clickable tech cards */
+.tech-card--clickable {
+    cursor: pointer;
+}
+
+/* Tech card icon variants */
+.tech-card-icon--primary {
+    background: rgba(var(--primary-rgb), 0.08);
+    color: var(--primary);
+}
+.tech-card-icon--accent {
+    background: rgba(var(--accent-rgb), 0.08);
+    color: var(--accent);
+}
+.tech-card-icon--secondary {
+    background: rgba(var(--secondary-rgb), 0.08);
+    color: var(--secondary);
+}
+
+/* Tech card link */
+.tech-card-link {
+    text-decoration: none;
+    margin-top: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+.tech-card-link--primary { color: var(--primary); }
+.tech-card-link--accent { color: var(--accent); }
+.tech-card-link--secondary { color: var(--secondary); }
+
+/* Pipeline icon colors */
+.pipeline-icon--primary { color: var(--primary); }
+.pipeline-icon--accent { color: var(--accent); }
+.pipeline-icon--secondary { color: var(--secondary); }
+.pipeline-icon--success { color: var(--success); }
+
+/* CTA section */
+.cta-overline {
+    color: var(--primary);
+    letter-spacing: 3px;
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.cta-title {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-desc {
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    font-size: 1.15rem;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-hero-outline--accent {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Stagger delays */
+.delay-1 { animation-delay: 0.15s; }
+.delay-2 { animation-delay: 0.3s; }
+.delay-3 { animation-delay: 0.4s; }
+.delay-4 { animation-delay: 0.45s; }
+
+/* Text center */
+.text-center { text-align: center; }
