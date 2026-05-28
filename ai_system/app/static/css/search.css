@@ -1,31 +1,4 @@
-        .page-hero {
-            position: relative;
-            padding: 7rem 2rem 2rem;
-            text-align: center;
-            overflow: hidden;
-        }
-        .page-hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center bottom, rgba(var(--primary-rgb), 0.05) 0%, transparent 60%);
-            pointer-events: none;
-        }
-        .page-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            color: var(--primary);
-            border: 1px solid rgba(var(--primary-rgb), 0.2);
-            padding: 0.4rem 1.2rem;
-            border-radius: 4px;
-            background: rgba(var(--primary-rgb), 0.04);
-            margin-bottom: 1.2rem;
-        }
-
+/* search.css specific styles */
         .form-card {
             max-width: 650px;
             margin: 2.5rem auto 4rem;
