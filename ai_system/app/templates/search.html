@@ -229,6 +229,9 @@
                 <a href="{% url 'search_page' %}" class="active"><i class="fa-solid fa-id-card"></i> بحث الوجه</a>
                 <a href="{% url 'video_search_page' %}"><i class="fa-solid fa-video"></i> تحليل الفيديو</a>
                 <a href="{% url 'dna_search_page' %}"><i class="fa-solid fa-dna"></i> مطابقة DNA</a>
+                <button id="theme-toggle" title="تغيير المظهر" style="background:none; border:none; color: var(--text); cursor:pointer; font-size:1.2rem; margin-right: 1.5rem; transition: color 0.3s;">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -317,6 +320,38 @@
             }
             return true;
         };
+    </script>
+    <script>
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle ? themeToggle.querySelector('i') : null;
+        
+        // Check for saved theme
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        if (currentTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            if (themeIcon) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            }
+        }
+        
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'light') {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            });
+        }
     </script>
 </body>
 </html>
