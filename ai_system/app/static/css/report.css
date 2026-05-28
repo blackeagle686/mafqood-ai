@@ -18,10 +18,10 @@
             opacity: 0.8;
         }
 
-        /* 2-Column Layout for Form */
+        /* 3-Column Layout for Form */
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
         }
         .form-full-width {
