@@ -687,7 +687,6 @@ textarea:focus {
     width: 100vw;
     min-height: 100vh;
     display: grid;
-    margin-bottom: 10rem;
     grid-template-columns: 1fr 1fr;
     align-items: center;
     overflow: hidden;
