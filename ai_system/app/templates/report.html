@@ -31,74 +31,107 @@
         </div>
     </nav>
 
-    <div class="page-hero">
-        <span class="page-badge"><i class="fa-solid fa-file-circle-plus"></i> NEW_REPORT</span>
-        <h1 class="page-hero-title">
-            تسجيل بلاغ عن مفقود
-        </h1>
-        <p class="page-hero-subtitle">
-            إضافة معلومات الشخص المفقود لمساعدتنا في عملية البحث ولم شمل العائلة.
-        </p>
-    </div>
+    <div class="container" style="padding-top: 6rem; min-height: calc(100vh - 150px); display: flex; align-items: center;">
+        
+        {% if status == 'success' %}
+        <div class="success-card" style="margin: auto;">
+            <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <h2 class="tech-font" style="color: var(--success); font-size: 1.4rem; letter-spacing: 2px; margin-bottom: 1rem;">
+                [ REPORT_RECEIVED_SECURELY ]
+            </h2>
+            <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 3rem;">
+                تم استلام البلاغ بنجاح وجاري البدء في معالجة البيانات باستخدام محرك الذكاء الاصطناعي للمساعدة في عملية البحث.
+            </p>
+            <a href="{% url 'index' %}" class="submit-btn" style="text-decoration: none; max-width: 300px; margin: 0 auto;">
+                <i class="fa-solid fa-house"></i> العودة للصفحة الرئيسية
+            </a>
+        </div>
+        {% else %}
+        <div class="split-layout-container">
+            <!-- Right Side (Info) -->
+            <div class="split-info-side">
+                <span class="page-badge"><i class="fa-solid fa-file-circle-plus"></i> NEW_REPORT</span>
+                <h1 class="page-hero-title">
+                    تسجيل بلاغ عن مفقود
+                </h1>
+                <p class="page-hero-subtitle">
+                    إضافة معلومات الشخص المفقود لمساعدتنا في عملية البحث ولم شمل العائلة.
+                </p>
+                
+                <ul class="info-features">
+                    <li>
+                        <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="feature-text">
+                            <strong>معالجة آمنة ومشفرة</strong>
+                            <span>نضمن الحفاظ على خصوصية البيانات والصور المرفقة وفق أعلى المعايير.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="feature-icon"><i class="fa-solid fa-microchip"></i></div>
+                        <div class="feature-text">
+                            <strong>تحليل ذكي متقدم</strong>
+                            <span>يتم استخدام نماذج AI لتحليل الوجه واستخراج الميزات الحيوية فور الإرسال.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <div class="feature-text">
+                            <strong>مطابقة تلقائية</strong>
+                            <span>مقارنة فورية مع قواعد بيانات المفقودين لتحديد أي تطابق محتمل.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
 
-    {% if status == 'success' %}
-    <div class="success-card">
-        <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
-        <h2 class="tech-font" style="color: var(--success); font-size: 1.4rem; letter-spacing: 2px; margin-bottom: 1rem;">
-            [ REPORT_RECEIVED_SECURELY ]
-        </h2>
-        <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 3rem;">
-            تم استلام البلاغ بنجاح وجاري البدء في معالجة البيانات باستخدام محرك الذكاء الاصطناعي للمساعدة في عملية البحث.
-        </p>
-        <a href="{% url 'index' %}" class="submit-btn" style="text-decoration: none; max-width: 300px; margin: 0 auto;">
-            <i class="fa-solid fa-house"></i> العودة للصفحة الرئيسية
-        </a>
-    </div>
-    {% else %}
-    <div class="form-card">
-        <form id="report-form" action="/api/people/report/" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <div class="form-grid">
-                <!-- Column 1 -->
-                <div>
-                    <div class="form-label"><i class="fa-solid fa-signature"></i> MISSING_PERSON_NAME</div>
-                    <input class="form-input" type="text" name="name" required placeholder="أدخل اسم الشخص المفقود بالكامل">
-                </div>
+            <!-- Left Side (Form) -->
+            <div class="split-form-side">
+                <div class="form-card">
+                    <form id="report-form" action="/api/people/report/" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="form-grid">
+                            <!-- Column 1 -->
+                            <div>
+                                <div class="form-label"><i class="fa-solid fa-signature"></i> MISSING_PERSON_NAME</div>
+                                <input class="form-input" type="text" name="name" required placeholder="أدخل اسم الشخص المفقود">
+                            </div>
 
-                <!-- Column 2 -->
-                <div>
-                    <div class="form-label"><i class="fa-solid fa-location-dot"></i> LAST_SEEN_LOCATION</div>
-                    <input class="form-input" type="text" name="last_seen" placeholder="آخر مكان شوهد فيه الشخص والظروف" required>
-                </div>
+                            <!-- Column 2 -->
+                            <div>
+                                <div class="form-label"><i class="fa-solid fa-location-dot"></i> LAST_SEEN_LOCATION</div>
+                                <input class="form-input" type="text" name="last_seen" placeholder="آخر مكان شوهد فيه الشخص" required>
+                            </div>
 
-                <!-- Full Width -->
-                <div class="form-full-width">
-                    <div class="form-label"><i class="fa-solid fa-scroll"></i> ADDITIONAL_DETAILS</div>
-                    <textarea class="form-textarea" name="details" rows="4"
-                        placeholder="العلامات المميزة، الملابس، الحالة الصحية، أو أي معلومات قد تساعد في التعرف عليه..."></textarea>
-                </div>
+                            <!-- Full Width -->
+                            <div class="form-full-width">
+                                <div class="form-label"><i class="fa-solid fa-scroll"></i> ADDITIONAL_DETAILS</div>
+                                <textarea class="form-textarea" name="details" rows="3"
+                                    placeholder="العلامات المميزة، الملابس، الحالة الصحية..."></textarea>
+                            </div>
 
-                <div class="form-full-width">
-                    <div class="form-label"><i class="fa-solid fa-camera-retro"></i> RECENT_PHOTO</div>
-                    <div class="upload-box" onclick="document.getElementById('file-input').click()">
-                        <div class="upload-box-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                        <p class="tech-font" style="color: var(--text); font-size: 1rem; margin-bottom: 0.5rem;">SECURE_DATA_UPLOAD</p>
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">ارفع أوضح صورة متاحة للمفقود لزيادة فرص التعرف عليه</p>
-                        <input type="file" id="file-input" name="file" accept="image/*" style="display: none;" onchange="previewImage(event)" required>
-                        <img id="image-preview" src="#" alt="Preview">
-                    </div>
-                </div>
+                            <div class="form-full-width">
+                                <div class="form-label"><i class="fa-solid fa-camera-retro"></i> RECENT_PHOTO</div>
+                                <div class="upload-box" onclick="document.getElementById('file-input').click()">
+                                    <div class="upload-box-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                    <p class="tech-font" style="color: var(--text); font-size: 1rem; margin-bottom: 0.5rem;">SECURE_DATA_UPLOAD</p>
+                                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">ارفع أوضح صورة متاحة للمفقود لزيادة فرص التعرف عليه</p>
+                                    <input type="file" id="file-input" name="file" accept="image/*" style="display: none;" onchange="previewImage(event)" required>
+                                    <img id="image-preview" src="#" alt="Preview">
+                                </div>
+                            </div>
 
-                <div class="form-full-width">
-                    <button type="submit" class="submit-btn" id="submitBtn">
-                        <i class="fa-solid fa-database"></i> حفظ البلاغ في قاعدة البيانات المركزية
-                    </button>
+                            <div class="form-full-width">
+                                <button type="submit" class="submit-btn" id="submitBtn">
+                                    <i class="fa-solid fa-database"></i> حفظ البلاغ وبدء التحليل
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </form>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 
     <script>
         const fileInput = document.getElementById('file-input');
