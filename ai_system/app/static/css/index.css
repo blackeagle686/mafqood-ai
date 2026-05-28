@@ -137,7 +137,7 @@
 
 .hero-title {
     font-family: 'Outfit', sans-serif;
-    font-size: 5rem;
+    font-size: 6.5rem;
     font-weight: 800;
     line-height: 1.05;
     margin-bottom: 1.2rem;
@@ -145,7 +145,7 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: -2px;
+    letter-spacing: -3px;
 }
 .animated-text-shift {
     background: linear-gradient(270deg, var(--primary), var(--accent), var(--secondary), var(--primary));
@@ -162,7 +162,7 @@
     100% { background-position: 0% 50%; }
 }
 @media (max-width: 768px) {
-    .hero-title { font-size: 3rem; }
+    .hero-title { font-size: 4rem; }
 }
 
 .hero-subtitle {
