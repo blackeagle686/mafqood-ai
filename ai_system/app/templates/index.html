@@ -392,37 +392,36 @@
         else scrollInd.style.opacity = '1';
     }, { passive: true });
 
-    /* ---- 3D DNA Helix Generation ---- */
-    const heroHelix = document.getElementById('hero-helix');
-    if (heroHelix) {
-        const nodesCount = 24;
-        for (let i = 0; i < nodesCount; i++) {
-            const offset = (i / nodesCount) * 100;
-            const delay = (i / nodesCount) * -8;
-            
-            const strand = document.createElement('div');
-            strand.className = 'dna-strand';
-            strand.style.top = `${offset}%`;
-            
-            const bar = document.createElement('div');
-            bar.className = 'dna-bar';
-            bar.style.width = '140px';
-            bar.style.animation = `spinHelix 8s linear infinite`;
-            bar.style.animationDelay = `${delay}s`;
-            
-            const nodeA = document.createElement('div');
-            nodeA.className = 'dna-node a';
-            nodeA.style.left = '0';
-            
-            const nodeB = document.createElement('div');
-            nodeB.className = 'dna-node b';
-            nodeB.style.right = '0';
-            
-            bar.appendChild(nodeA);
-            bar.appendChild(nodeB);
-            strand.appendChild(bar);
-            heroHelix.appendChild(strand);
-        }
+    /* ---- Cinematic Carousel Logic ---- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-item');
+    const indicators = document.querySelectorAll('.carousel-indicators .indicator');
+    let carouselInterval;
+
+    function setCarousel(index) {
+        if (slides.length === 0) return;
+        slides[currentSlide].classList.remove('active');
+        indicators[currentSlide].classList.remove('active');
+        currentSlide = (index + slides.length) % slides.length;
+        slides[currentSlide].classList.add('active');
+        indicators[currentSlide].classList.add('active');
+        resetCarouselInterval();
+    }
+
+    function moveCarousel(direction) {
+        setCarousel(currentSlide + direction);
+    }
+
+    function resetCarouselInterval() {
+        clearInterval(carouselInterval);
+        carouselInterval = setInterval(() => {
+            moveCarousel(1);
+        }, 5000);
+    }
+
+    // Initialize carousel if exists
+    if (slides.length > 0) {
+        resetCarouselInterval();
     }
     </script>
 </body>
