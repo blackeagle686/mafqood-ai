@@ -74,7 +74,7 @@
 [data-theme="light"] .bg-dna {
     mix-blend-mode: multiply;
     opacity: 0.0;
-    background-image: linear-gradient(45deg, )
+    background-image: linear-gradient(45deg, #ffffff, #f8f9fa);
 }
 
 [data-theme="light"] .bg-face {
