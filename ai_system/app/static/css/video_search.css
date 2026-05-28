@@ -1,34 +1,6 @@
-        .page-hero {
-            position: relative;
-            padding: 7rem 2rem 2rem;
-            text-align: center;
-            overflow: hidden;
-        }
-        .page-hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center bottom, rgba(var(--secondary-rgb), 0.08) 0%, transparent 60%);
-            pointer-events: none;
-        }
-        .page-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            color: var(--secondary);
-            border: 1px solid rgba(var(--secondary-rgb), 0.3);
-            padding: 0.4rem 1.2rem;
-            border-radius: 4px;
-            background: rgba(var(--secondary-rgb), 0.05);
-            margin-bottom: 1.2rem;
-        }
-
+/* video_search.css specific styles */
         .form-card {
-            max-width: 680px;
-            margin: 2.5rem auto 4rem;
+            width: 100%;
             background: var(--card-bg);
             border: 1px solid var(--secondary);
             border-radius: 20px;
