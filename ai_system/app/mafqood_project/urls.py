@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from app.core_api.views import IndexView, SearchView, ReportView, ResultsView, VideoSearchView
+from app.core_api.views import IndexView, SearchView, ReportView, ResultsView, VideoSearchView, DNASearchPageView
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -14,6 +14,7 @@ urlpatterns = [
     path('report/', ReportView.as_view(), name='report_page'),
     path('results/', ResultsView.as_view(), name='results_page'),
     path('video-search/', VideoSearchView.as_view(), name='video_search_page'),
+    path('dna-search/', DNASearchPageView.as_view(), name='dna_search_page'),
 
     # API Endpoints
     path('api/people/', include('app.people.urls')),
