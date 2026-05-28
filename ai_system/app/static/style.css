@@ -954,6 +954,7 @@ textarea:focus {
 }
 
 /* ============ STATS RIBBON ============ */
+#statu
 .stats-ribbon {
     background: hsla(220, 25%, 6%, 0.95);
     border-top: 1px solid var(--border-color);
