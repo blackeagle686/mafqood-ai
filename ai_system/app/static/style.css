@@ -32,7 +32,9 @@
     --card-bg: rgba(38, 60, 65, 0.6);
 
     --text: #fdfaf6;
+    --text-rgb: 253, 250, 246;
     --text-muted: #b0b8b9;
+    --input-bg: rgba(255, 255, 255, 0.03);
 
     --grid-color: rgba(var(--primary-rgb), 0.04);
     --border-color: rgba(var(--primary-rgb), 0.15);
@@ -57,7 +59,9 @@
     --card-bg: rgba(255, 255, 255, 0.75);
 
     --text: var(--color-10);
+    --text-rgb: 20, 54, 66;
     --text-muted: var(--color-8);
+    --input-bg: rgba(20, 54, 66, 0.05);
 
     --grid-color: rgba(var(--primary-rgb), 0.1);
     --border-color: rgba(var(--primary-rgb), 0.25);
