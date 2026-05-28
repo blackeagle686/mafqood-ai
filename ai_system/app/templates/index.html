@@ -258,8 +258,34 @@
                             تحليل التجمعات <i class="fa-solid fa-arrow-left"></i>
                         </a>
                     </div>
+                    </div>
                 </div>
+                <button class="carousel-btn next-btn" id="tech-next">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
             </div>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const track = document.getElementById('tech-track');
+                    const nextBtn = document.getElementById('tech-next');
+                    const prevBtn = document.getElementById('tech-prev');
+                    
+                    if (track && nextBtn && prevBtn) {
+                        const scrollAmount = 350; // approximate card width + gap
+                        
+                        nextBtn.addEventListener('click', () => {
+                            // In RTL, scrollLeft decreases (goes more negative) to scroll left visually
+                            track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                        });
+                        
+                        prevBtn.addEventListener('click', () => {
+                            // In RTL, scrollLeft increases towards 0 to scroll right visually
+                            track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                        });
+                    }
+                });
+            </script>
         </section>
 
         <!-- ===================== HOW IT WORKS PIPELINE ===================== -->
