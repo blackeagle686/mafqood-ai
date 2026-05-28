@@ -712,7 +712,7 @@ textarea:focus {
 }
 .bg-dna {
     background-image: url('/static/images/dna-bg2.jpg');
-    opacity: 0.15;
+    opacity: 0.5;
     mix-blend-mode: screen;
 }
 .bg-face {
