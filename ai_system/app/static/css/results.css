@@ -46,14 +46,7 @@
         }
 
         /* Result Cards Grid */
-        .results-mosaic {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-            padding: 0 2rem 4rem;
-            max-width: 1300px;
-            margin: 0 auto;
-        }
+        /* Bootstrap container and row handle the grid layout now */
 
         .result-card-v2 {
             position: relative;
@@ -394,16 +387,7 @@
         }
 
         .modal-v2-body {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
             padding: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .modal-v2-body {
-                grid-template-columns: 1fr;
-            }
         }
 
         .modal-v2-img-wrap {
