@@ -116,7 +116,7 @@
                         </div>
 
                         <button class="rc-action-btn"
-                            onclick="showDetails('{{ person.metadata.name|escapejs }}', '{{ person.metadata.last_seen|escapejs }}', '{{ person.metadata.details|escapejs }}', '{{ person.image_url }}', '{{ person.score }}')">
+                            onclick="showDetails('{{ person.metadata.name|escapejs }}', '{{ person.metadata.last_seen|escapejs }}', '{{ person.metadata.details|escapejs }}', '{{ person.image_url }}', '{{ person.score }}', '{{ person.metadata.age|default:'' }}', '{{ person.metadata.dna_str_loci|default:''|escapejs }}', '{{ person.metadata.lat|default:'' }}', '{{ person.metadata.long|default:'' }}')">
                             <i class="fa-solid fa-expand"></i> عرض ملف الحالة
                         </button>
                     </div>
@@ -149,9 +149,25 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-7 d-flex flex-column">
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div class="modal-info-block h-100">
+                                    <h4><i class="fa-solid fa-cake-candles"></i> AGE</h4>
+                                    <p id="modalAge"></p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="modal-info-block h-100">
+                                    <h4><i class="fa-solid fa-dna"></i> DNA_LOCI</h4>
+                                    <p id="modalDNA" style="font-family: monospace; font-size: 0.85rem; word-break: break-all;"></p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="modal-info-block">
                             <h4><i class="fa-solid fa-location-dot"></i> LAST_KNOWN_LOCATION</h4>
                             <p id="modalLocation"></p>
+                            <a id="modalMapLink" href="#" target="_blank" style="display: none; color: var(--primary); text-decoration: none; font-size: 0.9rem; margin-top: 0.5rem;"><i class="fa-solid fa-map"></i> فتح في الخرائط</a>
                         </div>
                         <div class="modal-info-block flex-grow-1">
                             <h4><i class="fa-solid fa-align-right"></i> CASE_DETAILS</h4>
@@ -182,12 +198,23 @@
             }, 400);
         });
 
-        function showDetails(name, location, details, imageUrl, score) {
+        function showDetails(name, location, details, imageUrl, score, age, dna, lat, long) {
             document.getElementById('modalName').innerText = name || 'غير معروف';
             document.getElementById('modalLocation').innerText = location || 'غير متوفر';
             document.getElementById('modalDetails').innerText = details || 'لا توجد تفاصيل إضافية';
             document.getElementById('modalImage').src = imageUrl;
             document.getElementById('modalScoreBig').innerText = parseFloat(score).toFixed(1) + '%';
+            
+            document.getElementById('modalAge').innerText = age ? age + ' سنة' : 'غير متوفر';
+            document.getElementById('modalDNA').innerText = dna || 'غير متوفر';
+
+            const mapLink = document.getElementById('modalMapLink');
+            if (lat && long) {
+                mapLink.href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${long}#map=16/${lat}/${long}`;
+                mapLink.style.display = 'inline-block';
+            } else {
+                mapLink.style.display = 'none';
+            }
 
             const modal = document.getElementById('detailModal');
             modal.style.display = 'flex';
