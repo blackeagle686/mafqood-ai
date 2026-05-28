@@ -406,7 +406,7 @@
 }
 .tech-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
     margin-top: 4rem;
 }
@@ -519,6 +519,14 @@
 .tech-card#card-gan:hover .tech-card-icon {
     background: rgba(var(--secondary-rgb), 0.1);
     box-shadow: 0 0 25px rgba(var(--secondary-rgb), 0.3);
+}
+.tech-card#card-vector:hover .tech-card-icon {
+    background: rgba(129, 88, 57, 0.1); /* --color-4 */
+    box-shadow: 0 0 25px rgba(129, 88, 57, 0.3);
+}
+.tech-card#card-cluster:hover .tech-card-icon {
+    background: rgba(0, 255, 128, 0.1); /* --success */
+    box-shadow: 0 0 25px rgba(0, 255, 128, 0.3);
 }
 .tech-card h3 {
     font-family: 'Outfit', sans-serif;
