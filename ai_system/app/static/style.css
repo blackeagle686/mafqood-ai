@@ -729,7 +729,7 @@ textarea:focus {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: radial-gradient(ellipse at 30% 50%, rgba(10, 15, 25, 0.3) 0%, rgba(5, 8, 12, 0.97) 100%);
+    background: ;
     z-index: 0;
     pointer-events: none;
 }
