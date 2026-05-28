@@ -460,13 +460,7 @@
     </main>
 
     <!-- ===================== SCRIPTS ===================== -->
-    <script>
-    <script src="/static/js/network-bg.js"></script>
-    document.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
-    initDots();
-    requestAnimationFrame(loop);
-
-    /* ---- Scroll Reveal ---- */
+    <script src="/static/js/network-bg.js"></script>    /* ---- Scroll Reveal ---- */
     const revealEls = document.querySelectorAll('.reveal, .reveal-stat');
     const revealObs = new IntersectionObserver((entries) => {
         entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); revealObs.unobserve(e.target); } });
