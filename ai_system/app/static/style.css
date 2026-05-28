@@ -756,6 +756,7 @@ textarea:focus {
 .hero-overline {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.85rem;
+    font-weight: bolder;
     letter-spacing: 3px;
     color: var(--text);
     text-transform: uppercase;
