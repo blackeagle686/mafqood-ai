@@ -32,9 +32,25 @@ class FaceSearchView(APIView):
             temp_path = os.path.join("temp_uploads", f"{temp_prefix}{uuid.uuid4()}{ext}")
             
             os.makedirs("temp_uploads", exist_ok=True)
-            with open(temp_path, 'wb+') as destination:
-                for chunk in image.chunks():
-                    destination.write(chunk)
+            
+            try:
+                # Don't resize if it's a video
+                if is_video:
+                    raise Exception("Video files shouldn't be resized using PIL")
+                    
+                from PIL import Image
+                img = Image.open(image)
+                if img.mode in ("RGBA", "P"):
+                    img = img.convert("RGB")
+                
+                # Resize if larger than 1080 to optimize memory and processing time
+                img.thumbnail((1080, 1080), Image.Resampling.LANCZOS)
+                img.save(temp_path, format='JPEG', quality=85)
+            except Exception:
+                image.seek(0)
+                with open(temp_path, 'wb+') as destination:
+                    for chunk in image.chunks():
+                        destination.write(chunk)
             
             # Use pipeline
             result = {}
