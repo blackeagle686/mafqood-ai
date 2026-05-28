@@ -19,6 +19,10 @@ class ReportMissingPersonView(APIView):
             name = serializer.validated_data['name']
             last_seen = serializer.validated_data['last_seen']
             details = serializer.validated_data['details']
+            age = serializer.validated_data.get('age')
+            lat = serializer.validated_data.get('lat')
+            long = serializer.validated_data.get('long')
+            dna_str_loci = serializer.validated_data.get('dna_str_loci')
             
             # Save file temporarily
             ext = os.path.splitext(image.name)[1]
@@ -35,6 +39,10 @@ class ReportMissingPersonView(APIView):
                 "name": name,
                 "last_seen": last_seen,
                 "details": details,
+                "age": age,
+                "lat": lat,
+                "long": long,
+                "dna_str_loci": dna_str_loci,
                 "timestamp": str(uuid.uuid4()) # simple unique id for metadata
             }
             
