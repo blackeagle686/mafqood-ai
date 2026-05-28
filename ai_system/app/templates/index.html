@@ -460,7 +460,9 @@
     </main>
 
     <!-- ===================== SCRIPTS ===================== -->
-    <script src="/static/js/network-bg.js"></script>    /* ---- Scroll Reveal ---- */
+    <script src="/static/js/network-bg.js"></script>
+    <script>
+    /* ---- Scroll Reveal ---- */
     const revealEls = document.querySelectorAll('.reveal, .reveal-stat');
     const revealObs = new IntersectionObserver((entries) => {
         entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); revealObs.unobserve(e.target); } });
