@@ -173,7 +173,11 @@
                     <p class="section-desc">ثلاثة محاور ذكاء اصطناعي متكاملة تعمل معًا لتقديم أدق النتائج</p>
                 </div>
 
-                <div class="tech-grid">
+                <div class="carousel-container" style="position: relative; margin-top: 4rem;">
+                    <button class="carousel-btn prev-btn" id="tech-prev">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    <div class="tech-grid carousel-track" id="tech-track">
                     <!-- Card 1: DNA -->
                     <div class="tech-card tech-card--clickable reveal" id="card-dna" style="--glow-color: var(--primary);" onclick="window.location.href='{% url 'dna_search_page' %}'">
                         <div class="tech-card-glow"></div>
