@@ -663,8 +663,8 @@ textarea:focus {
     pointer-events: none;
 }
 .bg-dna {
-    background-image: url('/static/images/dna_bg2.png');
-    opacity: 0.12;
+    background-image: url('/static/images/dna-bg2.jpg');
+    opacity: 0.15;
     mix-blend-mode: screen;
 }
 .bg-face {
