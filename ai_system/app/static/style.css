@@ -1272,14 +1272,23 @@ textarea:focus {
 .cinematic-carousel {
     position: relative;
     width: 100%;
-    max-width: 500px;
+    max-width: 650px;
     margin: 0 auto;
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--primary-glow);
-    border: 1px solid rgba(0, 242, 255, 0.2);
-    aspect-ratio: 4/3;
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.6),
+        0 0 40px var(--primary-glow),
+        inset 0 0 60px rgba(0, 0, 0, 0.4);
+    border: 1.5px solid rgba(0, 242, 255, 0.25);
+    aspect-ratio: 16/10;
     background: #000;
+    animation: carouselGlowPulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes carouselGlowPulse {
+    0%   { box-shadow: 0 15px 50px rgba(0,0,0,0.6), 0 0 30px var(--primary-glow), inset 0 0 60px rgba(0,0,0,0.4); }
+    100% { box-shadow: 0 15px 50px rgba(0,0,0,0.6), 0 0 60px var(--primary-glow), inset 0 0 60px rgba(0,0,0,0.3); }
 }
 
 .carousel-inner {
@@ -1295,21 +1304,33 @@ textarea:focus {
     width: 100%;
     height: 100%;
     opacity: 0;
-    transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
-    transform: scale(1.05);
+    transition: opacity 1.2s ease-in-out, transform 1.2s ease-in-out, filter 1.2s ease-in-out;
+    transform: scale(1.08);
+    filter: blur(6px) brightness(0.5);
 }
 
 .carousel-item.active {
     opacity: 1;
     transform: scale(1);
+    filter: blur(0px) brightness(1);
     z-index: 1;
+}
+
+.carousel-item.active img {
+    animation: kenBurns 8s ease-in-out infinite alternate;
+}
+
+@keyframes kenBurns {
+    0%   { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.08) translate(-1%, -1%); }
 }
 
 .carousel-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.8;
+    object-position: center;
+    display: block;
 }
 
 .carousel-caption {
@@ -1317,13 +1338,15 @@ textarea:focus {
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 2rem 1rem 1.5rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+    padding: 2.5rem 1.5rem 1.8rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     color: #fff;
     text-align: center;
-    transform: translateY(20px);
+    transform: translateY(30px);
     opacity: 0;
-    transition: all 0.5s ease 0.3s;
+    transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
 }
 
 .carousel-item.active .carousel-caption {
@@ -1333,39 +1356,46 @@ textarea:focus {
 
 .carousel-caption h4 {
     color: var(--primary);
-    font-size: 1.2rem;
-    margin-bottom: 0.3rem;
-    text-shadow: 0 0 10px var(--primary-glow);
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
+    text-shadow: 0 0 15px var(--primary-glow);
+    letter-spacing: 1px;
+    font-weight: 700;
 }
 
 .carousel-caption p {
-    font-size: 0.9rem;
-    color: #ccc;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
     margin: 0;
 }
 
 .carousel-control {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    transform: translateY(-50%) scale(1);
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     color: #fff;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     z-index: 2;
-    transition: var(--transition-fast);
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    font-size: 1rem;
 }
 
 .carousel-control:hover {
     background: var(--primary);
     color: #000;
-    box-shadow: 0 0 15px var(--primary-glow);
+    box-shadow: 0 0 20px var(--primary-glow);
+    transform: translateY(-50%) scale(1.15);
+    border-color: var(--primary);
 }
 
 .carousel-control.prev { right: 15px; }
@@ -1373,25 +1403,25 @@ textarea:focus {
 
 .carousel-indicators {
     position: absolute;
-    bottom: 10px;
+    bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 8px;
+    gap: 10px;
     z-index: 2;
 }
 
 .carousel-indicators .indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
+    width: 28px;
+    height: 4px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.25);
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .carousel-indicators .indicator.active {
     background: var(--primary);
-    box-shadow: 0 0 10px var(--primary-glow);
-    transform: scale(1.2);
+    box-shadow: 0 0 12px var(--primary-glow);
+    width: 40px;
 }
