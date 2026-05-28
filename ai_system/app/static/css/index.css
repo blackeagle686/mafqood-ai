@@ -186,25 +186,26 @@
 }
 .hero-badge {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.8rem;
-    padding: 0.45rem 1rem;
-    border: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    padding: 0.5rem 1.2rem;
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
     border-radius: 50px;
     color: var(--text);
-    /* background: hsla(220, 25%, 10%, 0.5); */
-    background-image: linear-gradient(45deg, var(--accent), var(--background));
-    backdrop-filter: blur(6px);
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.15) 0%, rgba(var(--accent-rgb), 0.05) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: var(--transition-fast);
+    gap: 0.6rem;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
 }
 .hero-badge i { color: var(--primary); }
 .hero-badge:hover {
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.25) 0%, rgba(var(--accent-rgb), 0.15) 100%);
     border-color: var(--primary);
-    color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.15);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 5px 15px rgba(var(--primary-rgb), 0.2);
 }
 
 /* Hero CTA Buttons */
