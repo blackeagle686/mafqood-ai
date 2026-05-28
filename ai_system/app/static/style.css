@@ -666,6 +666,7 @@ textarea:focus {
     background-image: url('/static/images/dna_bg.png');
     opacity: 0.12;
     mix-blend-mode: screen;
+    
 }
 .bg-face {
     background-image: url('/static/images/face_mesh.png');
