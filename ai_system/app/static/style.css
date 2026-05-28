@@ -306,10 +306,10 @@ input[type="text"],
 input[type="number"],
 textarea {
     width: 100%;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--input-bg);
     border: 1px solid var(--border-color);
     padding: 1rem;
-    color: white;
+    color: var(--text);
     font-family: 'Share Tech Mono', monospace;
     border-radius: 2px;
 }
@@ -978,7 +978,7 @@ textarea:focus {
     font-family: 'Outfit', sans-serif;
     font-size: 2.8rem;
     font-weight: 800;
-    color: white;
+    color: var(--text);
     line-height: 1;
 }
 .ribbon-stat-unit {
