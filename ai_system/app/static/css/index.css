@@ -144,16 +144,19 @@
     color: var(--text);
     letter-spacing: -2px;
 }
-.text-gradient-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
-    background-size: 200% auto;
+.animated-text-shift {
+    background: linear-gradient(270deg, var(--primary), var(--accent), var(--secondary), var(--primary));
+    background-size: 300% 300%;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: shine 4s linear infinite;
+    animation: gradientShiftAnim 6s ease infinite;
+    display: inline-block;
 }
-@keyframes shine {
-    to { background-position: 200% center; }
+@keyframes gradientShiftAnim {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 @media (max-width: 768px) {
     .hero-title { font-size: 3rem; }
