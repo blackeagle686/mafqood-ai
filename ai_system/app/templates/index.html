@@ -164,20 +164,20 @@
         <!-- ===================== TECHNOLOGY CARDS ===================== -->
         <section class="section-tech" id="tech">
             <div class="container">
-                <div class="section-header reveal" style="text-align: center; border-left: none; padding-left: 0;">
-                    <span class="tech-font" style="color: var(--accent); font-size: 1rem; letter-spacing: 3px;">
+                <div class="section-header section-header--centered reveal">
+                    <span class="tech-font section-overline section-overline--accent">
                         CORE TECHNOLOGY
                     </span>
-                    <h2 style="font-size: 3rem; margin-top: 0.8rem;">التقنيات الأساسية</h2>
-                    <p style="color: var(--text-muted); max-width: 700px; margin: 1.5rem auto 0; font-size: 1.1rem;">ثلاثة محاور ذكاء اصطناعي متكاملة تعمل معًا لتقديم أدق النتائج</p>
+                    <h2 class="section-title">التقنيات الأساسية</h2>
+                    <p class="section-desc">ثلاثة محاور ذكاء اصطناعي متكاملة تعمل معًا لتقديم أدق النتائج</p>
                 </div>
 
                 <div class="tech-grid">
                     <!-- Card 1: DNA -->
-                    <div class="tech-card reveal" id="card-dna" style="cursor: pointer;" onclick="window.location.href='{% url 'dna_search_page' %}'">
+                    <div class="tech-card tech-card--clickable reveal" id="card-dna" onclick="window.location.href='{% url 'dna_search_page' %}'">
                         <div class="tech-card-glow" style="--glow-color: var(--primary);"></div>
                         <div class="tech-card-number tech-font">01</div>
-                        <div class="tech-card-icon" style="background: rgba(var(--primary-rgb), 0.08); color: var(--primary);">
+                        <div class="tech-card-icon tech-card-icon--primary">
                             <i class="fa-solid fa-dna"></i>
                         </div>
                         <h3>DNA Matching</h3>
@@ -185,15 +185,15 @@
                         <div class="tech-card-tags">
                             <span>Genome</span><span>Sequence</span><span>Bio-Link</span>
                         </div>
-                        <a href="{% url 'dna_search_page' %}" style="color: var(--primary); text-decoration: none; margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: bold;">
+                        <a href="{% url 'dna_search_page' %}" class="tech-card-link tech-card-link--primary">
                             بوابة مطابقة الحمض النووي <i class="fa-solid fa-arrow-left"></i>
                         </a>
                     </div>
                     <!-- Card 2: Face -->
-                    <div class="tech-card reveal" style="animation-delay: 0.15s; cursor: pointer;" id="card-face" onclick="window.location.href='{% url 'search_page' %}'">
+                    <div class="tech-card tech-card--clickable reveal delay-1" id="card-face" onclick="window.location.href='{% url 'search_page' %}'">
                         <div class="tech-card-glow" style="--glow-color: var(--accent);"></div>
                         <div class="tech-card-number tech-font">02</div>
-                        <div class="tech-card-icon" style="background: rgba(var(--accent-rgb), 0.08); color: var(--accent);">
+                        <div class="tech-card-icon tech-card-icon--accent">
                             <i class="fa-solid fa-image-portrait"></i>
                         </div>
                         <h3>Face Search</h3>
@@ -201,15 +201,15 @@
                         <div class="tech-card-tags">
                             <span>CNN</span><span>ArcFace</span><span>Embeddings</span>
                         </div>
-                        <a href="{% url 'search_page' %}" style="color: var(--accent); text-decoration: none; margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: bold;">
+                        <a href="{% url 'search_page' %}" class="tech-card-link tech-card-link--accent">
                             بوابة البحث بالوجه <i class="fa-solid fa-arrow-left"></i>
                         </a>
                     </div>
                     <!-- Card 3: GAN -->
-                    <div class="tech-card reveal" style="animation-delay: 0.3s; cursor: pointer;" id="card-gan" onclick="window.location.href='{% url 'search_page' %}'">
+                    <div class="tech-card tech-card--clickable reveal delay-2" id="card-gan" onclick="window.location.href='{% url 'search_page' %}'">
                         <div class="tech-card-glow" style="--glow-color: var(--secondary);"></div>
                         <div class="tech-card-number tech-font">03</div>
-                        <div class="tech-card-icon" style="background: rgba(var(--secondary-rgb), 0.08); color: var(--secondary);">
+                        <div class="tech-card-icon tech-card-icon--secondary">
                             <i class="fa-solid fa-child-reaching"></i>
                         </div>
                         <h3>Age Progression</h3>
@@ -217,7 +217,7 @@
                         <div class="tech-card-tags">
                             <span>GAN</span><span>StyleGAN</span><span>Aging</span>
                         </div>
-                        <a href="{% url 'search_page' %}" style="color: var(--secondary); text-decoration: none; margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: bold;">
+                        <a href="{% url 'search_page' %}" class="tech-card-link tech-card-link--secondary">
                             توليد العمر والمطابقة <i class="fa-solid fa-arrow-left"></i>
                         </a>
                     </div>
