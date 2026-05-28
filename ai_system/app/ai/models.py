@@ -31,6 +31,15 @@ class Post(models.Model):
     post_type = models.IntegerField() # 0 = Lost, 1 = Found
     image_url = models.TextField()
     is_resolved = models.BooleanField(default=False)
+    
+    # Person Identifier Fields
+    name = models.CharField(max_length=255, null=True, blank=True)
+    age = models.IntegerField(null=True, blank=True)
+    dna_str_loci = models.JSONField(null=True, blank=True)
+    lat = models.FloatField(null=True, blank=True)
+    long = models.FloatField(null=True, blank=True)
+    video_url = models.TextField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
