@@ -808,7 +808,7 @@ textarea:focus {
     padding: 0.45rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: 50px;
-    color: var(--text-muted);
+    color: var(--text);
     /* background: hsla(220, 25%, 10%, 0.5); */
     background-image: linear-gradient(45deg, var(--accent), var(--background));
     backdrop-filter: blur(6px);
