@@ -145,6 +145,22 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* ===== Grid Layout (2 Columns) ===== */
+.sections-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+.grid-column {
+    display: flex;
+    flex-direction: column;
+}
+@media (max-width: 992px) {
+    .sections-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ===== Field Groups ===== */
 .field-group {
     margin-bottom: 1.2rem;
