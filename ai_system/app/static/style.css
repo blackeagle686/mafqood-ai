@@ -1095,7 +1095,7 @@ textarea:focus {
 .section-pipeline {
     padding: 8rem 0;
     position: relative;
-    background: 
+    background-image: linear-gradient()
 }
 .pipeline-track {
     position: relative;
