@@ -423,19 +423,38 @@
         else scrollInd.style.opacity = '1';
     }, { passive: true });
 
-    /* ---- Cinematic Carousel Logic ---- */
+    /* ---- Cinematic Showcase Logic ---- */
     let currentSlide = 0;
-    const slides = document.querySelectorAll('.carousel-item');
-    const indicators = document.querySelectorAll('.carousel-indicators .indicator');
+    const slides = document.querySelectorAll('.cine-slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('cine-progress-bar');
+    const counterEl = document.getElementById('cine-counter');
+    const SLIDE_DURATION = 6000;
     let carouselInterval;
+    let progressAnim;
+
+    function updateCounter() {
+        if (counterEl) {
+            counterEl.textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+        }
+    }
+
+    function runProgress() {
+        if (!progressBar) return;
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        void progressBar.offsetWidth; // force reflow
+        progressBar.style.transition = `width ${SLIDE_DURATION}ms linear`;
+        progressBar.style.width = '100%';
+    }
 
     function setCarousel(index) {
-        if (slides.length === 0) return;
+        if (totalSlides === 0) return;
         slides[currentSlide].classList.remove('active');
-        indicators[currentSlide].classList.remove('active');
-        currentSlide = (index + slides.length) % slides.length;
+        currentSlide = ((index % totalSlides) + totalSlides) % totalSlides;
         slides[currentSlide].classList.add('active');
-        indicators[currentSlide].classList.add('active');
+        updateCounter();
+        runProgress();
         resetCarouselInterval();
     }
 
@@ -447,11 +466,13 @@
         clearInterval(carouselInterval);
         carouselInterval = setInterval(() => {
             moveCarousel(1);
-        }, 5000);
+        }, SLIDE_DURATION);
     }
 
-    // Initialize carousel if exists
-    if (slides.length > 0) {
+    // Initialize
+    if (totalSlides > 0) {
+        updateCounter();
+        runProgress();
         resetCarouselInterval();
     }
     </script>
