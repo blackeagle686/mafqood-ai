@@ -173,7 +173,7 @@
                     <div class="tech-card reveal" id="card-dna" style="cursor: pointer;" onclick="window.location.href='{% url 'dna_search_page' %}'">
                         <div class="tech-card-glow" style="--glow-color: var(--primary);"></div>
                         <div class="tech-card-number tech-font">01</div>
-                        <div class="tech-card-icon" style="background: hsla(182, 100%, 50%, 0.08); color: var(--primary);">
+                        <div class="tech-card-icon" style="background: rgba(var(--primary-rgb), 0.08); color: var(--primary);">
                             <i class="fa-solid fa-dna"></i>
                         </div>
                         <h3>DNA Matching</h3>
@@ -205,7 +205,7 @@
                     <div class="tech-card reveal" style="animation-delay: 0.3s; cursor: pointer;" id="card-gan" onclick="window.location.href='{% url 'search_page' %}'">
                         <div class="tech-card-glow" style="--glow-color: var(--secondary);"></div>
                         <div class="tech-card-number tech-font">03</div>
-                        <div class="tech-card-icon" style="background: hsla(266, 100%, 50%, 0.08); color: var(--secondary);">
+                        <div class="tech-card-icon" style="background: rgba(var(--secondary-rgb), 0.08); color: var(--secondary);">
                             <i class="fa-solid fa-child-reaching"></i>
                         </div>
                         <h3>Age Progression</h3>
@@ -452,7 +452,7 @@
         if (mouse.x > 0) {
             ctx.beginPath();
             ctx.arc(mouse.x, mouse.y, MOUSE_RADIUS, 0, 6.2832);
-            ctx.strokeStyle = 'rgba(0,242,255,0.05)';
+            ctx.strokeStyle = 'rgba(var(--primary-rgb), 0.05)';
             ctx.lineWidth = 1;
             ctx.stroke();
         }

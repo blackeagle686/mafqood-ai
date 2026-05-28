@@ -131,9 +131,9 @@
             perspective: 1000px;
             overflow: hidden;
             margin: 2rem 0;
-            background: radial-gradient(circle, hsla(182, 100%, 50%, 0.05) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(var(--primary-rgb), 0.05) 0%, transparent 70%);
             border-radius: 12px;
-            border: 1px dashed rgba(0, 242, 255, 0.1);
+            border: 1px dashed rgba(var(--primary-rgb), 0.1);
         }
 
         .dna-helix {
@@ -193,7 +193,7 @@
         }
 
         .demo-btn {
-            background: hsla(266, 100%, 50%, 0.05);
+            background: rgba(var(--secondary-rgb), 0.05);
             border: 1px solid rgba(138, 43, 226, 0.2);
             color: var(--text);
             padding: 0.8rem 1.2rem;
@@ -209,7 +209,7 @@
 
         .demo-btn:hover {
             border-color: var(--secondary);
-            background: hsla(266, 100%, 50%, 0.15);
+            background: rgba(var(--secondary-rgb), 0.15);
             box-shadow: 0 0 15px var(--secondary-glow);
             transform: translateY(-2px);
         }
@@ -305,7 +305,7 @@
 
             <div class="dna-grid">
                 <!-- LEFT: Inputs & Settings Panel -->
-                <div class="card" style="border-color: hsla(182, 100%, 50%, 0.15); height: fit-content;">
+                <div class="card" style="border-color: rgba(var(--primary-rgb), 0.15); height: fit-content;">
                     <h3 class="tech-font" style="color: var(--primary); margin-bottom: 1.5rem;">
                         <i class="fa-solid fa-gears"></i> إعدادات الفحص والمطابقة
                     </h3>
@@ -403,7 +403,7 @@
                 </div>
 
                 <!-- RIGHT: Results & Animation Panel -->
-                <div class="card" style="border-color: hsla(266, 100%, 50%, 0.15); display: flex; flex-direction: column;">
+                <div class="card" style="border-color: rgba(var(--secondary-rgb), 0.15); display: flex; flex-direction: column;">
                     <div id="status-display" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
                         <h3 class="tech-font" style="color: var(--secondary); margin-bottom: 1rem; text-align: center;">
                             [ DNA_SEQUENCER_STANDBY ]
@@ -724,7 +724,7 @@
                         if (scoreVal === 2) {
                             statusBadge = '<span class="status-badge match">تطابق كامل (2)</span>';
                         } else if (scoreVal === 1) {
-                            statusBadge = '<span class="status-badge match" style="color:#00f2ff; background:rgba(0,242,255,0.05); border-color:rgba(0,242,255,0.2)">تطابق جزئي (1)</span>';
+                            statusBadge = '<span class="status-badge match" style="color:#00f2ff; background:rgba(var(--primary-rgb), 0.05); border-color:rgba(var(--primary-rgb), 0.2)">تطابق جزئي (1)</span>';
                         } else {
                             statusBadge = '<span class="status-badge mismatch">لا تطابق (0)</span>';
                         }

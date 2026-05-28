@@ -22,7 +22,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse at center bottom, hsla(182, 100%, 50%, 0.06) 0%, transparent 60%);
+            background: radial-gradient(ellipse at center bottom, rgba(var(--primary-rgb), 0.06) 0%, transparent 60%);
             pointer-events: none;
         }
 
@@ -265,8 +265,8 @@
             width: 100%;
             padding: 0.9rem;
             border-radius: 10px;
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+            background: rgba(var(--primary-rgb), 0.05);
             color: var(--primary);
             font-weight: 600;
             font-size: 0.9rem;
@@ -504,8 +504,8 @@
         }
 
         .modal-btn-print {
-            background: rgba(0, 242, 255, 0.08);
-            border: 1px solid rgba(0, 242, 255, 0.2);
+            background: rgba(var(--primary-rgb), 0.08);
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
             color: var(--primary);
         }
 
