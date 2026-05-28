@@ -715,7 +715,7 @@ textarea:focus {
     opacity: 0.5;
     mix-blend-mode: screen;
 }
-.bg-face {
+/* .bg-face {
     background-image: url('/static/images/face_mesh.png');
     opacity: 0.08;
     mix-blend-mode: color-dodge;
@@ -723,7 +723,7 @@ textarea:focus {
     background-size: contain;
     background-repeat: no-repeat;
     border-radius: 50%;
-}
+} */
 
 .hero-overlay {
     position: absolute;
