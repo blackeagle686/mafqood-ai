@@ -41,19 +41,22 @@
             max-width: 680px;
             margin: 2.5rem auto 4rem;
             background: var(--card-bg);
-            border: 1px solid rgba(var(--secondary-rgb), 0.2);
+            border: 1px solid var(--secondary);
             border-radius: 20px;
             padding: 2.5rem;
-            /* backdrop-filter: blur(100px); */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(var(--secondary-rgb), 0.1);
             position: relative;
+            overflow: hidden;
         }
         .form-card::after {
             content: '';
             position: absolute;
-            bottom: 0; left: 10%; right: 10%;
+            bottom: 0; left: 0; right: 0;
             height: 1px;
-            /* background: linear-gradient(90deg, transparent, var(--secondary), transparent); */
-            /* opacity: ; */
+            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+            opacity: 0.8;
         }
 
         .upload-box {
