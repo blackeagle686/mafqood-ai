@@ -73,7 +73,7 @@
 
 [data-theme="light"] .bg-dna {
     mix-blend-mode: multiply;
-    opacity: 0.4;
+    opacity: 0.0;
 }
 
 [data-theme="light"] .bg-face {
