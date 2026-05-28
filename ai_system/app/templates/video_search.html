@@ -5,18 +5,242 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تحليل الفيديو - مفقود AI</title>
+    <meta name="description" content="البحث الذكي في الفيديوهات عن الأشخاص المفقودين — منصة مفقود للذكاء الاصطناعي">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .page-hero {
+            position: relative;
+            padding: 7rem 2rem 2rem;
+            text-align: center;
+            overflow: hidden;
+        }
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center bottom, hsla(266, 100%, 50%, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .page-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: var(--secondary);
+            border: 1px solid rgba(131, 0, 255, 0.3);
+            padding: 0.4rem 1.2rem;
+            border-radius: 4px;
+            background: rgba(131, 0, 255, 0.05);
+            margin-bottom: 1.2rem;
+        }
+
+        .form-card {
+            max-width: 680px;
+            margin: 2.5rem auto 4rem;
+            background: hsla(220, 25%, 7%, 0.85);
+            border: 1px solid rgba(131, 0, 255, 0.2);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(6px);
+            position: relative;
+        }
+        .form-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 10%; right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+            opacity: 0.5;
+        }
+
+        .upload-box {
+            border: 2px dashed rgba(131, 0, 255, 0.3);
+            border-radius: 16px;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(131, 0, 255, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(131, 0, 255, 0.03), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        .upload-box:hover {
+            border-color: var(--secondary);
+            background: rgba(131, 0, 255, 0.05);
+            box-shadow: 0 0 30px rgba(131, 0, 255, 0.08);
+        }
+        .upload-box:hover::before { transform: translateX(100%); }
+
+        .upload-box-icon {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: rgba(131, 0, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        .upload-box-icon i { font-size: 2rem; color: var(--secondary); }
+        .file-name-display {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            word-break: break-all;
+        }
+
+        .form-row {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px dashed rgba(255,255,255,0.05);
+        }
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 1.5px;
+            color: var(--secondary);
+            margin-bottom: 0.8rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(131, 0, 255, 0.2);
+            background: rgba(255,255,255,0.02);
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+        }
+        .form-input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(131, 0, 255, 0.1);
+            background: rgba(131, 0, 255, 0.03);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.1rem;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--secondary), hsl(271, 100%, 40%));
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 2.5rem;
+        }
+        .submit-btn:hover {
+            box-shadow: 0 6px 30px rgba(131, 0, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        /* Loading Modal V2 (Purple Theme) */
+        .loading-modal-v2 {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .loading-modal-v2.show { opacity: 1; }
+
+        .scanner-v2 {
+            width: 280px;
+            height: 180px;
+            border: 2px solid var(--secondary);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(131, 0, 255, 0.2);
+            background: hsla(266, 100%, 50%, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .scanner-v2-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(131, 0, 255, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(131, 0, 255, 0.15) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 2;
+        }
+        .scanner-v2-line {
+            position: absolute;
+            left: 0; right: 0; top: 0;
+            height: 3px;
+            background: var(--secondary);
+            box-shadow: 0 0 20px 5px var(--secondary);
+            z-index: 3;
+            animation: scan-v2-horizontal 2s ease-in-out infinite alternate;
+        }
+        @keyframes scan-v2-horizontal {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(177px); }
+        }
+        .scanner-v2-icon {
+            font-size: 4.5rem;
+            color: var(--secondary);
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .loading-text-v2 {
+            margin-top: 2.5rem;
+            text-align: center;
+        }
+        .loading-text-v2 h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--secondary);
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+            margin-bottom: 0.8rem;
+        }
+        .loading-text-v2 p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+    </style>
 </head>
 
 <body>
     <div class="scanline"></div>
+    <div class="bg-layer bg-dna"></div>
     <nav>
         <div class="nav-content">
             <a href="/" class="logo">
                 <i class="fa-solid fa-hands-holding-child" style="margin-left: 0.5rem;"></i>
-                مفقود <span class="tech-font" style="font-size: 0.8rem; font-weight: 300; opacity: 0.7;">للبحث
-                    الإنساني</span>
+                مفقود <span class="tech-font" style="font-size: 0.8rem; font-weight: 300; opacity: 0.7;">البحث المتقدم</span>
             </a>
             <div class="nav-links">
                 <a href="{% url 'report_page' %}"><i class="fa-solid fa-file-invoice"></i> إرسال بلاغ</a>
@@ -27,89 +251,82 @@
         </div>
     </nav>
 
-    <main class="container" style="padding-top: 5rem;">
-        <header class="section-header" style="text-align: center; border-left: none; padding-left: 0;">
-            <h1 class="tech-font"
-                style="font-size: 3rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
-                البحث الذكي في الفيديوهات
-            </h1>
-            <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 800px; margin: 0 auto;">استخدام تقنيات
-                الذكاء الاصطناعي لمسح مقاطع الفيديو والتعرف على الأشخاص المفقودين للمساعدة في عملية البحث الميداني.</p>
-        </header>
+    <div class="page-hero">
+        <span class="page-badge"><i class="fa-solid fa-film"></i> VIDEO_ANALYSIS</span>
+        <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 30%, var(--secondary) 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+            البحث الذكي في الفيديوهات
+        </h1>
+        <p style="font-size: 1.1rem; color: var(--text-muted); max-width: 650px; margin: 0 auto; line-height: 1.8;">
+            استخدام تقنيات الذكاء الاصطناعي لمسح مقاطع الفيديو والتعرف على الأشخاص المفقودين للمساعدة في عملية البحث الميداني.
+        </p>
+    </div>
 
-        <section class="upload-section card"
-            style="max-width: 700px; margin: 3rem auto; border-color: hsla(266, 100%, 50%, 0.2);">
+    <div class="container">
+        <div class="form-card">
             <form id="videoUploadForm" action="/api/search/video/" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="upload-area" id="dropZone"
-                    style="border-radius: 12px; border-style: solid; border-width: 1px; border-color: hsla(266, 100%, 50%, 0.2); background: hsla(266, 100%, 50%, 0.02);">
+                <div class="upload-box" id="dropZone">
                     <input type="file" id="videoFile" name="file" accept="video/*" hidden required>
-                    <div class="upload-icon" style="color: var(--secondary);">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                    </div>
-                    <p class="tech-font" style="color: var(--text); font-size: 1.1rem; margin-bottom: 0.5rem;">
-                        READY_FOR_VIDEO_SEARCH</p>
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">اسحب مقطع الفيديو هنا (MP4, AVI, MOV)</p>
+                    <div class="upload-box-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <p class="tech-font" style="color: var(--text); font-size: 1.05rem; margin-bottom: 0.5rem;">READY_FOR_VIDEO_SEARCH</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">اسحب مقطع الفيديو هنا أو اضغط للاختيار (MP4, AVI, MOV)</p>
+                    <div id="file-name" class="file-name-display"></div>
                 </div>
 
-                <div class="form-group" style="margin-top: 3rem;">
-                    <label class="tech-font" style="color: var(--secondary);"><i class="fa-solid fa-gauge-high"></i>
-                        Sampling_Rate [Frames to Skip]</label>
-                    <input type="number" id="sampling_rate" name="sampling_rate" value="15" min="1"
-                        style="background: hsla(266, 100%, 50%, 0.05); border-color: hsla(266, 100%, 50%, 0.2);">
-                    <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">كلما زاد الرقم زادت
-                        سرعة المسح ولكن قد تقل الدقة في رصد الوجوه العابرة.</small>
+                <div class="form-row">
+                    <div class="form-label"><i class="fa-solid fa-gauge-high"></i> SAMPLING_RATE [FRAMES TO SKIP]</div>
+                    <input class="form-input" type="number" id="sampling_rate" name="sampling_rate" value="15" min="1">
+                    <small style="color: rgba(255,255,255,0.4); display: block; margin-top: 0.6rem; font-size: 0.85rem; line-height: 1.5;">
+                        <i class="fa-solid fa-circle-info" style="color: var(--secondary);"></i> كلما زاد الرقم زادت سرعة المسح ولكن قد تقل الدقة في رصد الوجوه العابرة.
+                    </small>
                 </div>
 
-                <button type="submit" class="btn-secondary" id="submitBtn" style="width: 100%; margin-top: 2rem;">
-                    <i class="fa-solid fa-magnifying-glass"></i> بدء عملية البحث الذكي
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fa-solid fa-microchip"></i> بدء تحليل إطارات الفيديو
                 </button>
             </form>
+        </div>
+    </div>
 
-            <!-- Loading Modal for Video -->
-            <div id="loadingModal" class="loading-modal">
-                <div class="scanner-container" style="border-color: var(--secondary);">
-                    <div class="scanner-grid"
-                        style="background-image: linear-gradient(rgba(131, 0, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(131, 0, 255, 0.1) 1px, transparent 1px);">
-                    </div>
-                    <div class="scanner-line"
-                        style="background: linear-gradient(to bottom, transparent, var(--secondary), transparent); box-shadow: 0 0 15px var(--secondary);">
-                    </div>
-                    <div
-                        style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: hsla(266, 100%, 50%, 0.1);">
-                        <i class="fa-solid fa-film" style="font-size: 5rem; color: var(--secondary); opacity: 0.5;"></i>
-                    </div>
-                </div>
-                <div class="loading-text tech-font">
-                    <h3 style="color: var(--secondary);">[ ANALYZING_VIDEO_STREAM ]</h3>
-                    <p>جاري مسح إطارات الفيديو والتحقق من سجلات المفقودين...</p>
-                    <div style="margin-top: 1.5rem; color: var(--secondary); font-size: 0.8rem; opacity: 0.8;"
-                        class="pulse">
-                        FRAME_EXTRACTION_IN_PROGRESS...
-                    </div>
-                </div>
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="loading-modal-v2">
+        <div class="scanner-v2">
+            <div class="scanner-v2-grid"></div>
+            <div class="scanner-v2-line"></div>
+            <i class="fa-solid fa-video scanner-v2-icon"></i>
+        </div>
+        <div class="loading-text-v2">
+            <h3>[ ANALYZING_VIDEO_STREAM ]</h3>
+            <p>جاري مسح إطارات الفيديو والتحقق من السجلات... يرجى الانتظار</p>
+            <div style="margin-top: 1rem; color: var(--secondary); font-size: 0.75rem; font-family: 'Share Tech Mono'; opacity: 0.7;" class="pulse">
+                FRAME_EXTRACTION_IN_PROGRESS...
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
 
     <script>
         const form = document.getElementById('videoUploadForm');
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('videoFile');
-        const statusArea = document.getElementById('statusArea');
+        const fileNameDisplay = document.getElementById('file-name');
         const submitBtn = document.getElementById('submitBtn');
 
         dropZone.onclick = () => fileInput.click();
+        
         fileInput.onchange = (e) => {
             if (e.target.files.length > 0) {
-                dropZone.querySelector('p').innerText = e.target.files[0].name;
+                fileNameDisplay.innerHTML = `<i class="fa-solid fa-file-video"></i> ${e.target.files[0].name}`;
+            } else {
+                fileNameDisplay.innerHTML = '';
             }
         };
 
         form.onsubmit = () => {
             if (fileInput.files.length > 0) {
                 submitBtn.disabled = true;
-                submitBtn.innerText = 'جاري التحضير...';
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحضير للتحليل...';
                 const loadingModal = document.getElementById('loadingModal');
                 loadingModal.style.display = 'flex';
                 setTimeout(() => loadingModal.classList.add('show'), 10);
@@ -119,5 +336,4 @@
         };
     </script>
 </body>
-
 </html>
