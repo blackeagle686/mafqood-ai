@@ -23,7 +23,8 @@
     --secondary-glow: rgba(var(--secondary-rgb), 0.3);
 
     --accent: var(--color-3);
-    --accent-glow: rgba(147, 94, 56, 0.3);
+    --accent-rgb: 147, 94, 56;
+    --accent-glow: rgba(var(--accent-rgb), 0.3);
 
     --background: var(--color-10);
     --surface: rgba(20, 54, 66, 0.7);
