@@ -1021,7 +1021,7 @@ textarea:focus {
 
 .tech-card {
     position: relative;
-    background: hsla(220, 25%, 8%, 0.8);
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 2.5rem 2rem;
@@ -1049,7 +1049,7 @@ textarea:focus {
     position: absolute;
     top: 1.2rem; left: 1.5rem;
     font-size: 0.8rem;
-    color: hsla(0, 0%, 100%, 0.15);
+    color: rgba(var(--text-rgb), 0.15);
     letter-spacing: 2px;
 }
 .tech-card-icon {
@@ -1065,7 +1065,7 @@ textarea:focus {
     font-family: 'Outfit', sans-serif;
     font-size: 1.3rem;
     font-weight: 700;
-    color: white;
+    color: var(--text);
     margin-bottom: 0.8rem;
 }
 .tech-card p {
