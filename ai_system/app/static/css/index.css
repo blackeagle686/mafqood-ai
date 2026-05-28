@@ -458,10 +458,6 @@
 @media (max-width: 768px) {
     .prev-btn, .next-btn { display: none; } /* Hide buttons on mobile, allow native touch scroll */
 }
-@media (max-width: 992px) {
-    .tech-grid { grid-template-columns: 1fr; max-width: 500px; margin-left: auto; margin-right: auto; }
-}
-
 .tech-card {
     position: relative;
     background: var(--card-bg);
