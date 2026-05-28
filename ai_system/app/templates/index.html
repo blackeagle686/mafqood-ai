@@ -274,27 +274,60 @@
                     if (track && nextBtn && prevBtn) {
                         const scrollAmount = 350; // approximate card width + gap
                         let autoPlayTimer;
+                        let isAnimating = false;
+                        
+                        // Custom smooth scroll function for elegant, slow transitions
+                        const customSmoothScrollBy = (change, duration = 1200) => {
+                            if (isAnimating) return;
+                            isAnimating = true;
+                            
+                            // Temporarily disable snap to prevent browser interference during animation
+                            track.style.scrollSnapType = 'none';
+                            
+                            const start = track.scrollLeft;
+                            const startTime = performance.now();
+
+                            const animateScroll = (currentTime) => {
+                                const elapsed = currentTime - startTime;
+                                const progress = Math.min(elapsed / duration, 1);
+                                
+                                // easeInOutCubic for a very premium feel
+                                const ease = progress < 0.5 
+                                    ? 4 * progress * progress * progress 
+                                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                                
+                                track.scrollLeft = start + change * ease;
+                                
+                                if (progress < 1) {
+                                    requestAnimationFrame(animateScroll);
+                                } else {
+                                    track.style.scrollSnapType = 'x mandatory';
+                                    isAnimating = false;
+                                }
+                            };
+                            requestAnimationFrame(animateScroll);
+                        };
                         
                         const scrollNext = () => {
-                            // In RTL, scrollLeft goes negative to scroll left visually
-                            track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                            if (isAnimating) return;
                             
-                            // Check if reached the end, loop back
-                            // Due to RTL differences across browsers, checking absolute scroll position
-                            setTimeout(() => {
-                                if (Math.abs(track.scrollLeft) >= (track.scrollWidth - track.clientWidth - 10)) {
-                                    track.scrollTo({ left: 0, behavior: 'smooth' });
-                                }
-                            }, 500);
+                            // Check if reached the end, loop back elegantly
+                            if (Math.abs(track.scrollLeft) >= (track.scrollWidth - track.clientWidth - 10)) {
+                                customSmoothScrollBy(-track.scrollLeft, 1500); // Rewind slowly
+                            } else {
+                                // In RTL, scrollLeft goes negative to scroll left visually
+                                customSmoothScrollBy(-scrollAmount, 1000);
+                            }
                         };
 
                         const scrollPrev = () => {
-                            track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                            setTimeout(() => {
-                                if (track.scrollLeft >= -10) {
-                                    track.scrollTo({ left: -(track.scrollWidth - track.clientWidth), behavior: 'smooth' });
-                                }
-                            }, 500);
+                            if (isAnimating) return;
+                            
+                            if (track.scrollLeft >= -10) {
+                                customSmoothScrollBy(-(track.scrollWidth - track.clientWidth), 1500);
+                            } else {
+                                customSmoothScrollBy(scrollAmount, 1000);
+                            }
                         };
 
                         nextBtn.addEventListener('click', () => {
@@ -307,9 +340,9 @@
                             resetAutoPlay();
                         });
 
-                        // Dynamic Motion: Auto-Play
+                        // Dynamic Motion: Auto-Play every 5 seconds
                         const startAutoPlay = () => {
-                            autoPlayTimer = setInterval(scrollNext, 3500);
+                            autoPlayTimer = setInterval(scrollNext, 5000);
                         };
                         
                         const stopAutoPlay = () => {
