@@ -58,8 +58,9 @@ class FaceSearchView(APIView):
             search_results = result.get('search_results', [])
             filtered_results = []
             for res in search_results:
-                score = round(100 * max(0, 1 - res.get('distance', 1.0)), 1)
-                if score > 40:
+                # Use the intelligent similarity mapping calculated by FaceSearchService
+                score = res.get('similarity', round(100 * max(0, 1 - res.get('distance', 1.0)), 1))
+                if score >= 40:
                     res['score'] = score
                     # Add image URL for the template
                     orig_path = res.get('metadata', {}).get('original_image', '')
