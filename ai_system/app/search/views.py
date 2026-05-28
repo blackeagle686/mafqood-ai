@@ -29,11 +29,9 @@ class FaceSearchView(APIView):
             if ext.lower() in ['.mp4', '.avi', '.mov', '.mkv']:
                 is_video = True
 
-            from django.conf import settings
+            temp_path = os.path.join("temp_uploads", f"{temp_prefix}{uuid.uuid4()}{ext}")
             
-            temp_path = os.path.join(settings.MEDIA_ROOT, f"{temp_prefix}{uuid.uuid4()}{ext}")
-            
-            os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+            os.makedirs("temp_uploads", exist_ok=True)
             with open(temp_path, 'wb+') as destination:
                 for chunk in image.chunks():
                     destination.write(chunk)
