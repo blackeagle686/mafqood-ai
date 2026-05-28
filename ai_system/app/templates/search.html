@@ -31,42 +31,72 @@
         </div>
     </nav>
 
-    <div class="page-hero">
-        <span class="page-badge"><i class="fa-solid fa-face-viewfinder"></i> FACE_RECOGNITION</span>
-        <h1 class="page-hero-title">
-            البحث الذكي عن المفقودين
-        </h1>
-        <p class="page-hero-subtitle">
-            قم برفع صورة الشخص المفقود للبدء في عملية المطابقة الفورية مع قاعدة البيانات.
-        </p>
-    </div>
+    <div class="container" style="padding-top: 6rem; min-height: calc(100vh - 150px); display: flex; align-items: center;">
+        <div class="split-layout-container">
+            <!-- Right Side (Info) -->
+            <div class="split-info-side">
+                <span class="page-badge"><i class="fa-solid fa-face-viewfinder"></i> FACE_RECOGNITION</span>
+                <h1 class="page-hero-title">
+                    البحث الذكي عن المفقودين
+                </h1>
+                <p class="page-hero-subtitle">
+                    قم برفع صورة الشخص المفقود للبدء في عملية المطابقة الفورية مع قاعدة البيانات.
+                </p>
+                
+                <ul class="info-features">
+                    <li>
+                        <div class="feature-icon"><i class="fa-solid fa-microchip"></i></div>
+                        <div class="feature-text">
+                            <strong>تحليل تلافيفي عميق</strong>
+                            <span>نستخدم شبكات CNN لاستخراج مئات الميزات الحيوية من الوجه بدقة فائقة.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <div class="feature-text">
+                            <strong>مطابقة سريعة Vector DB</strong>
+                            <span>بحث ميلي-ثانية داخل ملايين السجلات بفضل تقنيات البحث المتجهي HNSW.</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="feature-icon"><i class="fa-solid fa-child-reaching"></i></div>
+                        <div class="feature-text">
+                            <strong>توقع تقدم العمر</strong>
+                            <span>تكامل تلقائي مع نماذج التوليد للتعرف على المفقودين منذ فترات طويلة.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
 
-    <div class="container">
-        <div class="form-card">
-            {% if errors %}
-            <div class="error-alert">
-                <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.2rem;"></i>
-                <div>
-                    <strong>[ ERROR_ANALYTICS_FAILURE ]</strong><br>
-                    يرجى التأكد من جودة الصورة المرفوعة ووضوح ملامح الوجه.
+            <!-- Left Side (Form) -->
+            <div class="split-form-side">
+                <div class="form-card">
+                    {% if errors %}
+                    <div class="error-alert">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.2rem;"></i>
+                        <div>
+                            <strong>[ ERROR_ANALYTICS_FAILURE ]</strong><br>
+                            يرجى التأكد من جودة الصورة المرفوعة ووضوح ملامح الوجه.
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form id="search-form" action="/api/search/face/" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="upload-box" onclick="document.getElementById('file-input').click()">
+                            <div class="upload-box-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <p class="tech-font" style="color: var(--text); font-size: 1rem; margin-bottom: 0.5rem;">READY_FOR_SEARCH_SCAN</p>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">اسحب أو اختر صورة الشخص المفقود للبدء</p>
+                            <input type="file" id="file-input" name="file" accept="image/*" style="display: none;" onchange="previewImage(event)" required>
+                            <img id="image-preview" src="#" alt="Preview">
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <i class="fa-solid fa-magnifying-glass"></i> بدء عملية المطابقة البيومترية
+                        </button>
+                    </form>
                 </div>
             </div>
-            {% endif %}
-
-            <form id="search-form" action="/api/search/face/" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="upload-box" onclick="document.getElementById('file-input').click()">
-                    <div class="upload-box-icon"><i class="fa-solid fa-heart-pulse"></i></div>
-                    <p class="tech-font" style="color: var(--text); font-size: 1rem; margin-bottom: 0.5rem;">READY_FOR_SEARCH_SCAN</p>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">اسحب أو اختر صورة الشخص المفقود للبدء</p>
-                    <input type="file" id="file-input" name="file" accept="image/*" style="display: none;" onchange="previewImage(event)" required>
-                    <img id="image-preview" src="#" alt="Preview">
-                </div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <i class="fa-solid fa-magnifying-glass"></i> بدء عملية المطابقة البيومترية
-                </button>
-            </form>
         </div>
     </div>
 
