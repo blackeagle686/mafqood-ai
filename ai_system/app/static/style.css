@@ -691,7 +691,7 @@ textarea:focus {
     align-items: center;
     overflow: hidden;
     padding: 7rem 5rem 4rem 5rem;
-    gap: 1rem;
+    gap: 4rem;
 }
 
 @media (max-width: 992px) {
