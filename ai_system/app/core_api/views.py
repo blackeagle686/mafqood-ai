@@ -15,3 +15,6 @@ class ResultsView(TemplateView):
 
 class VideoSearchView(TemplateView):
     template_name = "video_search.html"
+
+class DNASearchPageView(TemplateView):
+    template_name = "dna_search.html"
