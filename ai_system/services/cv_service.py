@@ -48,6 +48,45 @@ class FaceCVPipeline:
     def __init__(self):
         self.app = FaceModelLoader.get_face_analysis()
 
+    def enhance_image(self, image: np.ndarray) -> np.ndarray:
+        """
+        Enhances image quality to improve face detection for challenging conditions:
+        - Denoising for low-quality/grainy images
+        - Dynamic Gamma Correction for poor lighting (dark/overexposed)
+        - Unsharp Masking for better edge definition (glasses, facial contours)
+        """
+        # 1. Denoise to handle grainy/noisy images
+        # We use a relatively light filter to preserve facial textures
+        denoised = cv2.fastNlMeansDenoisingColored(image, None, 5, 5, 7, 21)
+
+        # 2. Dynamic Gamma Correction for lighting
+        # Calculate mean brightness (L channel in LAB)
+        lab = cv2.cvtColor(denoised, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        mean_brightness = np.mean(l)
+
+        # Target a mean brightness of ~130
+        gamma = 1.0
+        if mean_brightness < 90:  # Very dark
+            gamma = 1.5
+        elif mean_brightness > 180:  # Overexposed
+            gamma = 0.8
+            
+        if gamma != 1.0:
+            invGamma = 1.0 / gamma
+            table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
+            l_gamma = cv2.LUT(l, table)
+            lab = cv2.merge((l_gamma, a, b))
+            color_corrected = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+        else:
+            color_corrected = denoised
+
+        # 3. Mild Unsharp Masking to define edges (helps with glasses)
+        gaussian = cv2.GaussianBlur(color_corrected, (0, 0), 2.0)
+        enhanced = cv2.addWeighted(color_corrected, 1.3, gaussian, -0.3, 0)
+
+        return enhanced
+
     def process_image(self, image_path: str) -> List[Face]:
         """Processes an image and returns a list of validated PipelineResultSchema."""
         logger.info(f"Processing image: {image_path}")
@@ -57,9 +96,12 @@ class FaceCVPipeline:
             return []
 
         try:
+            # Apply enhancement to handle noise, lighting, and glasses
+            processed_img = self.enhance_image(image)
+
             # Step 1: Detect and Extract (One-step via InsightFace)
             # This returns a list of face objects with bbox, kps, embedding, etc.
-            faces = self.app.get(image)
+            faces = self.app.get(processed_img)
             results = []
 
             for face in faces:
