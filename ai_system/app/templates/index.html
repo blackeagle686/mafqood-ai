@@ -64,10 +64,35 @@
 
             <div class="hero-visual reveal" style="animation-delay: 0.4s;">
                 <div class="hero-visual-glow"></div>
-                <!-- DNA Helix Loop Animation -->
-                <div class="dna-helix-container" style="height: 400px; width: 100%; max-width: 400px; margin: 0 auto; border: none; background: transparent;">
-                    <div class="dna-helix" id="hero-helix">
-                        <!-- Generated programmatically -->
+                <!-- Cinematic Image Carousel -->
+                <div class="cinematic-carousel" id="hero-carousel">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="/static/images/dna-img-3.jpg" alt="DNA Analysis">
+                            <div class="carousel-caption">
+                                <h4>تحليل الحمض النووي</h4>
+                                <p>دقة عالية في المطابقة الجينية</p>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="/static/images/face-ana-bg.jpg" alt="Face Analysis">
+                            <div class="carousel-caption">
+                                <h4>التعرف على الوجوه</h4>
+                                <p>مسح وتحديد الملامح بالذكاء الاصطناعي</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="carousel-control prev" onclick="moveCarousel(-1)">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    <button class="carousel-control next" onclick="moveCarousel(1)">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    
+                    <div class="carousel-indicators">
+                        <span class="indicator active" onclick="setCarousel(0)"></span>
+                        <span class="indicator" onclick="setCarousel(1)"></span>
                     </div>
                 </div>
             </div>
