@@ -674,6 +674,7 @@ textarea:focus {
     background-position: right center;
     background-size: contain;
     background-repeat: no-repeat;
+    border-radius: 50%;
 }
 
 .hero-overlay {
