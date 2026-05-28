@@ -93,59 +93,59 @@
                         {% csrf_token %}
                         
                         <div class="form-grid">
-                            <!-- Column 1 -->
-                            <div>
-                                <div class="form-label"><i class="fa-solid fa-signature"></i> MISSING_PERSON_NAME</div>
-                                <input class="form-input" type="text" name="name" required placeholder="أدخل اسم الشخص المفقود">
-                            </div>
+                            <!-- Right Column: Text & Data Inputs -->
+                            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                <!-- Name & Age Row -->
+                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <div class="form-label"><i class="fa-solid fa-signature"></i> MISSING_PERSON_NAME</div>
+                                        <input class="form-input" type="text" name="name" required placeholder="أدخل اسم الشخص المفقود">
+                                    </div>
+                                    <div>
+                                        <div class="form-label"><i class="fa-solid fa-cake-candles"></i> AGE</div>
+                                        <input class="form-input" type="number" name="age" placeholder="العمر" min="0" max="150">
+                                    </div>
+                                </div>
 
-                            <!-- Column 2 -->
-                            <div>
-                                <div class="form-label"><i class="fa-solid fa-location-dot"></i> LAST_SEEN_LOCATION</div>
-                                <input class="form-input" type="text" name="last_seen" placeholder="آخر مكان شوهد فيه الشخص" required>
-                            </div>
+                                <div>
+                                    <div class="form-label"><i class="fa-solid fa-location-dot"></i> LAST_SEEN_LOCATION</div>
+                                    <input class="form-input" type="text" name="last_seen" placeholder="آخر مكان شوهد فيه الشخص" required>
+                                </div>
 
-                            <!-- Column 3: Age -->
-                            <div>
-                                <div class="form-label"><i class="fa-solid fa-cake-candles"></i> AGE</div>
-                                <input class="form-input" type="number" name="age" placeholder="العمر التقريبي" min="0" max="150">
-                            </div>
+                                <div>
+                                    <div class="form-label"><i class="fa-solid fa-scroll"></i> ADDITIONAL_DETAILS</div>
+                                    <textarea class="form-textarea" name="details" rows="3"
+                                        placeholder="العلامات المميزة، الملابس، الحالة الصحية..."></textarea>
+                                </div>
 
-                            <!-- Full Width: DNA STR Loci -->
-                            <div class="form-full-width">
-                                <div class="form-label"><i class="fa-solid fa-dna"></i> DNA STR LOCI (JSON)</div>
-                                <textarea class="form-textarea" name="dna_str_loci" rows="2"
-                                    placeholder='مثال: {"vWA": [14, 15], "FGA": [20, 22]}'></textarea>
-                            </div>
-
-                            <!-- Full Width: Map -->
-                            <div class="form-full-width">
-                                <div class="form-label"><i class="fa-solid fa-map-location-dot"></i> PIN_EXACT_LOCATION</div>
-                                <div id="map" style="height: 300px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 0.5rem; z-index: 1;"></div>
-                                <input type="hidden" name="lat" id="lat-input">
-                                <input type="hidden" name="long" id="long-input">
-                            </div>
-
-                            <!-- Full Width -->
-                            <div class="form-full-width">
-                                <div class="form-label"><i class="fa-solid fa-scroll"></i> ADDITIONAL_DETAILS</div>
-                                <textarea class="form-textarea" name="details" rows="3"
-                                    placeholder="العلامات المميزة، الملابس، الحالة الصحية..."></textarea>
-                            </div>
-
-                            <div class="form-full-width">
-                                <div class="form-label"><i class="fa-solid fa-camera-retro"></i> RECENT_PHOTO</div>
-                                <div class="upload-box" onclick="document.getElementById('file-input').click()">
-                                    <div class="upload-box-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                                    <p class="tech-font" style="color: var(--text); font-size: 1rem; margin-bottom: 0.5rem;">SECURE_DATA_UPLOAD</p>
-                                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">ارفع أوضح صورة متاحة للمفقود لزيادة فرص التعرف عليه</p>
-                                    <input type="file" id="file-input" name="file" accept="image/*" style="display: none;" onchange="previewImage(event)" required>
-                                    <img id="image-preview" src="#" alt="Preview">
+                                <div>
+                                    <div class="form-label"><i class="fa-solid fa-dna"></i> DNA STR LOCI (JSON)</div>
+                                    <textarea class="form-textarea" name="dna_str_loci" rows="2"
+                                        placeholder='مثال: {"vWA": [14, 15], "FGA": [20, 22]}'></textarea>
                                 </div>
                             </div>
 
-                            <div class="form-full-width">
-                                <button type="submit" class="submit-btn" id="submitBtn">
+                            <!-- Left Column: Media & Map -->
+                            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                <div>
+                                    <div class="form-label"><i class="fa-solid fa-camera-retro"></i> RECENT_PHOTO</div>
+                                    <div class="upload-box" onclick="document.getElementById('file-input').click()" style="padding: 2rem 1.5rem;">
+                                        <div class="upload-box-icon" style="width: 60px; height: 60px; margin-bottom: 1rem;"><i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.5rem;"></i></div>
+                                        <p class="tech-font" style="color: var(--text); font-size: 0.95rem; margin-bottom: 0.5rem;">SECURE_DATA_UPLOAD</p>
+                                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">ارفع أوضح صورة متاحة للمفقود</p>
+                                        <input type="file" id="file-input" name="file" accept="image/*" style="display: none;" onchange="previewImage(event)" required>
+                                        <img id="image-preview" src="#" alt="Preview" style="margin-top: 1rem;">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="form-label"><i class="fa-solid fa-map-location-dot"></i> PIN_EXACT_LOCATION</div>
+                                    <div id="map" style="height: 220px; border-radius: 12px; border: 1px solid var(--border-color); z-index: 1;"></div>
+                                    <input type="hidden" name="lat" id="lat-input">
+                                    <input type="hidden" name="long" id="long-input">
+                                </div>
+
+                                <button type="submit" class="submit-btn" id="submitBtn" style="margin-top: auto;">
                                     <i class="fa-solid fa-database"></i> حفظ البلاغ وبدء التحليل
                                 </button>
                             </div>
