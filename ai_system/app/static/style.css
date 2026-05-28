@@ -690,7 +690,7 @@ textarea:focus {
     grid-template-columns: 1fr 1fr;
     align-items: center;
     overflow: hidden;
-    padding: 7rem 5rem 4rem 8rem;
+    padding: 7rem 8rem 4rem 5rem;
     gap: 3rem;
 }
 
