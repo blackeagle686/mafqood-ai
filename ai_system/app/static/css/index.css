@@ -512,7 +512,7 @@
     opacity: 1;
 }
 .tech-card:hover::after {
-    background: var(--surface);
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--glow-color-rgb, 183, 105, 53), 0.15) 100%);
 }
 .tech-card-glow {
     position: absolute;
