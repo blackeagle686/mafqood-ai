@@ -1272,7 +1272,7 @@ textarea:focus {
 .cine-showcase {
     position: relative;
     width: 100%;
-    max-width: 780px;
+    max-width: 950px;
     margin: 0 auto;
     aspect-ratio: 16/11;
     border-radius: 18px;
