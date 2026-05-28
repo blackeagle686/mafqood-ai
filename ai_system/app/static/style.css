@@ -843,7 +843,7 @@ textarea:focus {
     100% { opacity: 1; transform: scale(1.1); }
 }
 
-.hero-visual img {
+.hero-visual > img {
     max-width: 85%;
     max-height: 75vh;
     height: auto;
@@ -858,7 +858,7 @@ textarea:focus {
 }
 
 @media (max-width: 992px) {
-    .hero-visual img { max-width: 65%; max-height: 50vh; }
+    .hero-visual > img { max-width: 65%; max-height: 50vh; }
     .hero-visual-glow { display: none; }
 }
 
