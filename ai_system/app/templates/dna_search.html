@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مطابقة الحمض النووي (DNA) - مفقود AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dna-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .dna-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loci-inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .loci-inputs-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .loci-inputs-grid::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .loci-inputs-grid::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .locus-card {
+            background: hsla(220, 25%, 12%, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+            transition: var(--transition-fast);
+        }
+
+        .locus-card:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .locus-name {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: block;
+            font-weight: 600;
+        }
+
+        .locus-inputs {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .allele-input {
+            width: 100%;
+            padding: 0.4rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .allele-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 700;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Spinning DNA animation */
+        .dna-helix-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 250px;
+            position: relative;
+            perspective: 1000px;
+            overflow: hidden;
+            margin: 2rem 0;
+            background: radial-gradient(circle, hsla(182, 100%, 50%, 0.05) 0%, transparent 70%);
+            border-radius: 12px;
+            border: 1px dashed rgba(0, 242, 255, 0.1);
+        }
+
+        .dna-helix {
+            position: relative;
+            width: 200px;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: spinHelix 8s linear infinite;
+        }
+
+        @keyframes spinHelix {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .dna-strand {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .dna-node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .dna-node.a {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .dna-node.b {
+            background: var(--secondary);
+            box-shadow: 0 0 10px var(--secondary-glow);
+        }
+
+        .dna-bar {
+            position: absolute;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.15);
+            left: 50%;
+            transform: translateX(-50%);
+            transform-origin: center;
+        }
+
+        /* Demo profile buttons */
+        .demo-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-btn {
+            background: hsla(266, 100%, 50%, 0.05);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            color: var(--text);
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .demo-btn:hover {
+            border-color: var(--secondary);
+            background: hsla(266, 100%, 50%, 0.15);
+            box-shadow: 0 0 15px var(--secondary-glow);
+            transform: translateY(-2px);
+        }
+
+        .demo-btn i {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Genetic match locus visualization */
+        .locus-match-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .locus-match-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .status-badge.match {
+            background: rgba(157, 255, 0, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(157, 255, 0, 0.2);
+        }
+
+        .status-badge.mismatch {
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .results-details-box {
+            background: hsla(220, 25%, 6%, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+
+        .results-details-header {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.8rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scanline"></div>
+    <nav>
+        <div class="nav-content">
+            <a href="/" class="logo">
+                <i class="fa-solid fa-hands-holding-child" style="margin-left: 0.5rem;"></i>
+                مفقود <span class="tech-font" style="font-size: 0.8rem; font-weight: 300; opacity: 0.7;">للبحث الإنساني</span>
+            </a>
+            <div class="nav-links">
+                <a href="{% url 'report_page' %}"><i class="fa-solid fa-file-invoice"></i> إرسال بلاغ</a>
+                <a href="{% url 'search_page' %}"><i class="fa-solid fa-id-card"></i> بحث الوجه</a>
+                <a href="{% url 'video_search_page' %}"><i class="fa-solid fa-video"></i> تحليل الفيديو</a>
+                <a href="{% url 'dna_search_page' %}" class="active"><i class="fa-solid fa-dna"></i> مطابقة DNA</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 5rem; padding-bottom: 5rem;">
+        <main>
+            <div class="section-header" style="text-align: center; border-left: none; padding-left: 0;">
+                <h1 class="tech-font"
+                    style="font-size: 3rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                    تحليل ومطابقة الحمض النووي
+                </h1>
+                <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 800px; margin: 0 auto;">
+                    أدخل المؤشرات الجينية (STR Loci) لمطابقة عينة حمض نووي مع السجلات المتوفرة للتحقق من الهوية أو صلات القرابة (الأبوة أو الأخوة).
+                </p>
+            </div>
+
+            <div class="dna-grid">
+                <!-- LEFT: Inputs & Settings Panel -->
+                <div class="card" style="border-color: hsla(182, 100%, 50%, 0.15); height: fit-content;">
+                    <h3 class="tech-font" style="color: var(--primary); margin-bottom: 1.5rem;">
+                        <i class="fa-solid fa-gears"></i> إعدادات الفحص والمطابقة
+                    </h3>
+
+                    <div class="tabs-header">
+                        <button class="tab-btn active" onclick="switchTab('demo-tab')">عينات تجريبية</button>
+                        <button class="tab-btn" onclick="switchTab('manual-tab')">إدخال جيني يدوي</button>
+                        <button class="tab-btn" onclick="switchTab('file-tab')">تحميل ملف JSON</button>
+                    </div>
+
+                    <!-- TAB 1: Demos -->
+                    <div id="demo-tab" class="tab-content active">
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                            اختر إحدى العينات الجينية الجاهزة لمشاهدة آلية تحليل ومطابقة الـ DNA فورياً:
+                        </p>
+                        <div class="demo-buttons">
+                            <button class="demo-btn" onclick="loadDemo('direct')">
+                                <i class="fa-solid fa-fingerprint"></i>
+                                <div>
+                                    <strong>عينة يوسف خالد (مطابقة هوية مباشرة)</strong>
+                                    <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 0.2rem;">تطابق بنسبة 100% مع الملف الشخصي في قاعدة البيانات.</div>
+                                </div>
+                            </button>
+                            <button class="demo-btn" onclick="loadDemo('parent_child')">
+                                <i class="fa-solid fa-people-roof"></i>
+                                <div>
+                                    <strong>عينة والد أحمد محمد (مطابقة الأبوة)</strong>
+                                    <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 0.2rem;">توريث مندلي - يشارك الطفل أليلاً واحداً من الأب في كل موقع جيني.</div>
+                                </div>
+                            </button>
+                            <button class="demo-btn" onclick="loadDemo('sibling')">
+                                <i class="fa-solid fa-people-arrows"></i>
+                                <div>
+                                    <strong>عينة أخت سارة علي (مطابقة الأخوة)</strong>
+                                    <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 0.2rem;">مطابقة الهوية بالحالة (IBS) - تقدير القرابة بين الإخوة الأشقاء.</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Manual Input -->
+                    <div id="manual-tab" class="tab-content">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">تحديد الجنس البيولوجي (AMEL Locus):</label>
+                            <select id="gender-select" class="allele-input" style="text-align: right; padding: 0.8rem;">
+                                <option value="XY">XY (ذكر بيولوجي)</option>
+                                <option value="XX">XX (أنثى بيولوجية)</option>
+                            </select>
+                        </div>
+
+                        <label style="font-size: 0.9rem; color: var(--text-muted); display: block; margin-top: 1rem;">أدخل قيم الأليلات للمواقع الجينية (1 أو 2 لكل موقع):</label>
+                        <div class="loci-inputs-grid" id="loci-inputs">
+                            <!-- Dynamically generated inputs -->
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: File Upload -->
+                    <div id="file-tab" class="tab-content">
+                        <div class="upload-area" id="drop-zone" style="border-radius: 8px; border-style: dashed; padding: 2rem;">
+                            <div class="upload-icon" style="color: var(--primary); font-size: 2.5rem; margin-bottom: 1rem;">
+                                <i class="fa-solid fa-file-code"></i>
+                            </div>
+                            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 0.3rem;">اسحب ملف STR JSON هنا</p>
+                            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">أو اضغط لاختيار الملف من جهازك</p>
+                            <input type="file" id="json-file-input" accept=".json" style="display: none;" onchange="handleFileSelect(event)">
+                            <button type="button" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="document.getElementById('json-file-input').click()">اختيار ملف</button>
+                        </div>
+                        <div id="file-status" style="margin-top: 1rem; font-size: 0.85rem; color: var(--success); display: none;">
+                            <i class="fa-solid fa-circle-check"></i> تم تحميل الملف الجيني بنجاح!
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 2rem; padding-top: 1.5rem;">
+                        <div class="form-group" style="margin-bottom: 1.2rem;">
+                            <label for="search-type" style="font-size: 0.9rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">نوع المطابقة الجينية:</label>
+                            <select id="search-type" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); background: rgba(0, 0, 0, 0.3); color: var(--text); border-radius: 6px;">
+                                <option value="direct">مطابقة هوية مباشرة (تطابق 100%)</option>
+                                <option value="parent_child">مطابقة قرابة: الأبوة/الأمومة (Mendelian Inherit)</option>
+                                <option value="sibling">مطابقة قرابة: إخوة (IBS Evaluation)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label for="min-overlap" style="font-size: 0.9rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>الحد الأدنى للمواقع الجينية المشتركة للتطابق:</span>
+                                <span id="overlap-val" class="tech-font" style="color: var(--primary);">4</span>
+                            </label>
+                            <input type="range" id="min-overlap" min="2" max="10" value="4" oninput="document.getElementById('overlap-val').innerText = this.value" style="width: 100%; accent-color: var(--primary);">
+                        </div>
+
+                        <button onclick="runDNASearch()" class="btn-primary" style="width: 100%; padding: 1.2rem;">
+                            <i class="fa-solid fa-dna"></i> بدء معالجة ومطابقة الـ DNA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Results & Animation Panel -->
+                <div class="card" style="border-color: hsla(266, 100%, 50%, 0.15); display: flex; flex-direction: column;">
+                    <div id="status-display" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <h3 class="tech-font" style="color: var(--secondary); margin-bottom: 1rem; text-align: center;">
+                            [ DNA_SEQUENCER_STANDBY ]
+                        </h3>
+                        
+                        <!-- DNA Helix Loop Animation -->
+                        <div class="dna-helix-container">
+                            <div class="dna-helix" id="helix">
+                                <!-- Generated programmatically -->
+                            </div>
+                        </div>
+
+                        <p style="text-align: center; color: var(--text-muted); max-width: 400px; margin: 0 auto; line-height: 1.8;">
+                            الرجاء إدخال ملف DNA أو تحديد عينة تجريبية من القائمة الجانبية ثم الضغط على زر البدء لتشغيل نظام المطابقة الذكي.
+                        </p>
+                    </div>
+
+                    <!-- LOADING PANEL -->
+                    <div id="loading-display" style="display: none; flex-grow: 1; flex-direction: column; justify-content: center; align-items: center; padding: 4rem 0;">
+                        <div class="upload-icon pulse" style="color: var(--primary); font-size: 4rem;">
+                            <i class="fa-solid fa-dna"></i>
+                        </div>
+                        <h3 class="tech-font" style="color: var(--primary); margin-top: 2rem;">[ SEQUENCING_DNA_PROFILE ]</h3>
+                        <p style="color: var(--text-muted); margin-top: 1rem; text-align: center;">
+                            جاري مطابقة مؤشرات الـ STR الجينية مع قاعدة بيانات الحالات النشطة...
+                        </p>
+                        <div style="width: 80%; height: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; margin-top: 2rem; overflow: hidden; position: relative;">
+                            <div style="position: absolute; height: 100%; background: var(--primary); width: 40%; border-radius: 2px; animation: loadingBar 1.5s infinite ease-in-out;"></div>
+                        </div>
+                    </div>
+
+                    <!-- RESULTS PANEL -->
+                    <div id="results-display" style="display: none;">
+                        <h3 class="tech-font" style="color: var(--success); margin-bottom: 1.5rem;">
+                            <i class="fa-solid fa-square-poll-vertical"></i> نتائج المطابقة الجينية
+                        </h3>
+
+                        <div id="results-container">
+                            <!-- Matched results inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const standardLoci = [
+            "CSF1PO", "FGA", "TH01", "TPOX", "vWA", 
+            "D3S1358", "D5S818", "D7S820", "D8S1179", 
+            "D13S317", "D16S539", "D18S51", "D21S11"
+        ];
+
+        // Seeding standard loci fields
+        const lociGrid = document.getElementById('loci-inputs');
+        standardLoci.forEach(locus => {
+            const card = document.createElement('div');
+            card.className = 'locus-card';
+            card.innerHTML = `
+                <span class="locus-name">${locus}</span>
+                <div class="locus-inputs">
+                    <input type="number" step="any" placeholder="A1" class="allele-input locus-${locus}-1" data-locus="${locus}">
+                    <input type="number" step="any" placeholder="A2" class="allele-input locus-${locus}-2" data-locus="${locus}">
+                </div>
+            `;
+            lociGrid.appendChild(card);
+        });
+
+        // 3D Helix Generation
+        const helix = document.getElementById('helix');
+        const nodesCount = 18;
+        for (let i = 0; i < nodesCount; i++) {
+            const offset = (i / nodesCount) * 100;
+            const delay = (i / nodesCount) * -8;
+            
+            const strand = document.createElement('div');
+            strand.className = 'dna-strand';
+            strand.style.top = `${offset}%`;
+            
+            const bar = document.createElement('div');
+            bar.className = 'dna-bar';
+            bar.style.width = '120px';
+            bar.style.animation = `spinHelix 8s linear infinite`;
+            bar.style.animationDelay = `${delay}s`;
+            
+            const nodeA = document.createElement('div');
+            nodeA.className = 'dna-node a';
+            nodeA.style.left = '0';
+            
+            const nodeB = document.createElement('div');
+            nodeB.className = 'dna-node b';
+            nodeB.style.right = '0';
+            
+            bar.appendChild(nodeA);
+            bar.appendChild(nodeB);
+            strand.appendChild(bar);
+            helix.appendChild(strand);
+        }
+
+        // Tab Switch
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Load Demos
+        const demos = {
+            direct: {
+                searchType: 'direct',
+                gender: 'XY',
+                minOverlap: 4,
+                str: {
+                    "D3S1358": [12, 14], "vWA": [15, 16], "TH01": [7, 8], "FGA": [21, 23]
+                }
+            },
+            parent_child: {
+                searchType: 'parent_child',
+                gender: 'XY',
+                minOverlap: 4,
+                str: {
+                    "D3S1358": [15, 16], "vWA": [14, 17], "TH01": [6, 9.3], "FGA": [20, 24]
+                }
+            },
+            sibling: {
+                searchType: 'sibling',
+                gender: 'XX',
+                minOverlap: 4,
+                str: {
+                    "D3S1358": [15, 16], "vWA": [14, 18], "TH01": [6, 7], "FGA": [21, 25]
+                }
+            }
+        };
+
+        let currentStrData = null;
+
+        function loadDemo(type) {
+            const demo = demos[type];
+            document.getElementById('search-type').value = demo.searchType;
+            document.getElementById('gender-select').value = demo.gender;
+            document.getElementById('min-overlap').value = demo.minOverlap;
+            document.getElementById('overlap-val').innerText = demo.minOverlap;
+
+            // Clear old inputs
+            document.querySelectorAll('.allele-input[type="number"]').forEach(input => input.value = '');
+            
+            // Fill new values
+            for (let locus in demo.str) {
+                const vals = demo.str[locus];
+                const input1 = document.querySelector(`.locus-${locus}-1`);
+                const input2 = document.querySelector(`.locus-${locus}-2`);
+                if (input1) input1.value = vals[0] || '';
+                if (input2) input2.value = vals[1] || '';
+            }
+
+            // Switch to manual input tab to show the numbers
+            switchTab('manual-tab');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.remove('active');
+            currentStrData = demo.str;
+        }
+
+        // File reader
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    currentStrData = parsed;
+                    document.getElementById('file-status').style.display = 'block';
+                } catch (err) {
+                    alert('خطأ في قراءة ملف الـ JSON. الرجاء التأكد من بنية الملف.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Drag and drop events
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--primary)';
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = 'var(--border-color)';
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--border-color)';
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.json')) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    try {
+                        const parsed = JSON.parse(evt.target.result);
+                        currentStrData = parsed;
+                        document.getElementById('file-status').style.display = 'block';
+                    } catch (err) {
+                        alert('خطأ في قراءة ملف الـ JSON.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Run DNA Search
+        function runDNASearch() {
+            // Build strData from manual inputs if not using file tab
+            const activeTab = document.querySelector('.tab-content.active').id;
+            
+            if (activeTab === 'manual-tab' || currentStrData === null) {
+                const str = {};
+                standardLoci.forEach(locus => {
+                    const val1 = parseFloat(document.querySelector(`.locus-${locus}-1`).value);
+                    const val2 = parseFloat(document.querySelector(`.locus-${locus}-2`).value);
+                    const alleles = [];
+                    if (!isNaN(val1)) alleles.push(val1);
+                    if (!isNaN(val2)) alleles.push(val2);
+                    if (alleles.length > 0) {
+                        str[locus] = alleles;
+                    }
+                });
+                // Add gender
+                const gender = document.getElementById('gender-select').value;
+                if (gender) {
+                    str["AMEL"] = gender === "XY" ? ["X", "Y"] : ["X", "X"];
+                }
+                currentStrData = str;
+            }
+
+            if (Object.keys(currentStrData).length === 0) {
+                alert('الرجاء إدخال قيم موقع جيني واحد على الأقل للمطابقة.');
+                return;
+            }
+
+            const searchType = document.getElementById('search-type').value;
+            const minOverlap = document.getElementById('min-overlap').value;
+
+            // Display loading
+            document.getElementById('status-display').style.display = 'none';
+            document.getElementById('results-display').style.display = 'none';
+            document.getElementById('loading-display').style.display = 'flex';
+
+            // Send fetch request
+            fetch('/api/search/dna/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    strData: currentStrData,
+                    searchType: searchType,
+                    minOverlap: parseInt(minOverlap)
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading-display').style.display = 'none';
+                document.getElementById('results-display').style.display = 'block';
+
+                if (data.isSuccess && data.results.length > 0) {
+                    renderResults(data.results, searchType);
+                } else {
+                    document.getElementById('results-container').innerHTML = `
+                        <div style="text-align: center; padding: 3rem 0; border: 1px solid var(--danger); background: hsla(0, 100%, 50%, 0.03); border-radius: 8px; margin-top: 1rem;">
+                            <div style="font-size: 3rem; color: var(--danger); margin-bottom: 1.5rem;">
+                                <i class="fa-solid fa-user-slash"></i>
+                            </div>
+                            <h4 class="tech-font" style="color: var(--danger);">[ NO_GENETIC_MATCH_FOUND ]</h4>
+                            <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.95rem;">لم يتم العثور على أي حالات متطابقة في قاعدة البيانات تستوفي شروط البحث والحد الأدنى للمواقع المشتركة.</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(err => {
+                document.getElementById('loading-display').style.display = 'none';
+                document.getElementById('status-display').style.display = 'flex';
+                alert('حدث خطأ أثناء إجراء البحث الجيني.');
+            });
+        }
+
+        // Render Results Helper
+        function renderResults(results, searchType) {
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+
+            results.forEach(res => {
+                const meta = res.metadata;
+                const score = res.score;
+                const details = res.details;
+                
+                // Set match explanation text
+                let matchExplain = '';
+                if (searchType === 'direct') {
+                    matchExplain = 'تطابق هوية رقمي كامل على بصمة الحمض النووي (STR Profile Match).';
+                } else if (searchType === 'parent_child') {
+                    matchExplain = 'توافق كينشيب (توريث أبوة مندلي). يشارك الطفل أليلاً في كل موقع مشترك.';
+                } else {
+                    matchExplain = 'قرابة أخوة أشقاء مبنية على مقاربة الهوية بالحالة (IBS Score Estimation).';
+                }
+
+                // Render detail rows
+                let rowsHtml = '';
+                const matches = details.matches || details.compatible_loci || [];
+                const mismatches = details.mismatches || details.incompatible_loci || [];
+                const ibsScores = details.ibs_scores || {};
+
+                // Loop through overlapping loci
+                if (searchType === 'sibling') {
+                    for (let locus in ibsScores) {
+                        const scoreVal = ibsScores[locus];
+                        let statusBadge = '';
+                        if (scoreVal === 2) {
+                            statusBadge = '<span class="status-badge match">تطابق كامل (2)</span>';
+                        } else if (scoreVal === 1) {
+                            statusBadge = '<span class="status-badge match" style="color:#00f2ff; background:rgba(0,242,255,0.05); border-color:rgba(0,242,255,0.2)">تطابق جزئي (1)</span>';
+                        } else {
+                            statusBadge = '<span class="status-badge mismatch">لا تطابق (0)</span>';
+                        }
+                        rowsHtml += `
+                            <div class="locus-match-row">
+                                <span style="color: var(--primary);">${locus}</span>
+                                <span>IBS Score: ${scoreVal}</span>
+                                ${statusBadge}
+                            </div>
+                        `;
+                    }
+                } else {
+                    // Direct or Parent Child
+                    const allLoci = [...matches, ...mismatches];
+                    allLoci.forEach(locus => {
+                        const isMatch = matches.includes(locus);
+                        const badge = isMatch ? 
+                            '<span class="status-badge match">متوافق</span>' : 
+                            '<span class="status-badge mismatch">غير متوافق</span>';
+                        
+                        rowsHtml += `
+                            <div class="locus-match-row">
+                                <span style="color: var(--primary);">${locus}</span>
+                                <span>${isMatch ? 'موقع متطابق' : 'استثناء جيني'}</span>
+                                ${badge}
+                            </div>
+                        `;
+                    });
+                }
+
+                const card = document.createElement('div');
+                card.className = 'card result-card';
+                card.style.borderColor = 'hsla(157, 100%, 50%, 0.2)';
+                card.style.background = 'hsla(220, 25%, 8%, 0.9)';
+                card.style.marginTop = '1.5rem';
+                card.style.padding = '1.5rem';
+
+                card.innerHTML = `
+                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                        <div style="flex-shrink: 0; width: 120px; height: 120px; border-radius: 8px; overflow: hidden; border: 2px solid var(--success); box-shadow: 0 0 15px rgba(157, 255, 0, 0.2);">
+                            <img src="${meta.image_url || '/static/images/avatar_boy1.png'}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div style="flex-grow: 1; min-width: 250px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                <h4 style="color: var(--primary); font-size: 1.4rem; margin: 0;">${meta.name}</h4>
+                                <span class="score-badge tech-font" style="background: rgba(157, 255, 0, 0.1); border-color: rgba(157, 255, 0, 0.3); color: var(--success); padding: 0.5rem 1rem; border-radius: 4px; box-shadow: 0 0 15px rgba(157, 255, 0, 0.2);">
+                                    <i class="fa-solid fa-square-poll-horizontal"></i> ${score}% MATCH
+                                </span>
+                            </div>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                                <strong>نوع المطابقة:</strong> ${matchExplain}
+                            </p>
+                            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                <strong>آخر مكان تواجد:</strong> ${meta.last_seen}
+                            </p>
+                            <p style="font-size: 0.9rem; color: var(--text-muted);">
+                                <strong>تفاصيل الحالة:</strong> ${meta.details}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Loci Detail Breakdown Box -->
+                    <div class="results-details-box">
+                        <div class="results-details-header">
+                            <span>تفاصيل مطابقة المواقع الجينية (STR Loci BreakDown)</span>
+                            <span class="tech-font" style="font-size: 0.8rem; font-weight: 300;">OVERLAP_LOCI: ${res.overlap_count}</span>
+                        </div>
+                        <div style="max-height: 250px; overflow-y: auto;">
+                            ${rowsHtml}
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // CSRF Helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+
+</html>
