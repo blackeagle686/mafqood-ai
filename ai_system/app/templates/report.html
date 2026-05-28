@@ -215,29 +215,86 @@
         const fileInput = document.getElementById('file-input');
         const submitBtn = document.getElementById('submitBtn');
         const form = document.getElementById('report-form');
+        const dropZone = document.getElementById('drop-zone');
+        const previewContainer = document.getElementById('preview-container');
 
         function previewImage(event) {
-            const preview = document.getElementById('image-preview');
             const file = event.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = () => { preview.src = reader.result; preview.style.display = 'block'; }
-            if (file) reader.readAsDataURL(file);
+            reader.onload = () => {
+                const preview = document.getElementById('image-preview');
+                preview.src = reader.result;
+                if (previewContainer) previewContainer.style.display = 'block';
+                if (dropZone) dropZone.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
         }
 
-        if(form) {
+        function removePreview() {
+            if (fileInput) fileInput.value = '';
+            if (previewContainer) previewContainer.style.display = 'none';
+            if (dropZone) dropZone.style.display = 'flex';
+        }
+
+        function toggleDnaSection() {
+            const body = document.getElementById('dna-body');
+            const toggle = document.getElementById('dna-toggle');
+            if (!body || !toggle) return;
+            const isOpen = body.style.display !== 'none';
+            body.style.display = isOpen ? 'none' : 'block';
+            toggle.querySelector('i').style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        // Drag and Drop
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropZone.addEventListener(evt, e => {
+                    e.preventDefault(); e.stopPropagation();
+                    dropZone.classList.add('drag-over');
+                });
+            });
+            ['dragleave', 'drop'].forEach(evt => {
+                dropZone.addEventListener(evt, e => {
+                    e.preventDefault(); e.stopPropagation();
+                    dropZone.classList.remove('drag-over');
+                });
+            });
+            dropZone.addEventListener('drop', e => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    previewImage({ target: { files: files } });
+                }
+            });
+        }
+
+        if (form) {
             form.onsubmit = () => {
-                if(submitBtn) {
+                if (submitBtn) {
                     submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأمين البيانات ونقلها...';
+                    submitBtn.classList.add('submit-btn--loading');
+                    submitBtn.innerHTML = '<div class="submit-btn-content"><i class="fa-solid fa-spinner fa-spin"></i><span>جاري تأمين البيانات ونقلها...</span></div>';
                 }
                 return true;
             };
         }
 
-        // Initialize Leaflet Map
+        // Animate sections on scroll
         document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.form-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('form-section--visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            sections.forEach(s => observer.observe(s));
+
+            // Initialize Leaflet Map
             if (document.getElementById('map')) {
-                const map = L.map('map').setView([30.0444, 31.2357], 12); // Default to Cairo, Egypt
+                const map = L.map('map').setView([30.0444, 31.2357], 12);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                     subdomains: 'abcd',
@@ -245,22 +302,19 @@
                 }).addTo(map);
 
                 let marker;
-
                 map.on('click', function(e) {
-                    const lat = e.latlng.lat;
-                    const lng = e.latlng.lng;
-                    
-                    document.getElementById('lat-input').value = lat;
-                    document.getElementById('long-input').value = lng;
-
-                    if (marker) {
-                        marker.setLatLng(e.latlng);
-                    } else {
-                        marker = L.marker(e.latlng).addTo(map);
+                    document.getElementById('lat-input').value = e.latlng.lat;
+                    document.getElementById('long-input').value = e.latlng.lng;
+                    if (marker) { marker.setLatLng(e.latlng); }
+                    else { marker = L.marker(e.latlng).addTo(map); }
+                    // Update the hint
+                    const hint = document.querySelector('.map-hint');
+                    if (hint) {
+                        hint.innerHTML = '<i class="fa-solid fa-check-circle"></i> تم تحديد الموقع بنجاح';
+                        hint.classList.add('map-hint--set');
                     }
                 });
-                
-                // Force map to recalculate its size after it's visible to avoid rendering issues
+
                 setTimeout(() => map.invalidateSize(), 500);
             }
         });
