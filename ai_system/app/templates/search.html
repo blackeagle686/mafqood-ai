@@ -4,19 +4,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بحث عن شخص - مفقود</title>
+    <title>بحث عن شخص - مفقود AI</title>
+    <meta name="description" content="البحث عن المفقودين باستخدام تقنيات التعرف على الوجه بالذكاء الاصطناعي — منصة مفقود">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .page-hero {
+            position: relative;
+            padding: 7rem 2rem 2rem;
+            text-align: center;
+            overflow: hidden;
+        }
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center bottom, hsla(182, 100%, 50%, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .page-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: var(--primary);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            padding: 0.4rem 1.2rem;
+            border-radius: 4px;
+            background: rgba(0, 242, 255, 0.04);
+            margin-bottom: 1.2rem;
+        }
+
+        .form-card {
+            max-width: 650px;
+            margin: 2.5rem auto 4rem;
+            background: hsla(220, 25%, 7%, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(6px);
+            position: relative;
+        }
+        .form-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 10%; right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.5;
+        }
+
+        .upload-box {
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 242, 255, 0.015);
+        }
+        .upload-box:hover {
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.04);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.05);
+        }
+        .upload-box-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(0, 242, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            position: relative;
+        }
+        .upload-box-icon::after {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            border: 1px solid var(--primary);
+            opacity: 0;
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+        .upload-box-icon i { font-size: 1.8rem; color: var(--primary); }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.1rem;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), hsl(200, 100%, 45%));
+            color: #000;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 1.5rem;
+        }
+        .submit-btn:hover {
+            box-shadow: 0 6px 30px rgba(0, 242, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .error-alert {
+            background: hsla(0, 100%, 50%, 0.1);
+            border-left: 4px solid var(--danger);
+            color: #ff8888;
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        #image-preview {
+            max-width: 100%;
+            margin-top: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--primary);
+            display: none;
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+
+        /* Loading Modal V2 */
+        .loading-modal-v2 {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .loading-modal-v2.show { opacity: 1; }
+
+        .scanner-v2 {
+            width: 240px;
+            height: 240px;
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
+            background: #000;
+        }
+        .scanner-v2 img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+        }
+        .scanner-v2-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 242, 255, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.15) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 2;
+        }
+        .scanner-v2-line {
+            position: absolute;
+            left: 0; right: 0; top: 0;
+            height: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 20px 5px var(--primary);
+            z-index: 3;
+            animation: scan-v2 2s ease-in-out infinite alternate;
+        }
+        @keyframes scan-v2 {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(237px); }
+        }
+
+        .loading-text-v2 {
+            margin-top: 2.5rem;
+            text-align: center;
+        }
+        .loading-text-v2 h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--primary);
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+            margin-bottom: 0.8rem;
+        }
+        .loading-text-v2 p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+    </style>
 </head>
 
 <body>
     <div class="scanline"></div>
+    <div class="bg-layer bg-dna"></div>
     <nav>
         <div class="nav-content">
             <a href="/" class="logo">
                 <i class="fa-solid fa-hands-holding-child" style="margin-left: 0.5rem;"></i>
-                مفقود <span class="tech-font" style="font-size: 0.8rem; font-weight: 300; opacity: 0.7;">للبحث
-                    الإنساني</span>
+                مفقود <span class="tech-font" style="font-size: 0.8rem; font-weight: 300; opacity: 0.7;">البحث المتقدم</span>
             </a>
             <div class="nav-links">
                 <a href="{% url 'report_page' %}"><i class="fa-solid fa-file-invoice"></i> إرسال بلاغ</a>
@@ -27,65 +233,59 @@
         </div>
     </nav>
 
-    <div class="container" style="padding-top: 5rem;">
-        <main>
-            <div class="section-header" style="text-align: center; border-left: none; padding-left: 0;">
-                <h1 class="tech-font"
-                    style="font-size: 3rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
-                    البحث الذكي عن المفقودين
-                </h1>
-                <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 700px; margin: 0 auto;">قم برفع صورة
-                    الشخص المفقود للبدء في عملية المطابقة الفورية مع قاعدة البيانات للمساعدة في العثور عليه.</p>
-            </div>
-
-            <div class="card" style="max-width: 600px; margin: 3rem auto; border-color: hsla(182, 100%, 50%, 0.2);">
-                {% if errors %}
-                <div
-                    style="border-right: 4px solid var(--danger); background: hsla(0, 100%, 50%, 0.05); color: var(--danger); padding: 1.5rem; margin-bottom: 2.5rem; font-family: 'Share Tech Mono';">
-                    <i class="fa-solid fa-triangle-exclamation"></i> [ ERROR_ANALYTICS_FAILURE ]: يرجى التأكد من جودة
-                    الصورة المرفوعة ووضوح ملامح الوجه.
-                </div>
-                {% endif %}
-
-                <form id="search-form" action="/api/search/face/" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <div class="upload-area" onclick="document.getElementById('file-input').click()"
-                            style="border-radius: 12px; border-style: solid; border-width: 1px; border-color: var(--border-color); background: hsla(182, 100%, 50%, 0.02);">
-                            <div class="upload-icon" style="color: var(--primary);">
-                                <i class="fa-solid fa-heart-pulse"></i>
-                            </div>
-                            <p class="tech-font" style="color: var(--text); font-size: 1.1rem; margin-bottom: 0.5rem;">
-                                READY_FOR_SEARCH_SCAN</p>
-                            <p style="color: var(--text-muted); font-size: 0.9rem;">اسحب صورة الشخص المفقود هنا للاختيار
-                            </p>
-                            <input type="file" id="file-input" name="file" accept="image/*" style="display: none;"
-                                onchange="previewImage(event)" required>
-                            <img id="image-preview" src="#" alt="Preview"
-                                style="max-width: 100%; border-radius: 8px; border: 1px solid var(--primary); margin-top: 2rem; display: none; box-shadow: 0 0 20px var(--primary-glow);">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1.5rem;">
-                        <i class="fa-solid fa-magnifying-glass"></i> بدء عملية البحث والتحقق
-                    </button>
-                </form>
-            </div>
-        </main>
+    <div class="page-hero">
+        <span class="page-badge"><i class="fa-solid fa-face-viewfinder"></i> FACE_RECOGNITION</span>
+        <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+            البحث الذكي عن المفقودين
+        </h1>
+        <p style="font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; line-height: 1.8;">
+            قم برفع صورة الشخص المفقود للبدء في عملية المطابقة الفورية مع قاعدة البيانات.
+        </p>
     </div>
 
-    <!-- Loading Modal with Scanner -->
-    <div id="loadingModal" class="loading-modal">
-        <div class="scanner-container">
-            <div class="scanner-grid"></div>
-            <div class="scanner-line"></div>
+    <div class="container">
+        <div class="form-card">
+            {% if errors %}
+            <div class="error-alert">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.2rem;"></i>
+                <div>
+                    <strong>[ ERROR_ANALYTICS_FAILURE ]</strong><br>
+                    يرجى التأكد من جودة الصورة المرفوعة ووضوح ملامح الوجه.
+                </div>
+            </div>
+            {% endif %}
+
+            <form id="search-form" action="/api/search/face/" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="upload-box" onclick="document.getElementById('file-input').click()">
+                    <div class="upload-box-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                    <p class="tech-font" style="color: var(--text); font-size: 1rem; margin-bottom: 0.5rem;">READY_FOR_SEARCH_SCAN</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">اسحب أو اختر صورة الشخص المفقود للبدء</p>
+                    <input type="file" id="file-input" name="file" accept="image/*" style="display: none;" onchange="previewImage(event)" required>
+                    <img id="image-preview" src="#" alt="Preview">
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fa-solid fa-magnifying-glass"></i> بدء عملية المطابقة البيومترية
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="loading-modal-v2">
+        <div class="scanner-v2">
+            <div class="scanner-v2-grid"></div>
+            <div class="scanner-v2-line"></div>
             <img id="scanner-preview" src="#" alt="Scanning...">
         </div>
-        <div class="loading-text tech-font">
+        <div class="loading-text-v2">
             <h3>[ SCANNING_BIOMETRIC_DATA ]</h3>
-            <p>جاري المسح الضوئي والتحقق من السجلات... يرجى الانتظار</p>
-            <div style="margin-top: 1.5rem; color: var(--primary); font-size: 0.8rem; opacity: 0.8;" class="pulse">
-                INITIALIZING_DOMAIN_MATCH_QUERY...
+            <p>جاري استخراج الملامح ومطابقتها مع السجلات... يرجى الانتظار</p>
+            <div style="margin-top: 1rem; color: var(--primary); font-size: 0.75rem; font-family: 'Share Tech Mono'; opacity: 0.7;" class="pulse">
+                INITIALIZING_VECTOR_SEARCH...
             </div>
         </div>
     </div>
@@ -106,9 +306,12 @@
             const preview = document.getElementById('image-preview');
             const scannerPreview = document.getElementById('scanner-preview');
             const loadingModal = document.getElementById('loadingModal');
+            const submitBtn = document.getElementById('submitBtn');
 
             if (preview.src && preview.src !== window.location.href) {
                 scannerPreview.src = preview.src;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحضير...';
                 loadingModal.style.display = 'flex';
                 setTimeout(() => loadingModal.classList.add('show'), 10);
             }
@@ -116,5 +319,4 @@
         };
     </script>
 </body>
-
 </html>
