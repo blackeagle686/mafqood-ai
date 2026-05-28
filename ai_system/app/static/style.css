@@ -1461,7 +1461,7 @@ textarea:focus {
 .cine-caption h3 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text);
     margin: 0 0 0.4rem;
     text-shadow: 0 2px 20px rgba(0,0,0,0.6);
 }
