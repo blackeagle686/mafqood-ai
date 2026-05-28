@@ -96,32 +96,48 @@ class FaceCVPipeline:
             return []
 
         try:
-            # Apply enhancement to handle noise, lighting, and glasses
+            # Apply enhancement strictly for detection (handling noise, lighting, glasses)
             processed_img = self.enhance_image(image)
 
-            # Step 1: Detect and Extract (One-step via InsightFace)
-            # This returns a list of face objects with bbox, kps, embedding, etc.
-            faces = self.app.get(processed_img)
+            # 1. Detect faces on the enhanced image
+            bboxes, kpss = self.app.models['detection'].detect(processed_img, max_num=0, metric='default')
+            
             results = []
-
-            for face in faces:
-                bbox = face.bbox.astype(int).tolist()
+            if bboxes.shape[0] > 0:
+                from insightface.app.common import Face as IFace
                 
-                # Minimum size check (User suggestion integrated)
-                x1, y1, x2, y2 = bbox
-                w_face = x2 - x1
-                h_face = y2 - y1
-                
-                if w_face < 20 or h_face < 20:
-                    logger.warning(f"Face too small ({w_face}x{h_face}), skipping.")
-                    continue
+                for i in range(bboxes.shape[0]):
+                    bbox = bboxes[i, 0:4]
+                    det_score = bboxes[i, 4]
+                    kps = kpss[i] if kpss is not None else None
+                    
+                    # Create InsightFace internal object
+                    face = IFace(bbox=bbox, kps=kps, det_score=det_score)
+                    
+                    # 2. Extract embeddings using the ORIGINAL un-enhanced image!
+                    # This prevents the gamma/sharpening from distorting the embedding space
+                    for taskname, model in self.app.models.items():
+                        if taskname == 'detection':
+                            continue
+                        model.get(image, face)
+                    
+                    bbox_list = face.bbox.astype(int).tolist()
+                    
+                    # Minimum size check
+                    x1, y1, x2, y2 = bbox_list
+                    w_face = x2 - x1
+                    h_face = y2 - y1
+                    
+                    if w_face < 20 or h_face < 20:
+                        logger.warning(f"Face too small ({w_face}x{h_face}), skipping.")
+                        continue
 
-                if face.embedding is not None:
-                    results.append(Face(
-                        bbox=bbox,
-                        embedding=face.embedding.tolist(),
-                        score=float(face.det_score)
-                    ))
+                    if getattr(face, 'embedding', None) is not None:
+                        results.append(Face(
+                            bbox=bbox_list,
+                            embedding=face.embedding.tolist(),
+                            score=float(face.det_score)
+                        ))
 
             logger.info(f"Pipeline finished. Found {len(results)} faces.")
             return results
