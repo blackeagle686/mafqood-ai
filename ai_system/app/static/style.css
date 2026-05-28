@@ -797,7 +797,7 @@ textarea:focus {
     gap: 0.75rem;
     flex-wrap: wrap;
     margin-bottom: 2.5rem;
-    
+    background-color: ();
 }
 @media (max-width: 992px) {
     .hero-badges { justify-content: center; }
