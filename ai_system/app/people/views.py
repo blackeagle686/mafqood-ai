@@ -30,9 +30,22 @@ class ReportMissingPersonView(APIView):
             temp_path = os.path.join("temp_uploads", temp_filename)
             
             os.makedirs("temp_uploads", exist_ok=True)
-            with open(temp_path, 'wb+') as destination:
-                for chunk in image.chunks():
-                    destination.write(chunk)
+            
+            try:
+                from PIL import Image
+                img = Image.open(image)
+                if img.mode in ("RGBA", "P"):
+                    img = img.convert("RGB")
+                
+                # Resize if larger than 1080 to optimize memory and processing time
+                img.thumbnail((1080, 1080), Image.Resampling.LANCZOS)
+                img.save(temp_path, format='JPEG', quality=85)
+            except Exception:
+                # Fallback to writing chunks if Image processing fails
+                image.seek(0)
+                with open(temp_path, 'wb+') as destination:
+                    for chunk in image.chunks():
+                        destination.write(chunk)
             
             abs_path = os.path.abspath(temp_path)
             metadata = {
