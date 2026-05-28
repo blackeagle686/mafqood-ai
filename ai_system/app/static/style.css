@@ -1150,7 +1150,7 @@ textarea:focus {
 }
 
 .pipeline-card {
-    background: hsla(220, 25%, 8%, 0.7);
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.8rem 2rem;
@@ -1170,7 +1170,7 @@ textarea:focus {
     font-family: 'Outfit', sans-serif;
     font-size: 1.15rem;
     font-weight: 700;
-    color: white;
+    color: var(--text);
     margin-bottom: 0.5rem;
 }
 .pipeline-card p {
