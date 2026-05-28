@@ -402,17 +402,58 @@
 
 .tech-card {
     position: relative;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
+    background: rgba(15, 20, 25, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 2.5rem 2rem;
     overflow: hidden;
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+    z-index: 1;
 }
+
+/* Animated Gradient Border via Pseudo Elements */
+.tech-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        transparent, 
+        rgba(var(--glow-color-rgb, 100, 100, 255), 0.1),
+        var(--glow-color, var(--primary)), 
+        transparent 30%
+    );
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: -2;
+    animation: rotateCardGlow 4s linear infinite;
+}
+.tech-card::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    background: var(--card-bg);
+    border-radius: 15px;
+    z-index: -1;
+    transition: background 0.4s ease;
+}
+
+@keyframes rotateCardGlow {
+    100% { transform: rotate(360deg); }
+}
+
 .tech-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--border-hover);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border-color: transparent;
+}
+.tech-card:hover::before {
+    opacity: 1;
+}
+.tech-card:hover::after {
+    background: rgba(20, 25, 32, 0.85);
 }
 .tech-card-glow {
     position: absolute;
@@ -422,9 +463,10 @@
     opacity: 0;
     transition: opacity 0.5s;
     pointer-events: none;
+    z-index: -1;
 }
 .tech-card:hover .tech-card-glow {
-    opacity: 0.04;
+    opacity: 0.08;
 }
 .tech-card-number {
     position: absolute;
@@ -434,20 +476,46 @@
     letter-spacing: 2px;
 }
 .tech-card-icon {
-    width: 56px; height: 56px;
-    border-radius: 14px;
+    width: 64px; height: 64px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s, box-shadow 0.4s;
+}
+
+.tech-card:hover .tech-card-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: rgba(var(--primary-rgb), 0.1);
+    box-shadow: 0 0 25px rgba(var(--primary-rgb), 0.3);
+}
+
+.tech-card#card-dna:hover .tech-card-icon {
+    background: rgba(0, 204, 255, 0.1);
+    box-shadow: 0 0 25px rgba(0, 204, 255, 0.3);
+}
+.tech-card#card-face:hover .tech-card-icon {
+    background: rgba(255, 51, 102, 0.1);
+    box-shadow: 0 0 25px rgba(255, 51, 102, 0.3);
+}
+.tech-card#card-gan:hover .tech-card-icon {
+    background: rgba(153, 51, 255, 0.1);
+    box-shadow: 0 0 25px rgba(153, 51, 255, 0.3);
 }
 .tech-card h3 {
     font-family: 'Outfit', sans-serif;
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--text);
     margin-bottom: 0.8rem;
+    transition: color 0.3s ease;
+}
+.tech-card:hover h3 {
+    color: var(--glow-color, var(--primary));
 }
 .tech-card p {
     color: var(--text-muted);
