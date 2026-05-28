@@ -40,7 +40,7 @@
         .form-card {
             max-width: 680px;
             margin: 2.5rem auto 4rem;
-            background: hsla(220, 25%, 7%, 0.85);
+            background: var(--card-bg);
             border: 1px solid rgba(var(--secondary-rgb), 0.2);
             border-radius: 20px;
             padding: 2.5rem;
@@ -121,7 +121,7 @@
             padding: 1rem 1.2rem;
             border-radius: 12px;
             border: 1px solid rgba(var(--secondary-rgb), 0.2);
-            background: rgba(255,255,255,0.02);
+            background: var(--input-bg);
             color: var(--text);
             font-size: 1rem;
             transition: all 0.3s ease;
@@ -140,7 +140,7 @@
             border-radius: 14px;
             border: none;
             background: linear-gradient(135deg, var(--secondary), hsl(271, 100%, 40%));
-            color: #fff;
+            color: var(--text);
             font-size: 1.05rem;
             font-weight: 700;
             cursor: pointer;
@@ -257,7 +257,7 @@
     <div class="page-hero">
         <span class="page-badge"><i class="fa-solid fa-film"></i> VIDEO_ANALYSIS</span>
         <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 1rem;
-            background: linear-gradient(135deg, #fff 30%, var(--secondary) 100%);
+            background: linear-gradient(135deg, var(--text) 30%, var(--secondary) 100%);
             -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
             البحث الذكي في الفيديوهات
         </h1>
@@ -281,7 +281,7 @@
                 <div class="form-row">
                     <div class="form-label"><i class="fa-solid fa-gauge-high"></i> SAMPLING_RATE [FRAMES TO SKIP]</div>
                     <input class="form-input" type="number" id="sampling_rate" name="sampling_rate" value="15" min="1">
-                    <small style="color: rgba(255,255,255,0.4); display: block; margin-top: 0.6rem; font-size: 0.85rem; line-height: 1.5;">
+                    <small style="color: rgba(var(--text-rgb), 0.4); display: block; margin-top: 0.6rem; font-size: 0.85rem; line-height: 1.5;">
                         <i class="fa-solid fa-circle-info" style="color: var(--secondary);"></i> كلما زاد الرقم زادت سرعة المسح ولكن قد تقل الدقة في رصد الوجوه العابرة.
                     </small>
                 </div>

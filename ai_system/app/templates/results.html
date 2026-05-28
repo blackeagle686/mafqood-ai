@@ -41,7 +41,7 @@
             padding: 0.6rem 1.4rem;
             border-radius: 50px;
             border: 1px solid var(--border-color);
-            background: hsla(220, 25%, 10%, 0.6);
+            background: var(--card-bg);
             backdrop-filter: blur(8px);
             font-size: 0.85rem;
             color: var(--text-muted);
@@ -71,7 +71,7 @@
             position: relative;
             border-radius: 16px;
             overflow: hidden;
-            background: hsla(220, 25%, 8%, 0.8);
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
             transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
             opacity: 0;
@@ -124,7 +124,7 @@
             width: 100%;
             aspect-ratio: 4/3;
             overflow: hidden;
-            background: #0a0a0a;
+            background: var(--surface-solid);
         }
 
         .rc-image-wrap img {
@@ -190,7 +190,7 @@
         .rc-name {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #fff;
+            color: var(--text);
             margin: 0 0 0.6rem;
         }
 
@@ -211,7 +211,7 @@
 
         .rc-details-text {
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.45);
+            color: rgba(var(--text-rgb), 0.45);
             line-height: 1.6;
             margin: 0.8rem 0 1.2rem;
             min-height: 2.5rem;
@@ -360,7 +360,7 @@
         }
 
         .modal-v2-content {
-            background: hsla(220, 25%, 8%, 0.95);
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 20px;
             max-width: 900px;
@@ -452,7 +452,7 @@
 
         .modal-v2-score-label {
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(var(--text-rgb), 0.5);
             letter-spacing: 2px;
             font-family: 'Share Tech Mono', monospace;
         }
@@ -460,7 +460,7 @@
         .modal-info-block {
             padding: 1.2rem;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
             margin-bottom: 1.2rem;
         }
@@ -556,7 +556,7 @@
             <i class="fa-solid fa-shield-check"></i> MATCH_RESULTS
         </span>
         <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 1rem;
-            background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
+            background: linear-gradient(135deg, var(--text) 30%, var(--primary) 100%);
             -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
             نتائج البحث والتحقق
         </h1>
