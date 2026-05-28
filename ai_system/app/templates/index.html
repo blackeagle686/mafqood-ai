@@ -228,11 +228,11 @@
         <!-- ===================== HOW IT WORKS PIPELINE ===================== -->
         <section class="section-pipeline" id="pipeline">
             <div class="container">
-                <div class="section-header reveal" style="text-align: center; border-left: none; padding-left: 0;">
-                    <span class="tech-font" style="color: var(--primary); font-size: 1rem; letter-spacing: 3px;">
+                <div class="section-header section-header--centered reveal">
+                    <span class="tech-font section-overline section-overline--primary">
                         WORKFLOW
                     </span>
-                    <h2 style="font-size: 3rem; margin-top: 0.8rem;">كيف يعمل النظام؟</h2>
+                    <h2 class="section-title">كيف يعمل النظام؟</h2>
                 </div>
 
                 <div class="pipeline-track">
@@ -241,34 +241,34 @@
                     <div class="pipeline-step reveal">
                         <div class="pipeline-dot" style="--dot-color: var(--primary);"></div>
                         <div class="pipeline-card">
-                            <div class="pipeline-icon" style="color: var(--primary);"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                            <div class="pipeline-icon pipeline-icon--primary"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                             <h4>رفع البيانات</h4>
                             <p>رفع صورة أو مقطع فيديو أو بيانات جينية عبر واجهة سهلة الاستخدام.</p>
                         </div>
                     </div>
 
-                    <div class="pipeline-step reveal" style="animation-delay: 0.15s;">
+                    <div class="pipeline-step reveal delay-1">
                         <div class="pipeline-dot" style="--dot-color: var(--accent);"></div>
                         <div class="pipeline-card">
-                            <div class="pipeline-icon" style="color: var(--accent);"><i class="fa-solid fa-brain"></i></div>
+                            <div class="pipeline-icon pipeline-icon--accent"><i class="fa-solid fa-brain"></i></div>
                             <h4>التحليل الذكي</h4>
                             <p>النظام يعالج البيانات عبر نماذج AI متعددة (وجه + DNA + عمر) بالتوازي.</p>
                         </div>
                     </div>
 
-                    <div class="pipeline-step reveal" style="animation-delay: 0.3s;">
+                    <div class="pipeline-step reveal delay-2">
                         <div class="pipeline-dot" style="--dot-color: var(--secondary);"></div>
                         <div class="pipeline-card">
-                            <div class="pipeline-icon" style="color: var(--secondary);"><i class="fa-solid fa-chart-line"></i></div>
+                            <div class="pipeline-icon pipeline-icon--secondary"><i class="fa-solid fa-chart-line"></i></div>
                             <h4>المطابقة والتقييم</h4>
                             <p>مقارنة النتائج مع قاعدة البيانات وترتيب النتائج حسب نسبة التطابق.</p>
                         </div>
                     </div>
 
-                    <div class="pipeline-step reveal" style="animation-delay: 0.45s;">
+                    <div class="pipeline-step reveal delay-4">
                         <div class="pipeline-dot" style="--dot-color: var(--success);"></div>
                         <div class="pipeline-card">
-                            <div class="pipeline-icon" style="color: var(--success);"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                            <div class="pipeline-icon pipeline-icon--success"><i class="fa-solid fa-hand-holding-heart"></i></div>
                             <h4>لم الشمل</h4>
                             <p>عرض النتائج وتسهيل التواصل للمساعدة في إعادة الأسر معًا بأسرع وقت.</p>
                         </div>
@@ -279,25 +279,25 @@
 
         <!-- ===================== CTA FOOTER ===================== -->
         <section class="section-cta" id="cta">
-            <div class="container reveal" style="text-align: center;">
+            <div class="container reveal text-center">
                 <div class="cta-glow"></div>
-                <span class="tech-font" style="color: var(--primary); letter-spacing: 3px; font-size: 0.9rem; display: block; margin-bottom: 1rem;">
+                <span class="tech-font cta-overline">
                     START NOW
                 </span>
-                <h2 style="font-size: 3rem; margin-bottom: 1.5rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+                <h2 class="cta-title">
                     ابدأ رحلة البحث الآن
                 </h2>
-                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 3rem; font-size: 1.15rem;">
+                <p class="cta-desc">
                     ارفع صورة أو أرسل بلاغًا ودع الذكاء الاصطناعي يساعدك في العثور على من تبحث عنه.
                 </p>
-                <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                <div class="cta-buttons">
                     <a href="{% url 'search_page' %}" class="btn-hero-primary" id="cta-bottom-search">
                         <i class="fa-solid fa-crosshairs"></i> البحث بالصورة
                     </a>
                     <a href="{% url 'video_search_page' %}" class="btn-hero-outline" id="cta-bottom-video">
                         <i class="fa-solid fa-video"></i> تحليل الفيديو
                     </a>
-                    <a href="{% url 'report_page' %}" class="btn-hero-outline" id="cta-bottom-report" style="border-color: var(--accent); color: var(--accent);">
+                    <a href="{% url 'report_page' %}" class="btn-hero-outline btn-hero-outline--accent" id="cta-bottom-report">
                         <i class="fa-solid fa-file-circle-plus"></i> إرسال بلاغ
                     </a>
                 </div>
@@ -306,11 +306,11 @@
 
         <!-- ===================== FOOTER ===================== -->
         <footer class="site-footer">
-            <div class="container" style="text-align: center;">
+            <div class="container footer-content">
                 <div class="footer-logo">
                     <i class="fa-solid fa-hands-holding-child"></i> مفقود
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">
+                <p class="footer-text">
                     منصة إنسانية مدعومة بالذكاء الاصطناعي — جميع الحقوق محفوظة © 2026
                 </p>
             </div>
