@@ -1,0 +1,262 @@
+        .dna-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .dna-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loci-inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .loci-inputs-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .loci-inputs-grid::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .loci-inputs-grid::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .locus-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+            transition: var(--transition-fast);
+        }
+
+        .locus-card:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .locus-name {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: block;
+            font-weight: 600;
+        }
+
+        .locus-inputs {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .allele-input {
+            width: 100%;
+            padding: 0.4rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .allele-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 700;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Spinning DNA animation */
+        .dna-helix-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 250px;
+            position: relative;
+            perspective: 1000px;
+            overflow: hidden;
+            margin: 2rem 0;
+            background: radial-gradient(circle, rgba(var(--primary-rgb), 0.05) 0%, transparent 70%);
+            border-radius: 12px;
+            border: 1px dashed rgba(var(--primary-rgb), 0.1);
+        }
+
+        .dna-helix {
+            position: relative;
+            width: 200px;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: spinHelix 8s linear infinite;
+        }
+
+        @keyframes spinHelix {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .dna-strand {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .dna-node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .dna-node.a {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .dna-node.b {
+            background: var(--secondary);
+            box-shadow: 0 0 10px var(--secondary-glow);
+        }
+
+        .dna-bar {
+            position: absolute;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.15);
+            left: 50%;
+            transform: translateX(-50%);
+            transform-origin: center;
+        }
+
+        /* Demo profile buttons */
+        .demo-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-btn {
+            background: rgba(var(--secondary-rgb), 0.05);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            color: var(--text);
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .demo-btn:hover {
+            border-color: var(--secondary);
+            background: rgba(var(--secondary-rgb), 0.15);
+            box-shadow: 0 0 15px var(--secondary-glow);
+            transform: translateY(-2px);
+        }
+
+        .demo-btn i {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Genetic match locus visualization */
+        .locus-match-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .locus-match-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .status-badge.match {
+            background: rgba(157, 255, 0, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(157, 255, 0, 0.2);
+        }
+
+        .status-badge.mismatch {
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .results-details-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+
+        .results-details-header {
+            background: var(--input-bg);
+            padding: 0.8rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+        }
