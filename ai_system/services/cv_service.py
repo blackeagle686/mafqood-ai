@@ -70,7 +70,7 @@ class FaceCVPipeline:
                 w_face = x2 - x1
                 h_face = y2 - y1
                 
-                if w_face < 40 or h_face < 40:
+                if w_face < 20 or h_face < 20:
                     logger.warning(f"Face too small ({w_face}x{h_face}), skipping.")
                     continue
 
