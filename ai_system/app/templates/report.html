@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="/static/css/base.css">
     <link rel="stylesheet" href="/static/css/report.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
 <body>
@@ -103,6 +105,27 @@
                                 <input class="form-input" type="text" name="last_seen" placeholder="آخر مكان شوهد فيه الشخص" required>
                             </div>
 
+                            <!-- Column 3: Age -->
+                            <div>
+                                <div class="form-label"><i class="fa-solid fa-cake-candles"></i> AGE</div>
+                                <input class="form-input" type="number" name="age" placeholder="العمر التقريبي" min="0" max="150">
+                            </div>
+
+                            <!-- Full Width: DNA STR Loci -->
+                            <div class="form-full-width">
+                                <div class="form-label"><i class="fa-solid fa-dna"></i> DNA STR LOCI (JSON)</div>
+                                <textarea class="form-textarea" name="dna_str_loci" rows="2"
+                                    placeholder='مثال: {"vWA": [14, 15], "FGA": [20, 22]}'></textarea>
+                            </div>
+
+                            <!-- Full Width: Map -->
+                            <div class="form-full-width">
+                                <div class="form-label"><i class="fa-solid fa-map-location-dot"></i> PIN_EXACT_LOCATION</div>
+                                <div id="map" style="height: 300px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 0.5rem; z-index: 1;"></div>
+                                <input type="hidden" name="lat" id="lat-input">
+                                <input type="hidden" name="long" id="long-input">
+                            </div>
+
                             <!-- Full Width -->
                             <div class="form-full-width">
                                 <div class="form-label"><i class="fa-solid fa-scroll"></i> ADDITIONAL_DETAILS</div>
@@ -156,6 +179,35 @@
                 return true;
             };
         }
+
+        // Initialize Leaflet Map
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('map')) {
+                const map = L.map('map').setView([24.7136, 46.6753], 5); // Default to Saudi Arabia
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                let marker;
+
+                map.on('click', function(e) {
+                    const lat = e.latlng.lat;
+                    const lng = e.latlng.lng;
+                    
+                    document.getElementById('lat-input').value = lat;
+                    document.getElementById('long-input').value = lng;
+
+                    if (marker) {
+                        marker.setLatLng(e.latlng);
+                    } else {
+                        marker = L.marker(e.latlng).addTo(map);
+                    }
+                });
+                
+                // Force map to recalculate its size after it's visible to avoid rendering issues
+                setTimeout(() => map.invalidateSize(), 500);
+            }
+        });
     </script>
     
     <!-- ===================== FOOTER ===================== -->
