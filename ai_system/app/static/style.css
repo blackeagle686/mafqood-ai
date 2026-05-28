@@ -87,7 +87,7 @@
 }
 
 [data-theme="light"] .section-pipeline {
-    background-image: linear-gradient(45deg, var(--color-10), var(--background));
+    background-image: linear-gradient(45deg,var(--color-1), var(--color-10), var(--background));
 }
 
 * {
