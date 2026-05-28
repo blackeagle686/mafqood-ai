@@ -92,64 +92,118 @@
                     <form id="report-form" action="/api/people/report/" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         
-                        <div class="form-grid">
-                            <!-- Right Column: Text & Data Inputs -->
-                            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                                <!-- Name & Age Row -->
-                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
-                                    <div>
+                        <!-- ===== SECTION 1: Personal Info ===== -->
+                        <div class="form-section" data-step="1">
+                            <div class="form-section-header">
+                                <div class="step-indicator"><span>01</span></div>
+                                <div class="step-title">
+                                    <h3>البيانات الشخصية</h3>
+                                    <p class="tech-font">IDENTITY_DATA</p>
+                                </div>
+                            </div>
+                            <div class="form-section-body">
+                                <div class="field-row field-row--split">
+                                    <div class="field-group field-group--grow">
                                         <div class="form-label"><i class="fa-solid fa-signature"></i> MISSING_PERSON_NAME</div>
                                         <input class="form-input" type="text" name="name" required placeholder="أدخل اسم الشخص المفقود">
                                     </div>
-                                    <div>
+                                    <div class="field-group field-group--small">
                                         <div class="form-label"><i class="fa-solid fa-cake-candles"></i> AGE</div>
                                         <input class="form-input" type="number" name="age" placeholder="العمر" min="0" max="150">
                                     </div>
                                 </div>
-
-                                <div>
-                                    <div class="form-label"><i class="fa-solid fa-location-dot"></i> LAST_SEEN_LOCATION</div>
-                                    <input class="form-input" type="text" name="last_seen" placeholder="آخر مكان شوهد فيه الشخص" required>
-                                </div>
-
-                                <div>
+                                <div class="field-group">
                                     <div class="form-label"><i class="fa-solid fa-scroll"></i> ADDITIONAL_DETAILS</div>
                                     <textarea class="form-textarea" name="details" rows="3"
                                         placeholder="العلامات المميزة، الملابس، الحالة الصحية..."></textarea>
                                 </div>
-
-                                <div>
-                                    <div class="form-label"><i class="fa-solid fa-dna"></i> DNA STR LOCI (JSON)</div>
-                                    <textarea class="form-textarea" name="dna_str_loci" rows="2"
-                                        placeholder='مثال: {"vWA": [14, 15], "FGA": [20, 22]}'></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Left Column: Media & Map -->
-                            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                                <div>
-                                    <div class="form-label"><i class="fa-solid fa-camera-retro"></i> RECENT_PHOTO</div>
-                                    <div class="upload-box" onclick="document.getElementById('file-input').click()" style="padding: 2rem 1.5rem;">
-                                        <div class="upload-box-icon" style="width: 60px; height: 60px; margin-bottom: 1rem;"><i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.5rem;"></i></div>
-                                        <p class="tech-font" style="color: var(--text); font-size: 0.95rem; margin-bottom: 0.5rem;">SECURE_DATA_UPLOAD</p>
-                                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">ارفع أوضح صورة متاحة للمفقود</p>
-                                        <input type="file" id="file-input" name="file" accept="image/*" style="display: none;" onchange="previewImage(event)" required>
-                                        <img id="image-preview" src="#" alt="Preview" style="margin-top: 1rem;">
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="form-label"><i class="fa-solid fa-map-location-dot"></i> PIN_EXACT_LOCATION</div>
-                                    <div id="map" style="height: 220px; border-radius: 12px; border: 1px solid var(--border-color); z-index: 1;"></div>
-                                    <input type="hidden" name="lat" id="lat-input">
-                                    <input type="hidden" name="long" id="long-input">
-                                </div>
-
-                                <button type="submit" class="submit-btn" id="submitBtn" style="margin-top: auto;">
-                                    <i class="fa-solid fa-database"></i> حفظ البلاغ 
-                                </button>
                             </div>
                         </div>
+
+                        <!-- ===== SECTION 2: Photo Upload ===== -->
+                        <div class="form-section" data-step="2">
+                            <div class="form-section-header">
+                                <div class="step-indicator"><span>02</span></div>
+                                <div class="step-title">
+                                    <h3>صورة المفقود</h3>
+                                    <p class="tech-font">BIOMETRIC_CAPTURE</p>
+                                </div>
+                            </div>
+                            <div class="form-section-body">
+                                <div class="upload-box" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                                    <div class="upload-box-visual">
+                                        <div class="upload-box-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                        <div class="upload-box-rings">
+                                            <div class="ring ring-1"></div>
+                                            <div class="ring ring-2"></div>
+                                        </div>
+                                    </div>
+                                    <p class="tech-font upload-title">SECURE_DATA_UPLOAD</p>
+                                    <p class="upload-subtitle">اسحب الصورة هنا أو اضغط للاختيار</p>
+                                    <div class="upload-formats"><i class="fa-solid fa-image"></i> JPG, PNG, WEBP</div>
+                                    <input type="file" id="file-input" name="file" accept="image/*" style="display: none;" onchange="previewImage(event)" required>
+                                </div>
+                                <div class="image-preview-container" id="preview-container" style="display: none;">
+                                    <img id="image-preview" src="#" alt="Preview">
+                                    <button type="button" class="preview-remove" onclick="removePreview()"><i class="fa-solid fa-xmark"></i></button>
+                                    <div class="preview-badge tech-font"><i class="fa-solid fa-check-circle"></i> IMAGE_LOADED</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== SECTION 3: Location ===== -->
+                        <div class="form-section" data-step="3">
+                            <div class="form-section-header">
+                                <div class="step-indicator"><span>03</span></div>
+                                <div class="step-title">
+                                    <h3>الموقع الجغرافي</h3>
+                                    <p class="tech-font">GEO_LOCATION</p>
+                                </div>
+                            </div>
+                            <div class="form-section-body">
+                                <div class="field-group">
+                                    <div class="form-label"><i class="fa-solid fa-location-dot"></i> LAST_SEEN_LOCATION</div>
+                                    <input class="form-input" type="text" name="last_seen" placeholder="آخر مكان شوهد فيه الشخص" required>
+                                </div>
+                                <div class="field-group">
+                                    <div class="form-label"><i class="fa-solid fa-map-location-dot"></i> PIN_EXACT_LOCATION</div>
+                                    <div id="map"></div>
+                                    <input type="hidden" name="lat" id="lat-input">
+                                    <input type="hidden" name="long" id="long-input">
+                                    <div class="map-hint tech-font"><i class="fa-solid fa-crosshairs"></i> اضغط على الخريطة لتحديد الموقع بدقة</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== SECTION 4: DNA (Optional) ===== -->
+                        <div class="form-section form-section--optional" data-step="4">
+                            <div class="form-section-header">
+                                <div class="step-indicator step-indicator--optional"><span>04</span></div>
+                                <div class="step-title">
+                                    <h3>بيانات DNA <span class="optional-tag">اختياري</span></h3>
+                                    <p class="tech-font">GENETIC_PROFILE</p>
+                                </div>
+                                <button type="button" class="section-toggle" id="dna-toggle" onclick="toggleDnaSection()">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            <div class="form-section-body dna-body" id="dna-body" style="display: none;">
+                                <div class="field-group">
+                                    <div class="form-label"><i class="fa-solid fa-dna"></i> DNA STR LOCI (JSON)</div>
+                                    <textarea class="form-textarea form-textarea--code" name="dna_str_loci" rows="3"
+                                        placeholder='{"vWA": [14, 15], "FGA": [20, 22], "TH01": [6, 9.3]}'></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== Submit ===== -->
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <div class="submit-btn-content">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>إرسال البلاغ</span>
+                            </div>
+                            <div class="submit-btn-glow"></div>
+                        </button>
                     </form>
                 </div>
             </div>
