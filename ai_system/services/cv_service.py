@@ -48,6 +48,32 @@ class FaceCVPipeline:
     def __init__(self):
         self.app = FaceModelLoader.get_face_analysis()
 
+    def enhance_image(self, image: np.ndarray) -> np.ndarray:
+        """
+        Preprocesses image to handle challenging lighting and enhance facial features (e.g., glasses).
+        Uses CLAHE on the L-channel of LAB color space to preserve color while normalizing contrast.
+        """
+        # Convert to LAB color space
+        lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+
+        # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        cl = clahe.apply(l)
+
+        # Merge channels and convert back to BGR
+        limg = cv2.merge((cl, a, b))
+        enhanced = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+
+        # Apply slight sharpening to enhance contours (glasses, edges)
+        kernel = np.array([[0, -1, 0],
+                           [-1, 5, -1],
+                           [0, -1, 0]])
+        sharpened = cv2.filter2D(enhanced, -1, kernel)
+
+        # Blend original with sharpened to avoid over-enhancement
+        return cv2.addWeighted(enhanced, 0.7, sharpened, 0.3, 0)
+
     def process_image(self, image_path: str) -> List[Face]:
         """Processes an image and returns a list of validated PipelineResultSchema."""
         logger.info(f"Processing image: {image_path}")
@@ -57,9 +83,12 @@ class FaceCVPipeline:
             return []
 
         try:
+            # Preprocess the image to improve detection and embedding accuracy
+            preprocessed_image = self.enhance_image(image)
+
             # Step 1: Detect and Extract (One-step via InsightFace)
             # This returns a list of face objects with bbox, kps, embedding, etc.
-            faces = self.app.get(image)
+            faces = self.app.get(preprocessed_image)
             results = []
 
             for face in faces:
