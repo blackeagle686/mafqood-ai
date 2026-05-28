@@ -317,14 +317,20 @@
 
     <!-- ===================== SCRIPTS ===================== -->
     <script>
-    /* ---- Interactive Particle Network ---- */
+    /* ---- Enhanced Interactive Particle Network ---- */
     const canvas = document.getElementById('network-canvas');
     const ctx = canvas.getContext('2d');
     let W, H;
     let particles = [];
-    const PARTICLE_COUNT = 100;
-    const LINK_DIST = 150;
+    const PARTICLE_COUNT = 180;
+    const LINK_DIST = 180;
+    const MOUSE_RADIUS = 250;
     let mouse = { x: -9999, y: -9999 };
+    const COLORS = [
+        { r: 0, g: 242, b: 255 },   // cyan (primary)
+        { r: 131, g: 0, b: 255 },   // purple (secondary)
+        { r: 255, g: 0, b: 170 },   // pink (accent)
+    ];
 
     function resizeCanvas() {
         const hero = document.getElementById('hero');
@@ -337,56 +343,113 @@
         constructor() {
             this.x = Math.random() * W;
             this.y = Math.random() * H;
-            this.vx = (Math.random() - 0.5) * 0.8;
-            this.vy = (Math.random() - 0.5) * 0.8;
-            this.r = Math.random() * 2 + 0.5;
+            this.vx = (Math.random() - 0.5) * 0.6;
+            this.vy = (Math.random() - 0.5) * 0.6;
+            this.baseR = Math.random() * 2 + 0.8;
+            this.r = this.baseR;
+            this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            this.phase = Math.random() * Math.PI * 2;
         }
-        update() {
+        update(time) {
             this.x += this.vx;
             this.y += this.vy;
             if (this.x < 0 || this.x > W) this.vx *= -1;
             if (this.y < 0 || this.y > H) this.vy *= -1;
+
+            // Pulse radius
+            this.r = this.baseR + Math.sin(time * 0.002 + this.phase) * 0.5;
+
+            // Mouse interaction — attract gently
             const dx = mouse.x - this.x;
             const dy = mouse.y - this.y;
             const d = Math.sqrt(dx * dx + dy * dy);
-            if (d < 200) { this.x -= dx * 0.02; this.y -= dy * 0.02; }
+            if (d < MOUSE_RADIUS && d > 0) {
+                const force = (1 - d / MOUSE_RADIUS) * 0.035;
+                this.vx += dx / d * force;
+                this.vy += dy / d * force;
+            }
+
+            // Damping
+            this.vx *= 0.998;
+            this.vy *= 0.998;
         }
         draw() {
+            const { r: cr, g: cg, b: cb } = this.color;
+            // Glow halo
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r * 4, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, 0.06)`;
+            ctx.fill();
+            // Core dot
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 242, 255, 0.6)';
+            ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, 0.85)`;
             ctx.fill();
         }
     }
 
-    function initDots() { resizeCanvas(); particles = []; for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Dot()); }
+    function initDots() {
+        resizeCanvas();
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Dot());
+    }
 
-    function loop() {
+    function loop(time) {
         ctx.clearRect(0, 0, W, H);
+
+        // Draw connections
         for (let i = 0; i < particles.length; i++) {
-            particles[i].update();
-            particles[i].draw();
+            particles[i].update(time);
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
                 const dy = particles[i].y - particles[j].y;
                 const d = Math.sqrt(dx * dx + dy * dy);
                 if (d < LINK_DIST) {
+                    const alpha = (1 - d / LINK_DIST) * 0.25;
+                    const ci = particles[i].color;
+                    const cj = particles[j].color;
+                    const grad = ctx.createLinearGradient(
+                        particles[i].x, particles[i].y,
+                        particles[j].x, particles[j].y
+                    );
+                    grad.addColorStop(0, `rgba(${ci.r},${ci.g},${ci.b},${alpha})`);
+                    grad.addColorStop(1, `rgba(${cj.r},${cj.g},${cj.b},${alpha})`);
                     ctx.beginPath();
                     ctx.moveTo(particles[i].x, particles[i].y);
                     ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.strokeStyle = `rgba(0, 242, 255, ${(1 - d / LINK_DIST) * 0.3})`;
-                    ctx.lineWidth = 0.8;
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = 0.7;
                     ctx.stroke();
                 }
             }
         }
+
+        // Draw particles on top
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].draw();
+        }
+
+        // Mouse cursor ring
+        if (mouse.x > 0 && mouse.y > 0) {
+            ctx.beginPath();
+            ctx.arc(mouse.x, mouse.y, MOUSE_RADIUS, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(0, 242, 255, 0.06)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            // Inner glow
+            ctx.beginPath();
+            ctx.arc(mouse.x, mouse.y, 6, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 242, 255, 0.15)';
+            ctx.fill();
+        }
+
         requestAnimationFrame(loop);
     }
 
     document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
     document.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
     initDots();
-    loop();
+    requestAnimationFrame(loop);
 
     /* ---- Scroll Reveal ---- */
     const revealEls = document.querySelectorAll('.reveal, .reveal-stat');
