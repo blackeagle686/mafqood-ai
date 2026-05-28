@@ -757,7 +757,7 @@ textarea:focus {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.85rem;
     letter-spacing: 3px;
-    color: var(--primary);
+    color: var(--text);
     text-transform: uppercase;
     margin-bottom: 1.5rem;
     display: inline-block;
