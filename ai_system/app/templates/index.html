@@ -366,6 +366,39 @@
         if (window.scrollY > 80) scrollInd.style.opacity = '0';
         else scrollInd.style.opacity = '1';
     }, { passive: true });
+
+    /* ---- 3D DNA Helix Generation ---- */
+    const heroHelix = document.getElementById('hero-helix');
+    if (heroHelix) {
+        const nodesCount = 24;
+        for (let i = 0; i < nodesCount; i++) {
+            const offset = (i / nodesCount) * 100;
+            const delay = (i / nodesCount) * -8;
+            
+            const strand = document.createElement('div');
+            strand.className = 'dna-strand';
+            strand.style.top = `${offset}%`;
+            
+            const bar = document.createElement('div');
+            bar.className = 'dna-bar';
+            bar.style.width = '140px';
+            bar.style.animation = `spinHelix 8s linear infinite`;
+            bar.style.animationDelay = `${delay}s`;
+            
+            const nodeA = document.createElement('div');
+            nodeA.className = 'dna-node a';
+            nodeA.style.left = '0';
+            
+            const nodeB = document.createElement('div');
+            nodeB.className = 'dna-node b';
+            nodeB.style.right = '0';
+            
+            bar.appendChild(nodeA);
+            bar.appendChild(nodeB);
+            strand.appendChild(bar);
+            heroHelix.appendChild(strand);
+        }
+    }
     </script>
 </body>
 
