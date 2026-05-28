@@ -396,8 +396,34 @@
             </div>
         </section>
 
+        <!-- ===================== CTA FOOTER ===================== -->
+        <section class="section-cta" id="cta">
+            <div class="container reveal text-center">
+                <div class="cta-glow"></div>
+                <span class="tech-font cta-overline">
+                    START NOW
+                </span>
+                <h2 class="cta-title">
+                    ابدأ رحلة البحث الآن
+                </h2>
+                <p class="cta-desc">
+                    ارفع صورة أو أرسل بلاغًا ودع الذكاء الاصطناعي يساعدك في العثور على من تبحث عنه.
+                </p>
+                <div class="cta-buttons">
+                    <a href="{% url 'search_page' %}" class="btn-hero-primary" id="cta-bottom-search">
+                        <i class="fa-solid fa-crosshairs"></i> البحث بالصورة
+                    </a>
+                    <a href="{% url 'video_search_page' %}" class="btn-hero-outline" id="cta-bottom-video">
+                        <i class="fa-solid fa-video"></i> تحليل الفيديو
+                    </a>
+                    <a href="{% url 'report_page' %}" class="btn-hero-outline btn-hero-outline--accent" id="cta-bottom-report">
+                        <i class="fa-solid fa-file-circle-plus"></i> إرسال بلاغ
+                    </a>
+                </div>
+            </div>
+        </section>
 
-        <!-- ===================== STATS TICKER ===================== -->
+                <!-- ===================== STATS TICKER ===================== -->
         <section class="stats-ribbon" id="stats">
             <div class="stats-ribbon-inner">
                 <div class="ribbon-stat reveal-stat">
