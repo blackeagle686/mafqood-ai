@@ -716,7 +716,7 @@ textarea:focus {
     mix-blend-mode: screen;
 }
 .bg-face {
-    /* background-image: url('/static/images/face_mesh.png'); */
+    background-image: url('/static/images/face_mesh.png');
     opacity: 0.08;
     mix-blend-mode: color-dodge;
     background-position: right center;
