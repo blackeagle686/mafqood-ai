@@ -1,36 +1,69 @@
 @import url('https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Outfit:wght@300;400;600;800&family=Share+Tech+Mono&display=swap');
 
 :root {
-    /* --- COLOR PALETTE (HSL for harmony) --- */
-    --primary: hsl(182, 100%, 50%);
-    --primary-glow: hsla(182, 100%, 50%, 0.4);
-    --secondary: hsl(266, 100%, 50%);
-    --secondary-glow: hsla(266, 100%, 50%, 0.3);
-    --accent: hsl(313, 100%, 50%);
-    --accent-glow: hsla(313, 100%, 50%, 0.3);
+    /* --- COLOR PALETTE --- */
+    --color-1: #b76935;
+    --color-2: #a56336;
+    --color-3: #935e38;
+    --color-4: #815839;
+    --color-5: #6f523b;
+    --color-6: #5c4d3c;
+    --color-7: #4a473e;
+    --color-8: #38413f;
+    --color-9: #263c41;
+    --color-10: #143642;
 
-    --background: hsl(220, 30%, 3%);
-    --surface: hsla(220, 25%, 7%, 0.7);
-    --surface-solid: hsl(220, 25%, 7%);
-    --card-bg: hsla(220, 25%, 10%, 0.6);
+    /* --- BASE THEME (DARK) --- */
+    --primary: var(--color-1);
+    --primary-rgb: 183, 105, 53;
+    --primary-glow: rgba(var(--primary-rgb), 0.4);
 
-    --text: hsl(210, 20%, 95%);
-    --text-muted: hsl(215, 15%, 65%);
+    --secondary: var(--color-2);
+    --secondary-rgb: 165, 99, 54;
+    --secondary-glow: rgba(var(--secondary-rgb), 0.3);
 
-    --grid-color: hsla(182, 100%, 50%, 0.04);
-    --border-color: hsla(182, 100%, 50%, 0.15);
-    --border-hover: hsla(182, 100%, 50%, 0.4);
+    --accent: var(--color-3);
+    --accent-glow: rgba(147, 94, 56, 0.3);
+
+    --background: var(--color-10);
+    --surface: rgba(20, 54, 66, 0.7);
+    --surface-solid: var(--color-9);
+    --card-bg: rgba(38, 60, 65, 0.6);
+
+    --text: #fdfaf6;
+    --text-muted: #b0b8b9;
+
+    --grid-color: rgba(var(--primary-rgb), 0.04);
+    --border-color: rgba(var(--primary-rgb), 0.15);
+    --border-hover: rgba(var(--primary-rgb), 0.4);
 
     --danger: hsl(0, 100%, 65%);
     --success: hsl(157, 100%, 50%);
 
     /* --- GLASS --- */
     --glass-blur: 15px;
-    --glass-border: hsla(0, 0%, 100%, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.05);
 
     /* --- TRANSITIONS --- */
     --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-smooth: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] {
+    --background: #f8f9fa;
+    --surface: rgba(255, 255, 255, 0.85);
+    --surface-solid: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.75);
+
+    --text: var(--color-10);
+    --text-muted: var(--color-8);
+
+    --grid-color: rgba(var(--primary-rgb), 0.1);
+    --border-color: rgba(var(--primary-rgb), 0.25);
+    --border-hover: rgba(var(--primary-rgb), 0.5);
+
+    --glass-border: rgba(0, 0, 0, 0.05);
+    --primary-glow: rgba(var(--primary-rgb), 0.2);
 }
 
 * {
