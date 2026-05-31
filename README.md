@@ -22,54 +22,54 @@
 ---
 </div>
 
-## 📖 Table of Contents
+## Table of Contents
 
-- [✨ Key Features](#-key-features)
-- [🏗️ Architecture](#️-architecture)
-- [🔄 System Workflow](#-system-workflow)
-- [📁 Project Structure](#-project-structure)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [⚙️ Configuration](#️-configuration)
-- [🚀 How to Run](#-how-to-run)
-- [📡 API Reference](#-api-reference)
-- [🧪 Testing](#-testing)
-- [👨‍💻 Author](#-author)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [System Workflow](#system-workflow)
+- [Project Structure](#project-structure)
+- [Tech Stack](#tech-stack)
+- [Configuration](#configuration)
+- [How to Run](#how-to-run)
+- [API Reference](#api-reference)
+- [Testing](#testing)
+- [Author](#author)
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 | Feature | Description |
 |--------|-------------|
-| 🎯 **Face Detection & Embedding** | Powered by InsightFace (`buffalo_l` model), detects and embeds faces at 512-dimensional vectors |
-| 🔍 **Vector Similarity Search** | ChromaDB used as a persistent vector database for fast approximate nearest-neighbor (ANN) face lookups |
-| 🎞️ **Video Intelligence** | Frame-sampled face search across uploaded video files with deduplication across frames |
-| 🧬 **Age Progression** | GAN-based module generates +5/+10/+15 year facial variations to find long-missing persons |
-| 📊 **Smart Weighting** | Geospatial and case-status weightings applied on top of raw similarity scores |
-| 🔔 **Webhook Alerts** | Automatic high-confidence match (≥95%) webhook notifications to external systems |
-| ⚙️ **Async Task Queue** | Celery + Redis for background indexing, clustering, and social media polling |
-| 🌐 **Dual Renderer** | DRF views render both JSON (API) and HTML (template-based UI) from the same endpoint |
-| 🧹 **NLP Moderation** | Arabic/English text cleaning and bad-words classification with LLM-powered fallback |
+| **Face Detection & Embedding** | Powered by InsightFace (`buffalo_l` model), detects and embeds faces at 512-dimensional vectors |
+| **Vector Similarity Search** | ChromaDB used as a persistent vector database for fast approximate nearest-neighbor (ANN) face lookups |
+| **Video Intelligence** | Frame-sampled face search across uploaded video files with deduplication across frames |
+| **Age Progression** | GAN-based module generates +5/+10/+15 year facial variations to find long-missing persons |
+| **Smart Weighting** | Geospatial and case-status weightings applied on top of raw similarity scores |
+| **Webhook Alerts** | Automatic high-confidence match (≥95%) webhook notifications to external systems |
+| **Async Task Queue** | Celery + Redis for background indexing, clustering, and social media polling |
+| **Dual Renderer** | DRF views render both JSON (API) and HTML (template-based UI) from the same endpoint |
+| **NLP Moderation** | Arabic/English text cleaning and bad-words classification with LLM-powered fallback |
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 The system follows a **Domain-Driven, Layered Architecture** — cleanly separating concerns across API, Pipeline Orchestration, Services, and Infrastructure layers.
 
 ```mermaid
 graph TB
-    subgraph "🌐 Presentation Layer"
-        UI[🖥️ HTML Templates<br/>Django DRF TemplateHTML]
-        API[⚡ REST API<br/>JSON Endpoints]
+    subgraph "Presentation Layer"
+        UI[HTML Templates<br/>Django DRF TemplateHTML]
+        API[REST API<br/>JSON Endpoints]
     end
 
-    subgraph "🔀 Pipeline Layer"
+    subgraph "Pipeline Layer"
         SP[SearchPipeline<br/>Image & Video Router]
         RP[ReportPipeline<br/>Indexing Orchestrator]
     end
 
-    subgraph "⚙️ Service Layer"
+    subgraph "Service Layer"
         CV[FaceCVPipeline<br/>InsightFace Detection & Embedding]
         FSS[FaceSearchService<br/>Core Search & Weighting Logic]
         AGE[AgeProgressionGAN<br/>+5/+10/+15yr Simulation]
@@ -77,7 +77,7 @@ graph TB
         NLP[NLP Service<br/>Arabic-English Text Moderation]
     end
 
-    subgraph "🏛️ Infrastructure Layer"
+    subgraph "Infrastructure Layer"
         VDB[(ChromaDB<br/>Vector Store)]
         REDIS[(Redis<br/>Message Broker)]
         WHK[WebhookNotifier<br/>High-Confidence Alerts]
@@ -85,7 +85,7 @@ graph TB
         BEAT[Celery Beat<br/>Scheduled Tasks]
     end
 
-    subgraph "🧱 Core"
+    subgraph "Core"
         ENT[Face Entity<br/>bbox · embedding · score]
     end
 
@@ -128,9 +128,9 @@ graph TB
 
 ---
 
-## 🔄 System Workflow
+## System Workflow
 
-### 📥 Reporting a Missing Person (Indexing Flow)
+### Reporting a Missing Person (Indexing Flow)
 
 ```mermaid
 sequenceDiagram
@@ -147,12 +147,12 @@ sequenceDiagram
     CV->>CV: Filter faces < 40px
     CV-->>RP: [Face(bbox, embedding, score)]
     RP->>VDB: upsert(ids, embeddings, metadata)
-    VDB-->>RP: ✅ stored
+    VDB-->>RP: stored
     RP-->>API: {status: success, faces_found: N}
     API-->>User: 202 Accepted
 ```
 
-### 🔎 Searching for a Person (Search Flow)
+### Searching for a Person (Search Flow)
 
 ```mermaid
 sequenceDiagram
@@ -190,11 +190,11 @@ sequenceDiagram
     API-->>Searcher: Results (JSON or HTML)
 ```
 
-### ⏰ Background Task Workflow (Celery)
+### Background Task Workflow (Celery)
 
 ```mermaid
 flowchart LR
-    BEAT[🕐 Celery Beat<br/>every 15 min] -->|trigger| Q[(Redis Queue)]
+    BEAT[Celery Beat<br/>every 15 min] -->|trigger| Q[(Redis Queue)]
     Q --> W1[Worker: Clustering<br/>evaluate & re-cluster]
     Q --> W2[Worker: Social Media<br/>Poll Facebook Groups]
     W1 --> VDB[(ChromaDB)]
@@ -211,32 +211,32 @@ flowchart LR
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ai_system/
-├── 📦 app/                         # Django Application Root
-│   ├── 🔧 config.py                # Centralized configuration (env-aware)
-│   ├── ⚡ celery_app.py             # Celery app + Beat schedule definitions
-│   ├── 🧩 pipelines/
-│   │   ├── search_pipeline.py      # Orchestrates image & video search
-│   │   └── report_pipeline.py      # Orchestrates missing person indexing
-│   ├── 🔎 search/                  # Face Search Django App
-│   │   ├── views.py                # FaceSearchView (DRF APIView)
-│   │   ├── serializers.py          # Input validation
+├── app/                          # Django Application Root
+│   ├── config.py                 # Centralized configuration (env-aware)
+│   ├── celery_app.py             # Celery app + Beat schedule definitions
+│   ├── pipelines/
+│   │   ├── search_pipeline.py    # Orchestrates image & video search
+│   │   └── report_pipeline.py    # Orchestrates missing person indexing
+│   ├── search/                   # Face Search Django App
+│   │   ├── views.py              # FaceSearchView (DRF APIView)
+│   │   ├── serializers.py        # Input validation
 │   │   └── urls.py
-│   ├── 👤 people/                  # Missing Person Reporting App
-│   │   ├── views.py                # ReportMissingPersonView
+│   ├── people/                   # Missing Person Reporting App
+│   │   ├── views.py              # ReportMissingPersonView
 │   │   ├── models.py
 │   │   └── serializers.py
-│   ├── 🖥️ templates/               # Jinja2/Django HTML templates
+│   ├── templates/                # Jinja2/Django HTML templates
 │   │   ├── results.html
 │   │   ├── report.html
 │   │   └── video_search.html
-│   └── 🏠 mafqood_project/         # Django project settings
+│   └── mafqood_project/          # Django project settings
 │       └── settings.py
 │
-├── ⚙️ services/                    # Domain Services (Framework-Agnostic)
+├── services/                     # Domain Services (Framework-Agnostic)
 │   ├── cv_service.py               # InsightFace detection + embedding (Singleton)
 │   ├── face_search_service.py      # Core face search, index, delete, weighting
 │   ├── age_progression_service.py  # GAN-based +5/+10/+15yr age simulation
@@ -244,7 +244,7 @@ ai_system/
 │   ├── nlp_service.py              # Arabic/English text cleaning & classification
 │   └── clustering_service.py       # Unsupervised face clustering
 │
-├── 🏛️ infra/                       # Infrastructure Layer
+├── infra/                        # Infrastructure Layer
 │   ├── repositories/
 │   │   └── vector_db_repo.py       # ChromaDB abstraction (VectorDB)
 │   ├── external/
@@ -252,23 +252,23 @@ ai_system/
 │   └── celery/
 │       └── tasks.py                # Async Celery task definitions
 │
-├── 🧱 core/
+├── core/
 │   └── entities.py                 # Core Face entity (bbox, embedding, score)
 │
-├── 🛠️ utils/
+├── utils/
 │   └── file_utils.py               # Temp file cleanup utilities
 │
-├── 🧪 tests/                       # Test Suite
-├── 📜 scripts/                     # Helper scripts
-├── 🐳 Dockerfile                   # Docker image definition
-├── 🐳 docker-compose.yml           # Full stack orchestration
-├── 📋 requirements.txt
-└── 🔧 Makefile                     # Developer shortcuts
+├── tests/                        # Test Suite
+├── scripts/                      # Helper scripts
+├── Dockerfile                    # Docker image definition
+├── docker-compose.yml            # Full stack orchestration
+├── requirements.txt
+└── Makefile                      # Developer shortcuts
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 <table>
 <thead>
@@ -280,52 +280,52 @@ ai_system/
 </thead>
 <tbody>
 <tr>
-<td><strong>🌐 Web Framework</strong></td>
+<td><strong>Web Framework</strong></td>
 <td>Django 6 + Django REST Framework</td>
 <td>API endpoints, dual JSON/HTML rendering, serialization</td>
 </tr>
 <tr>
-<td><strong>👁️ Face Recognition</strong></td>
+<td><strong>Face Recognition</strong></td>
 <td>InsightFace (<code>buffalo_l</code>) + ONNX Runtime</td>
 <td>Face detection, alignment, and 512-d embedding extraction</td>
 </tr>
 <tr>
-<td><strong>🖼️ Computer Vision</strong></td>
+<td><strong>Computer Vision</strong></td>
 <td>OpenCV 4.8</td>
 <td>Image I/O, video frame sampling, and age effect simulation</td>
 </tr>
 <tr>
-<td><strong>🗄️ Vector Database</strong></td>
+<td><strong>Vector Database</strong></td>
 <td>ChromaDB 0.4</td>
 <td>Persistent face embedding storage and ANN similarity search</td>
 </tr>
 <tr>
-<td><strong>📨 Task Queue</strong></td>
+<td><strong>Task Queue</strong></td>
 <td>Celery 5.2 + Redis 7</td>
 <td>Background indexing, clustering jobs, and social media polling</td>
 </tr>
 <tr>
-<td><strong>🤖 LLM Integration</strong></td>
+<td><strong>LLM Integration</strong></td>
 <td>OpenAI API</td>
 <td>Contextual text appropriateness classification</td>
 </tr>
 <tr>
-<td><strong>🧠 ML Utilities</strong></td>
+<td><strong>ML Utilities</strong></td>
 <td>scikit-learn, NumPy, Pillow</td>
 <td>Clustering, numerical ops, image preprocessing</td>
 </tr>
 <tr>
-<td><strong>🐳 Containerization</strong></td>
+<td><strong>Containerization</strong></td>
 <td>Docker + Docker Compose</td>
 <td>Full stack orchestration (API, worker, beat, flower, redis)</td>
 </tr>
 <tr>
-<td><strong>📊 Monitoring</strong></td>
+<td><strong>Monitoring</strong></td>
 <td>Flower</td>
 <td>Celery task monitoring dashboard on port 5555</td>
 </tr>
 <tr>
-<td><strong>🧪 Testing</strong></td>
+<td><strong>Testing</strong></td>
 <td>pytest + pytest-asyncio + pytest-mock</td>
 <td>Unit and integration testing</td>
 </tr>
@@ -334,7 +334,7 @@ ai_system/
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 Copy `.env` and configure the following variables:
 
@@ -352,9 +352,9 @@ cp .env.example .env
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
-### 🐳 Option 1 — Docker Compose (Recommended)
+### Option 1 — Docker Compose (Recommended)
 
 Start the full stack with a single command:
 
@@ -371,11 +371,11 @@ Services launched:
 
 | Service | Container | Port | Description |
 |---|---|---|---|
-| 🌐 Django API | `mafqood_api` | `8000` | Main web application |
-| ⚡ Celery Worker | `mafqood_worker` | — | Background task processor |
-| 🕐 Celery Beat | `mafqood_beat` | — | Periodic task scheduler |
-| 📊 Flower | `mafqood_flower` | `5555` | Task monitoring dashboard |
-| 🗄️ Redis | `mafqood_redis` | `6379` | Message broker |
+| Django API | `mafqood_api` | `8000` | Main web application |
+| Celery Worker | `mafqood_worker` | — | Background task processor |
+| Celery Beat | `mafqood_beat` | — | Periodic task scheduler |
+| Flower | `mafqood_flower` | `5555` | Task monitoring dashboard |
+| Redis | `mafqood_redis` | `6379` | Message broker |
 
 ```bash
 # Check service health
@@ -390,7 +390,7 @@ docker-compose down
 
 ---
 
-### 💻 Option 2 — Local Development
+### Option 2 — Local Development
 
 #### Prerequisites
 
@@ -435,7 +435,7 @@ chmod +x quickstart.sh
 
 ---
 
-### ☁️ Option 3 — Google Colab
+### Option 3 — Google Colab
 
 Use the Colab launcher for cloud testing:
 
@@ -445,7 +445,7 @@ python colab_launcher.py
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 ### `POST /api/people/report/`
 > Report a missing person and index their face into the vector database.
@@ -453,10 +453,10 @@ python colab_launcher.py
 **Request** (`multipart/form-data`):
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `file` | Image | ✅ | Photo of the missing person |
-| `name` | string | ✅ | Full name |
-| `last_seen` | string | ✅ | Last known location |
-| `details` | string | ✅ | Additional information |
+| `file` | Image | Yes | Photo of the missing person |
+| `name` | string | Yes | Full name |
+| `last_seen` | string | Yes | Last known location |
+| `details` | string | Yes | Additional information |
 
 **Response** `202 Accepted`:
 ```json
@@ -474,7 +474,7 @@ python colab_launcher.py
 **Request** (`multipart/form-data`):
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `file` | Image / Video | ✅ | Query photo or video file |
+| `file` | Image / Video | Yes | Query photo or video file |
 | `n_results` | integer | `5` | Max number of matches to return |
 | `use_age_progression` | boolean | `false` | Enable +5/+10/+15yr face aging |
 | `sampling_rate` | integer | `15` | Frame sampling rate for videos |
@@ -502,7 +502,7 @@ python colab_launcher.py
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -520,7 +520,7 @@ docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
 
 ---
 
-## 🔧 Makefile Shortcuts
+## Makefile Shortcuts
 
 ```bash
 make build       # Build Docker images
@@ -534,7 +534,7 @@ make shell       # Open Django shell
 
 ---
 
-## 📊 System Monitoring
+## System Monitoring
 
 Once running, access the **Flower dashboard** for real-time Celery task monitoring:
 
@@ -544,13 +544,13 @@ http://localhost:5555
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 <div align="center">
 
 <br/>
 
-### Built with ❤️ to help reunite families
+### Built to help reunite families
 
 <br/>
 
