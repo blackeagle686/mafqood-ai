@@ -2,8 +2,8 @@
 
 # 🔍 Mafqood AI — مفقود
 
-<h1 align="center" style="font-size: 3.2rem; color: #5e60ce; margin-bottom: 10px;">
-    🧬🔍 AI-Powered Missing Persons Search & Recognition Platform
+<h1 align="center" style="font-size: 3.2rem; color: cyan; margin-bottom: 10px;">
+    🧬 AI-Powered Missing Persons Search & Recognition Platform
 </h1>
 
 <p align="center" style="font-size: 1.2rem; color: #64dfdf;">
@@ -22,7 +22,6 @@
 <br/>
 
 > **Mafqood** is an AI-powered missing person search platform that combines facial recognition, DNA search, age progression technology, vector similarity retrieval, and intelligent image/video analysis to accelerate the process of identifying and locating missing individuals.
-
 By leveraging modern machine learning and computer vision techniques, the platform can analyze photos, videos, and biometric data, generate age-progressed predictions, and perform large-scale similarity searches through a unified, production-ready Django REST API.
 
 <br/>
