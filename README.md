@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔍 Mafqood AI — مفقود
+# Mafqood AI — مفقود
 
 <h1 align="center" style="font-size: 3.2rem; color: cyan; margin-bottom: 10px;">
     🧬 AI-Powered Missing Persons Search & Recognition Platform
