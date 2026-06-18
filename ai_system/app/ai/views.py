@@ -423,29 +423,6 @@ class ManagePostView(APIView):
                 )
                 if search_res.get("status") == "success":
                     pre_search_results = search_res.get("search_results", [])
-                    from django.utils import timezone
-                    from datetime import timedelta
-                    for res in pre_search_results:
-                        if res.get("similarity", 0.0) >= 60.0:
-                            match_meta = res.get("metadata") or {}
-                            match_post_id = match_meta.get("postId")
-                            if match_post_id:
-                                try:
-                                    opposite_post = Post.objects.get(post_id=match_post_id)
-                                    if opposite_post.post_type == 1:  # Found post
-                                        duration = timezone.now() - opposite_post.created_at
-                                        if duration <= timedelta(days=30):
-                                            logger.warning(
-                                                f"Rejecting new Lost post {postId}: Matched Found post {match_post_id} "
-                                                f"created at {opposite_post.created_at} which is within 30 days."
-                                            )
-                                            cleanup_temp_file(local_path)
-                                            return Response({
-                                                "isSuccess": False,
-                                                "error": "A matching found post for this person was created within the last month. New lost post rejected."
-                                            }, status=status.HTTP_400_BAD_REQUEST)
-                                except Post.DoesNotExist:
-                                    pass
             except Exception as e:
                 logger.error(f"Error in pre-ingestion check: {e}")
 

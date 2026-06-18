@@ -58,7 +58,7 @@ class ClusteringAgent:
             embeddings = data.get('embeddings', [])
             metadatas = data.get('metadatas', [])
             
-            if not ids or not embeddings:
+            if len(ids) == 0 or len(embeddings) == 0:
                 return {"status": "success", "message": "No data available to cluster."}
             
             # 2. Convert to numpy array
