@@ -453,56 +453,9 @@ class ManagePostView(APIView):
             cleanup_temp_file(local_path)
             return Response({"error": f"Failed to index face: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # 5. Search for matches (Reuse search results for Lost posts to avoid double inference)
-        search_results = []
-        if postType == 0:
-            search_results = pre_search_results
-            cleanup_temp_file(local_path)
-        else:
-            try:
-                # Search for best face matches
-                search_res = face_service.search_face_by_image(
-                    local_path, 
-                    n_results=10, 
-                    cleanup=False
-                )
-                if search_res.get("status") == "success":
-                    search_results = search_res.get("search_results", [])
-            finally:
-                cleanup_temp_file(local_path)
+        # 5. Cleanup temporary image file
+        cleanup_temp_file(local_path)
 
-        # 6. Filter active matches (Threshold >= 60.0) & calculate confidence decimals
-        filtered_results = []
-        for res in search_results:
-            similarity = res.get("similarity", 0.0)
-            if similarity < 60.0:
-                continue
-
-            match_meta = res.get("metadata") or {}
-            match_post_id = match_meta.get("postId")
-            match_user_id = match_meta.get("userId")
-
-            if not match_post_id or not match_user_id:
-                continue
-
-            # Verify that the matched post actually exists and is active/unresolved
-            try:
-                opposite_post = Post.objects.get(post_id=match_post_id)
-                if opposite_post.is_resolved or opposite_post.post_type == postType:
-                    continue
-            except Post.DoesNotExist:
-                # If opposite is missing in SQLite, fallback to matching by status string
-                if match_meta.get("status") == status_str:
-                    continue
-
-            # similarity value is out of 100.0; mapping confidenceScore to range [0.0, 1.0]
-            confidence_score = round(similarity / 100.0, 2)
-
-            filtered_results.append({
-                "userId": match_user_id,
-                "postId": match_post_id,
-                "confidenceScore": confidence_score
-            })
 
 
         return Response({"isSuccess": True, "message": "Post successfully received and queued for matching."}, status=status.HTTP_200_OK)
