@@ -21,8 +21,8 @@ class WebhookNotifier:
         """
         from django.conf import settings
         
-        webhook_url = os.getenv("DOTNET_WEBHOOK_URL") or "https://mafqood.runasp.net/api/ai/match-results"
-        api_key = str(getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026') or 'mafqood-shared-secret-key-2026')
+        webhook_url = "https://mafqood.runasp.net/api/ai/match-results"
+        api_key =  'mafqood-shared-secret-key-2026'
         
         logger.info(f"Triggering Webhook alert to .NET system at {webhook_url}")
         
@@ -43,7 +43,7 @@ class WebhookNotifier:
                     headers=headers
                 )
                 
-            if response.status_code in (200, 201, 202):
+            if response.status_code in (200, 201, 202, 204):
                 logger.info("Webhook delivered successfully.")
                 return True
             else:
@@ -81,7 +81,7 @@ class WebhookNotifier:
                     headers=headers
                 )
                 
-            if response.status_code in (200, 201, 202):
+            if response.status_code in (200, 201, 202, 204):
                 logger.info(f"Webhook delivered successfully: {response.status_code}")
                 return True
             else:
@@ -118,7 +118,7 @@ class WebhookNotifier:
                     headers=headers
                 )
                 
-            if response.status_code in (200, 201, 202):
+            if response.status_code in (200, 201, 202, 204):
                 logger.info(f"DNA Webhook delivered successfully: {response.status_code}")
                 return True
             else:
