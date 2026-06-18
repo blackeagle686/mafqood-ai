@@ -21,8 +21,8 @@ class WebhookNotifier:
         """
         from django.conf import settings
         
-        webhook_url = os.getenv("DOTNET_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/match-results")
-        api_key = getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
+        webhook_url = os.getenv("DOTNET_WEBHOOK_URL") or "https://mafqood.runasp.net/api/ai/match-results"
+        api_key = str(getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026') or 'mafqood-shared-secret-key-2026')
         
         logger.info(f"Triggering Webhook alert to .NET system at {webhook_url}")
         
@@ -33,7 +33,7 @@ class WebhookNotifier:
         
         try:
             # We use a 30.0s timeout to allow for slow cold-starts on hosting servers
-            with httpx.Client(timeout=30.0) as client:
+            with httpx.Client(timeout=30.0, follow_redirects=True) as client:
                 response = client.post(
                     webhook_url,
                     json={
@@ -62,8 +62,8 @@ class WebhookNotifier:
         """
         from django.conf import settings
         
-        webhook_url = os.getenv("MAFQOOD_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/match-results")
-        api_key = getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
+        webhook_url = os.getenv("MAFQOOD_WEBHOOK_URL") or "https://mafqood.runasp.net/api/ai/match-results"
+        api_key = str(getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026') or 'mafqood-shared-secret-key-2026')
         
         masked_key = f"{api_key[:4]}...{api_key[-4:]}" if api_key and len(api_key) > 8 else str(api_key)
         logger.info(f"Dispatching match callback to Mafqood at {webhook_url} with API Key: '{masked_key}' (length: {len(api_key) if api_key else 0})")
@@ -74,7 +74,7 @@ class WebhookNotifier:
         }
         
         try:
-            with httpx.Client(timeout=30.0) as client:
+            with httpx.Client(timeout=30.0, follow_redirects=True) as client:
                 response = client.post(
                     webhook_url,
                     json=payload,
@@ -99,8 +99,8 @@ class WebhookNotifier:
         """
         from django.conf import settings
         
-        webhook_url = os.getenv("MAFQOOD_DNA_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/dna-match-results")
-        api_key = getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
+        webhook_url = os.getenv("MAFQOOD_DNA_WEBHOOK_URL") or "https://mafqood.runasp.net/api/ai/dna-match-results"
+        api_key = str(getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026') or 'mafqood-shared-secret-key-2026')
         
         masked_key = f"{api_key[:4]}...{api_key[-4:]}" if api_key and len(api_key) > 8 else str(api_key)
         logger.info(f"Dispatching DNA match callback to Mafqood at {webhook_url} with API Key: '{masked_key}'")
@@ -111,7 +111,7 @@ class WebhookNotifier:
         }
         
         try:
-            with httpx.Client(timeout=30.0) as client:
+            with httpx.Client(timeout=30.0, follow_redirects=True) as client:
                 response = client.post(
                     webhook_url,
                     json=payload,
