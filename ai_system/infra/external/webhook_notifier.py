@@ -7,7 +7,6 @@ from typing import Dict, Any
 logger = logging.getLogger(__name__)
 
 # Usually this would be in config.py
-DOTNET_SYSTEM_WEBHOOK_URL = os.getenv("DOTNET_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/match-results")
 
 class WebhookNotifier:
     """
@@ -22,9 +21,10 @@ class WebhookNotifier:
         """
         from django.conf import settings
         
+        webhook_url = os.getenv("DOTNET_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/match-results")
         api_key = getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
         
-        logger.info(f"Triggering Webhook alert to .NET system at {DOTNET_SYSTEM_WEBHOOK_URL}")
+        logger.info(f"Triggering Webhook alert to .NET system at {webhook_url}")
         
         headers = {
             "X-Api-Key": api_key,
@@ -32,10 +32,10 @@ class WebhookNotifier:
         }
         
         try:
-            # We use a brief timeout so we don't block our celery tasks for too long
-            with httpx.Client(timeout=5.0) as client:
+            # We use a 30.0s timeout to allow for slow cold-starts on hosting servers
+            with httpx.Client(timeout=30.0) as client:
                 response = client.post(
-                    DOTNET_SYSTEM_WEBHOOK_URL,
+                    webhook_url,
                     json={
                         "event_type": "high_confidence_match",
                         "payload": match_data
@@ -74,7 +74,7 @@ class WebhookNotifier:
         }
         
         try:
-            with httpx.Client(timeout=10.0) as client:
+            with httpx.Client(timeout=30.0) as client:
                 response = client.post(
                     webhook_url,
                     json=payload,
@@ -99,7 +99,7 @@ class WebhookNotifier:
         """
         from django.conf import settings
         
-        webhook_url = os.getenv("MAFQOOD_DNA_WEBHOOK_URL", os.getenv("MAFQOOD_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/dna-match-results"))
+        webhook_url = os.getenv("MAFQOOD_DNA_WEBHOOK_URL", "https://mafqood.runasp.net/api/ai/dna-match-results")
         api_key = getattr(settings, 'MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
         
         masked_key = f"{api_key[:4]}...{api_key[-4:]}" if api_key and len(api_key) > 8 else str(api_key)
@@ -111,7 +111,7 @@ class WebhookNotifier:
         }
         
         try:
-            with httpx.Client(timeout=10.0) as client:
+            with httpx.Client(timeout=30.0) as client:
                 response = client.post(
                     webhook_url,
                     json=payload,
