@@ -165,13 +165,15 @@ class FaceSearchService:
                 p1, p2 = (current_post_id, match_post_id) if status == "missing" else (match_post_id, current_post_id)
                 
                 try:
-                    FaceMatch.objects.create(
+                    face_match, created = FaceMatch.objects.get_or_create(
                         missing_post_id=p1,
                         found_post_id=p2,
-                        combined_score=combined_score,
-                        face_similarity=face_sim,
-                        time_score=1.0, 
-                        location_score=loc_sim
+                        defaults={
+                            "combined_score": combined_score,
+                            "face_similarity": face_sim,
+                            "time_score": 1.0,
+                            "location_score": loc_sim
+                        }
                     )
                     
                     # Trigger Webhook with .NET-compatible payload
@@ -199,7 +201,8 @@ class FaceSearchService:
                                 "confidenceScore": round(combined_score, 2)
                             }]
                         }
-                    WebhookNotifier.send_match_results_to_mafqood(webhook_payload)
+                    from infra.celery.tasks import send_webhook_task
+                    send_webhook_task.delay(webhook_payload)
                 except Exception:
                     pass
             
