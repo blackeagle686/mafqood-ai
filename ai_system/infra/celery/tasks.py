@@ -301,4 +301,34 @@ def send_dna_webhook_task(self, payload: Dict[str, Any]):
     
     return {"status": "success"}
 
+@shared_task(bind=True)
+def evaluate_and_trigger_clustering(self):
+    """
+    Background Task: Triggers the clustering operation periodically.
+    """
+    from services.clustering_service import ClusteringAgent
+    logger.info("Starting background clustering task...")
+    try:
+        agent = ClusteringAgent()
+        result = agent.perform_clustering()
+        logger.info(f"Clustering completed with result: {result}")
+        return {"status": "success", "result": result}
+    except Exception as e:
+        logger.error(f"Error in background clustering task: {e}")
+        return {"status": "failure", "error": str(e)}
 
+@shared_task(bind=True)
+def poll_facebook_groups_task(self):
+    """
+    Background Task: Periodically polls Facebook groups for missing person posts.
+    """
+    logger.info("Starting background Facebook group polling task...")
+    try:
+        from web_scrapping.facebook import FacebookScraper
+        scraper = FacebookScraper()
+        # TODO: Implement reading from a list of group URLs and processing results
+        logger.info("Facebook group polling completed.")
+        return {"status": "success", "message": "Polling stub completed"}
+    except Exception as e:
+        logger.error(f"Error in background Facebook group polling task: {e}")
+        return {"status": "failure", "error": str(e)}
