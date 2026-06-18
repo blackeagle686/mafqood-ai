@@ -130,7 +130,7 @@ class ExtractEntitiesView(APIView):
 
     Request body (JSON):
         {
-            "text":      "طفل مفقود في القاهرة...",
+            "text":      "طفل اثر في القاهرة...",
             "image_url": "https://example.com/photo.jpg"  (optional)
         }
 
@@ -759,5 +759,58 @@ class DNASearchView(APIView):
             "isSuccess": True,
             "results": results
         }, status=status.HTTP_200_OK)
+
+
+from rest_framework.parsers import MultiPartParser, FormParser
+from services.agentic_rag import AgenticRAGService
+import uuid
+
+class AgenticRAGView(APIView):
+    """
+    POST /api/ai/agent/chat/
+    Agentic RAG endpoint that receives text, image, and/or DNA,
+    and returns a response from the AI Agent.
+    """
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = []
+    
+    def post(self, request):
+        text_query = request.data.get('text', '')
+        image_file = request.FILES.get('image')
+        dna_data_str = request.data.get('dna')
+        
+        dna_data = None
+        if dna_data_str:
+            try:
+                import json
+                dna_data = json.loads(dna_data_str)
+            except Exception as e:
+                return Response({"error": "Invalid DNA JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+                
+        image_path = None
+        if image_file:
+            import os
+            from django.conf import settings
+            ext = os.path.splitext(image_file.name)[1]
+            temp_filename = f"agent_img_{uuid.uuid4()}{ext}"
+            image_path = os.path.join(settings.MEDIA_ROOT, temp_filename)
+            os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+            with open(image_path, 'wb+') as destination:
+                for chunk in image_file.chunks():
+                    destination.write(chunk)
+                    
+        try:
+            agent = AgenticRAGService()
+            response_text = agent.process_query(text_query, image_path, dna_data)
+            
+            return Response({
+                "isSuccess": True,
+                "response": response_text
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Agentic RAG View Error: {e}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
