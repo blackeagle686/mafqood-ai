@@ -84,8 +84,9 @@ class ClusteringAgent:
                 metadatas[i]['cluster_id'] = int(label)
                 
             # Upsert the updated metadata back to ChromaDB
-            self.vdb.collection.update(
+            self.vdb.upsert(
                 ids=ids,
+                embeddings=embeddings,
                 metadatas=metadatas
             )
             
