@@ -201,8 +201,9 @@ class FaceSearchService:
                                 "confidenceScore": round(combined_score, 2)
                             }]
                         }
-                    from infra.celery.tasks import send_webhook_task
-                    send_webhook_task.delay(webhook_payload)
+                    if created:
+                        from infra.celery.tasks import send_webhook_task
+                        send_webhook_task.delay(webhook_payload)
                 except Exception:
                     pass
             

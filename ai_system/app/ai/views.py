@@ -504,31 +504,6 @@ class ManagePostView(APIView):
                 "confidenceScore": confidence_score
             })
 
-        # 6. Dispatch Webhook Callback
-        if filtered_results:
-            from infra.celery.tasks import send_webhook_task
-            
-            if postType == 0:  # Current is Lost post, send its direct matches
-                payload = {
-                    "userId": userId,
-                    "postId": postId,
-                    "matchedResults": filtered_results
-                }
-                send_webhook_task.delay(payload)
-            else:  # Current is Found post, notify owners of each matched Lost post
-                for lost_hit in filtered_results:
-                    payload = {
-                        "userId": lost_hit["userId"],
-                        "postId": lost_hit["postId"],
-                        "matchedResults": [
-                            {
-                                "userId": userId,
-                                "postId": postId,
-                                "confidenceScore": lost_hit["confidenceScore"]
-                            }
-                        ]
-                    }
-                    send_webhook_task.delay(payload)
 
         return Response({"isSuccess": True, "message": "Post successfully received and queued for matching."}, status=status.HTTP_200_OK)
 
