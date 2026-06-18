@@ -21,8 +21,8 @@ class WebhookNotifier:
         """
         from django.conf import settings
         
-        webhook_url = "https://mafqood.runasp.net/api/ai/match-results"
-        api_key =  'mafqood-shared-secret-key-2026'
+        webhook_url = os.getenv('MAFQOOD_WEBHOOK_URL', 'https://mafqood.runasp.net/api/ai/match-results')
+        api_key = os.getenv('MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
         
         logger.info(f"Triggering Webhook alert to .NET system at {webhook_url}")
         
@@ -62,8 +62,8 @@ class WebhookNotifier:
         """
         from django.conf import settings
         
-        webhook_url = "https://mafqood.runasp.net/api/ai/match-results"
-        api_key = 'mafqood-shared-secret-key-2026'
+        webhook_url = os.getenv('MAFQOOD_WEBHOOK_URL', 'https://mafqood.runasp.net/api/ai/match-results')
+        api_key = os.getenv('MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
         
         masked_key = f"{api_key[:4]}...{api_key[-4:]}" if api_key and len(api_key) > 8 else str(api_key)
         logger.info(f"Dispatching match callback to Mafqood at {webhook_url} with API Key: '{masked_key}' (length: {len(api_key) if api_key else 0})")
@@ -99,8 +99,8 @@ class WebhookNotifier:
         """
         from django.conf import settings
         
-        webhook_url = "https://mafqood.runasp.net/api/ai/dna-match-results"
-        api_key = 'mafqood-shared-secret-key-2026'
+        webhook_url = os.getenv('MAFQOOD_DNA_WEBHOOK_URL', 'https://mafqood.runasp.net/api/ai/dna-match-results')
+        api_key = os.getenv('MAFQOOD_WEBHOOK_API_KEY', 'mafqood-shared-secret-key-2026')
         
         masked_key = f"{api_key[:4]}...{api_key[-4:]}" if api_key and len(api_key) > 8 else str(api_key)
         logger.info(f"Dispatching DNA match callback to Mafqood at {webhook_url} with API Key: '{masked_key}'")
