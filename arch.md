@@ -724,7 +724,58 @@ The AI microservice follows a **Domain-Driven, Layered Architecture**:
 
 ### 5.3 Face Search & Match Pipeline
 
-When the C# backend sends a `POST /api/ai/posts` request, the following internal flow occurs within the Mafqood AI service:
+#### Request Lifetime & Subsystem Schema
+
+This flowchart illustrates the end-to-end journey of a request originating from the C# backend, flowing through the Python AI services, and returning a high-confidence match notification.
+
+```mermaid
+flowchart TD
+    %% Styling
+    style CSHARP fill:#1565c0,stroke:#0d47a1,color:#fff
+    style CSHARP_CB fill:#1565c0,stroke:#0d47a1,color:#fff
+    style DRF fill:#ff9800,stroke:#e65100,color:#000
+    style CELERY fill:#7b1fa2,stroke:#4a148c,color:#fff
+    style CV fill:#c8e6c9,stroke:#2e7d32,color:#000
+    style SEARCH fill:#fff3e0,stroke:#e65100,color:#000
+    style VDB fill:#533483,stroke:#e94560,color:#fff
+    style WHK fill:#fce4ec,stroke:#c62828,color:#000
+    
+    subgraph "C# Athar Backend"
+        CSHARP["Hangfire Worker<br/>(AI Sync Job)"]
+        CSHARP_CB["Match Callback Endpoint<br/>(/api/ai/match-results)"]
+    end
+
+    subgraph "Mafqood AI Subsystem (Python/Django)"
+        DRF["Django DRF API<br/>POST /api/ai/posts"]
+        
+        subgraph "Async Processing Pipeline (Celery / Redis)"
+            CELERY["Celery Task Worker<br/>(process_image_task)"]
+            
+            subgraph "Service Layer"
+                CV["InsightFace (buffalo_l)<br/>Face Detection & 512-d Embedding"]
+                SEARCH["FaceSearchService<br/>Cross-Matching & Weighting"]
+            end
+            
+            VDB[("ChromaDB<br/>Vector Database")]
+            WHK["WebhookNotifier<br/>(Confidence ≥ 95%)"]
+        end
+    end
+
+    %% Flow Paths
+    CSHARP -- "1. Upload Image + Metadata" --> DRF
+    DRF -- "2. 202 Accepted (queued)" --> CSHARP
+    
+    DRF -- "3. Enqueue Task" --> CELERY
+    CELERY -- "4. Process via" --> CV
+    CV -- "5. Store & Search" --> VDB
+    VDB -- "6. Return Neighbors" --> SEARCH
+    SEARCH -- "7. High Confidence Match" --> WHK
+    WHK -- "8. HTTP POST JSON Payload" --> CSHARP_CB
+```
+
+#### Detailed Execution Sequence
+
+When the C# backend sends a `POST /api/ai/posts` request, the exact synchronous and asynchronous interactions are as follows:
 
 ```mermaid
 sequenceDiagram
@@ -782,3 +833,44 @@ For DNA reports, the system exposes `/api/ai/dna/posts`.
 #### 5.4.3 Video Intelligence
 If a video is submitted for search, the `VideoProcessor` component samples frames at configurable intervals, runs them through the `FaceCVPipeline`, and deduplicates faces across frames before querying ChromaDB.
 
+### 5.5 Performance Profiling & Time Complexity
+
+To assist with load testing and capacity planning, the following breakdowns outline the expected time complexity of the underlying AI algorithms and a theoretical execution timeline for a standard AI processing job.
+
+#### 5.5.1 AI Pipeline Algorithm Complexity
+
+| Subsystem Component | Algorithm / Technology | Time Complexity | Bottleneck Profile |
+|---|---|---|---|
+| **Face Detection** | RetinaFace (CNN) | `O(W × H)` (W, H = Image dimensions) | Compute bound (CPU/GPU) |
+| **Feature Extraction** | ArcFace (ResNet) | `O(1)` (Fixed 112x112 pixel crop) | Compute bound (CPU/GPU) |
+| **Vector Search (ANN)**| HNSW Graph (ChromaDB) | `O(log N)` (N = stored embeddings) | Memory / RAM Bandwidth |
+| **DNA STR Matching** | Array Intersection | `O(N × L)` (N = profiles, L = loci) | Memory / L3 Cache |
+| **Age Progression** | FRAN U-Net (ONNX) | `O(P)` (P = model parameters) | Compute bound (High latency) |
+
+#### 5.5.2 Execution Timeline (Single Image Post)
+
+The following Gantt chart illustrates the expected end-to-end latency for a standard image post, assuming no queue wait time and processing on a standard CPU-only worker node. 
+
+```mermaid
+gantt
+    title Single Post AI Pipeline Latency (Approx CPU Times)
+    dateFormat  s
+    axisFormat  %S.%L
+    
+    section C# Backend
+    Hangfire HTTP POST     :a1, 0, 0.5s
+    Receive Match Webhook  :a2, after c5, 0.5s
+    
+    section AI Django API
+    Validate & Enqueue     :b1, after a1, 0.2s
+    
+    section AI Celery Worker
+    Download Image I/O     :c1, after b1, 0.8s
+    Face Detection (ONNX)  :c2, after c1, 1.2s
+    Feature Embedding      :c3, after c2, 0.5s
+    ChromaDB ANN Search    :c4, after c3, 0.1s
+    Weighting & Scoring    :c5, after c4, 0.1s
+```
+
+> [!WARNING]
+> **Latency Multipliers**: If a post contains a **Video**, the `VideoProcessor` extracts frames at 1 FPS. A 10-second video will run the `Face Detection` and `Feature Embedding` steps **10 times**, scaling the worker phase from ~2.7s to over 15s. Ensure Celery workers are scaled horizontally to prevent queue starvation during video batch processing.
