@@ -81,7 +81,7 @@ graph TB
         STRIPE_SVC["Stripe API<br/>(Payment Processing)"]
         GOOGLE_SVC["Google OAuth 2.0<br/>(Social Sign-In)"]
         
-        subgraph "Mafqood AI (Python)"
+        subgraph "Athar AI (Python)"
             AI_API["Django DRF API"]
             AI_WORKER["Celery Workers<br/>(InsightFace / Matching)"]
             AI_VDB[("ChromaDB<br/>(Vector Store)")]
@@ -223,8 +223,8 @@ sequenceDiagram
     participant SR as SignalR Hub
     participant FCM as Firebase FCM
     participant HF as Hangfire<br/>(Job Queue)
-    participant AI_API as Mafqood AI API
-    participant AI_W as Mafqood Celery Worker
+    participant AI_API as Athar AI API
+    participant AI_W as Athar Celery Worker
 
     User->>+EP: POST /posts<br/>[FromForm] Image, Type, Lat, Lng, Description
     EP->>+MP: mediator.Send(CreatePostRequest)
@@ -384,8 +384,8 @@ sequenceDiagram
     participant DISK as wwwroot/<br/>(Static Files)
     participant HF_DB as SQL Server<br/>(Hangfire DB)
     participant HF as Hangfire Worker
-    participant AI_API as Mafqood AI API
-    participant AI_W as Mafqood Celery Worker
+    participant AI_API as Athar AI API
+    participant AI_W as Athar Celery Worker
     participant CALLBACK as ReceiveMatchResults<br/>Endpoint
     participant MATCH_H as ReceiveMatchResults<br/>Handler
     participant NOTIF as Notification Pipeline
@@ -506,7 +506,7 @@ flowchart TD
         TIMEOUT["Timeout<br/>(10s per request)"]
     end
 
-    AI_API["Mafqood AI API (Django)"]
+    AI_API["Athar AI API (Django)"]
 
     CREATE -->|"Fire and Forget"| TASKRUN
     UPDATE -->|"Fire and Forget"| TASKRUN
@@ -700,7 +700,7 @@ flowchart LR
 
 ---
 
-## 5. Mafqood AI Subsystem Architecture (Python)
+## 5. Athar AI Subsystem Architecture (Python)
 
 ### 5.1 AI Technology Stack
 
@@ -745,7 +745,7 @@ flowchart TD
         CSHARP_CB["Match Callback Endpoint<br/>(/api/ai/match-results)"]
     end
 
-    subgraph "Mafqood AI Subsystem (Python/Django)"
+    subgraph "Athar AI Subsystem (Python/Django)"
         DRF["Django DRF API<br/>POST /api/ai/posts"]
         
         subgraph "Async Processing Pipeline (Celery / Redis)"
